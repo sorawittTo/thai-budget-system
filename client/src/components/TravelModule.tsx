@@ -12,7 +12,7 @@ import { toast } from "@/hooks/use-toast";
 import type { Employee, TravelExpense, InsertTravelExpense } from "@shared/schema";
 
 // ฟังก์ชันคำนวณยอดรวมของแต่ละ tab
-export function calculateTravelTotals(employees: Employee[] = [], workDays: {[key: number]: number} = {}, otherVehicleCosts: {[key: number]: number} = {}, accommodationCosts: {[key: number]: number} = {}) {
+export function calculateTravelTotals(employees: Employee[] = [], workDays: Record<string, any> = {}, otherVehicleCosts: Record<string, any> = {}, accommodationCosts: Record<string, any> = {}) {
   const activeEmployees = employees.filter(emp => emp.status === "Active");
   const level7Employees = employees.filter(emp => emp.level === "7");
   const eligibleEmployees = employees.filter((employee: Employee) => {
@@ -37,7 +37,7 @@ export function calculateTravelTotals(employees: Employee[] = [], workDays: {[ke
   const familyVisitTotal = activeEmployees.reduce((sum: number, emp: Employee) => {
     const baseTourCost = (emp as any).tourCost || 5000; // ตรงกับโค้ดในตัว module
     const roundTripCost = baseTourCost * 2;
-    const tripCount = workDays[`trip_${emp.id}` as keyof typeof workDays] || 1;
+    const tripCount = Number(workDays[`trip_${emp.id}`] || 1);
     return sum + (roundTripCost * tripCount);
   }, 0);
 
@@ -366,7 +366,7 @@ export default function TravelModule() {
                   // ดึงค่ารถทัวร์จากข้อมูลพนักงาน (tourCost) และคูณ 2 สำหรับไป-กลับ
                   const baseTourCost = (employee as any).tourCost || 5000; // ค่า default หากไม่มีข้อมูล
                   const roundTripCost = baseTourCost * 2; // ไป-กลับ
-                  const tripCount = workDays[`trip_${employee.id}`] || 1;
+                  const tripCount = Number(workDays[`trip_${employee.id}`] || 1);
                   const totalCost = roundTripCost * tripCount;
                   
                   return (
@@ -400,7 +400,7 @@ export default function TravelModule() {
                     {activeEmployees.reduce((sum: number, emp: Employee) => {
                       const baseTourCost = (emp as any).tourCost || 5000;
                       const roundTripCost = baseTourCost * 2;
-                      const tripCount = workDays[`trip_${emp.id}`] || 1;
+                      const tripCount = Number(workDays[`trip_${emp.id}`] || 1);
                       return sum + roundTripCost * tripCount;
                     }, 0).toLocaleString()}
                   </TableCell>
