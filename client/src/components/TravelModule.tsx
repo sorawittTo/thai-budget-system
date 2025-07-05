@@ -22,6 +22,8 @@ export default function TravelModule() {
   const [editFormData, setEditFormData] = useState<any>({});
   const [companyEventDestination, setCompanyEventDestination] = useState("กรุงเทพมหานคร");
   const [busFareRate, setBusFareRate] = useState(600);
+  const [otherVehicleCosts, setOtherVehicleCosts] = useState<{[key: number]: number}>({});
+  const [rotationNotes, setRotationNotes] = useState<{[key: number]: string}>({});
   const queryClient = useQueryClient();
 
   const { data: employees = [], isLoading: employeeLoading } = useQuery({
@@ -439,6 +441,8 @@ export default function TravelModule() {
                   <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">ค่าที่พัก</TableHead>
                   <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">ค่ารถโดยสาร<br/>โคราช-กทม ไปกลับ</TableHead>
                   <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">ค่ารถรับจ้าง<br/>ไป-กลับ</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">ค่าพาหนะอื่นๆ</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">หมายเหตุ</TableHead>
                   <TableHead className="text-center font-semibold text-orange-800">รวม</TableHead>
                 </TableRow>
               </TableHeader>
@@ -451,7 +455,8 @@ export default function TravelModule() {
                   const accommodationCost = accommodationDays * 2100;
                   const busCost = 300 * 2;
                   const taxiCost = 250 * 2;
-                  const total = allowanceCost + accommodationCost + busCost + taxiCost;
+                  const otherVehicleCost = otherVehicleCosts[employee.id] || 0;
+                  const total = allowanceCost + accommodationCost + busCost + taxiCost + otherVehicleCost;
                   
                   return (
                     <TableRow key={employee.id} className="hover:bg-gray-50 transition-colors">
@@ -479,12 +484,37 @@ export default function TravelModule() {
                       </TableCell>
                       <TableCell className="border-r border-gray-200 text-center">{busCost.toLocaleString()}</TableCell>
                       <TableCell className="border-r border-gray-200 text-center">{taxiCost.toLocaleString()}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        <Input 
+                          type="number" 
+                          value={otherVehicleCost} 
+                          onChange={(e) => setOtherVehicleCosts(prev => ({
+                            ...prev,
+                            [employee.id]: parseInt(e.target.value) || 0
+                          }))}
+                          className="w-20 text-center mx-auto bg-gray-50 border-gray-300" 
+                          min="0"
+                          placeholder="0"
+                        />
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        <Input 
+                          type="text" 
+                          value={rotationNotes[employee.id] || ""} 
+                          onChange={(e) => setRotationNotes(prev => ({
+                            ...prev,
+                            [employee.id]: e.target.value
+                          }))}
+                          className="w-32 text-center mx-auto bg-gray-50 border-gray-300" 
+                          placeholder="หมายเหตุ..."
+                        />
+                      </TableCell>
                       <TableCell className="text-center font-semibold text-orange-700">{total.toLocaleString()}</TableCell>
                     </TableRow>
                   );
                 })}
                 <TableRow className="bg-gradient-to-r from-orange-50 to-yellow-50 border-t-2 border-orange-200">
-                  <TableCell colSpan={7} className="text-center font-bold text-orange-800">รวมทั้งหมด</TableCell>
+                  <TableCell colSpan={9} className="text-center font-bold text-orange-800">รวมทั้งหมด</TableCell>
                   <TableCell className="text-center font-bold text-lg text-orange-700">
                     {level7Employees.reduce((sum: number, emp: Employee) => {
                       const currentWorkDays = workDays[emp.id] || 1;
@@ -494,7 +524,8 @@ export default function TravelModule() {
                       const accommodationCost = accommodationDays * 2100;
                       const busCost = 300 * 2;
                       const taxiCost = 250 * 2;
-                      return sum + allowanceCost + accommodationCost + busCost + taxiCost;
+                      const otherVehicleCost = otherVehicleCosts[emp.id] || 0;
+                      return sum + allowanceCost + accommodationCost + busCost + taxiCost + otherVehicleCost;
                     }, 0).toLocaleString()}
                   </TableCell>
                 </TableRow>
