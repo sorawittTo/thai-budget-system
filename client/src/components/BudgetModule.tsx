@@ -156,9 +156,32 @@ export default function BudgetModule() {
     <div id="view-budget" className="main-view bg-white rounded-xl shadow-lg">
       <header className="bg-white text-gray-800 p-4 rounded-t-xl border-b">
         <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-xl font-bold">งบประมาณประจำปี {new Date().getFullYear() + 543}</h2>
-            <p className="text-sm text-gray-500">จัดการรายการงบประมาณและเปรียบเทียบรายปี</p>
+          <div className="flex items-center gap-4">
+            <div>
+              <h2 className="text-xl font-bold">งบประมาณประจำปี</h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm">ปีปัจจุบัน:</span>
+              <select
+                value={newItem.currentYear}
+                onChange={(e) => setNewItem({ ...newItem, currentYear: parseInt(e.target.value) })}
+                className="border border-gray-300 rounded px-2 py-1 text-sm"
+              >
+                {Array.from({ length: 10 }, (_, i) => 2568 + i).map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+              <span className="text-sm">เปรียบเทียบ:</span>
+              <select
+                value={newItem.compareYear}
+                onChange={(e) => setNewItem({ ...newItem, compareYear: parseInt(e.target.value) })}
+                className="border border-gray-300 rounded px-2 py-1 text-sm"
+              >
+                {Array.from({ length: 10 }, (_, i) => 2568 + i).map(year => (
+                  <option key={year} value={year}>{year}</option>
+                ))}
+              </select>
+            </div>
           </div>
           <Button
             onClick={() => setShowAddForm(!showAddForm)}
@@ -263,8 +286,8 @@ export default function BudgetModule() {
                     <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '120px' }}>รหัสงบประมาณ</th>
                     <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '120px' }}>รหัสบัญชี</th>
                     <th className="px-4 py-3 text-left border border-gray-300 item-name-cell" style={{ width: '350px' }}>รายการ</th>
-                    <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '100px' }}>ปี 2568</th>
-                    <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '100px' }}>ปี 2569</th>
+                    <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '100px' }}>ปี {newItem.currentYear}</th>
+                    <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '100px' }}>ปี {newItem.compareYear}</th>
                     <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '100px' }}>เปลี่ยนแปลง</th>
                     <th className="px-4 py-3 text-left border border-gray-300" style={{ width: '150px' }}>หมายเหตุ</th>
                     <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '100px' }}>จัดการ</th>
@@ -380,7 +403,7 @@ export default function BudgetModule() {
                   sum + group.items.reduce((itemSum, item) => itemSum + (item.currentYearAmount || 0), 0), 0
                 ).toLocaleString('th-TH')}
               </div>
-              <div className="text-sm text-gray-600">รวมปี 2568</div>
+              <div className="text-sm text-gray-600">รวมปี {newItem.currentYear}</div>
             </div>
             <div className="text-center">
               <div className="text-2xl font-bold text-purple-600">
@@ -388,7 +411,7 @@ export default function BudgetModule() {
                   sum + group.items.reduce((itemSum, item) => itemSum + (item.compareYearAmount || 0), 0), 0
                 ).toLocaleString('th-TH')}
               </div>
-              <div className="text-sm text-gray-600">รวมปี 2569</div>
+              <div className="text-sm text-gray-600">รวมปี {newItem.compareYear}</div>
             </div>
             <div className="text-center">
               <div className={`text-2xl font-bold ${
