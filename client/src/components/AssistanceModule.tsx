@@ -169,6 +169,8 @@ export default function AssistanceModule() {
       category = "level_7";
     } else if (level >= 6) {
       category = "level_6";
+    } else if (level === 5.5) {
+      category = "level_5_5"; // ระดับ 5.5 (ควบ) มีอัตราเฉพาะ
     } else if (level >= 5) {
       category = "level_5";
     } else if (level >= 4) {
