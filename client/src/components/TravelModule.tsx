@@ -24,7 +24,6 @@ export default function TravelModule() {
   const [busFareRate, setBusFareRate] = useState(600);
   const [otherVehicleCosts, setOtherVehicleCosts] = useState<{[key: number]: number}>({});
   const [rotationNotes, setRotationNotes] = useState<{[key: number]: string}>({});
-  const [accommodationCosts, setAccommodationCosts] = useState<{[key: number]: number}>({});
   const queryClient = useQueryClient();
 
   const { data: employees = [], isLoading: employeeLoading } = useQuery({
@@ -50,90 +49,168 @@ export default function TravelModule() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/travel-expenses"] });
+      setEditingItem(null);
+    },
+  });
+
+  const deleteTravelExpense = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest(`/api/travel-expenses/${id}`, "DELETE");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/travel-expenses"] });
     },
   });
 
   const handleYearChange = (direction: "prev" | "next") => {
-    setCurrentYear(prev => direction === "prev" ? prev - 1 : prev + 1);
+    if (direction === "prev") {
+      setCurrentYear(prev => prev - 1);
+    } else {
+      setCurrentYear(prev => prev + 1);
+    }
   };
 
-  const renderTabs = () => {
-    const tabs = [
-      { key: "souvenir", label: "ของที่ระลึก", icon: "🎁", color: "from-green-500 to-emerald-600" },
-      { key: "family", label: "เยี่ยมบ้าน", icon: "🏠", color: "from-blue-500 to-cyan-600" },
-      { key: "company", label: "งานบริษัท", icon: "🏢", color: "from-purple-500 to-violet-600" },
-      { key: "rotation", label: "ร่วมงานวันพนักงาน", icon: "🔄", color: "from-orange-500 to-amber-600" }
-    ];
+  // Filter employees who have service years of 20, 25, 30, 35, or 40 years
+  const eligibleEmployees = (employees as Employee[]).filter((employee: Employee) => {
+    const serviceYears = currentYear - employee.startYear;
+    return [20, 25, 30, 35, 40].includes(serviceYears);
+  });
 
-    return (
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-2">
-        <div className="flex gap-2">
-          {tabs.map((tab) => (
-            <Button
-              key={tab.key}
-              variant={activeTab === tab.key ? "default" : "ghost"}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
-                activeTab === tab.key 
-                  ? `bg-gradient-to-r ${tab.color} text-white shadow-lg transform scale-105` 
-                  : "hover:bg-gray-100 text-gray-600"
-              }`}
-            >
-              <span className="text-lg">{tab.icon}</span>
-              <span className="font-medium">{tab.label}</span>
-            </Button>
-          ))}
-        </div>
+  // Calculate active employees (for family visit)
+  const activeEmployees = (employees as Employee[]).filter((employee: Employee) => employee.status === "Active");
+
+  // Filter level 7 employees (for rotation work)
+  const level7Employees = (employees as Employee[]).filter((employee: Employee) => employee.level === "7");
+
+  const renderTabs = () => (
+    <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-2">
+      <div className="flex flex-wrap gap-2">
+        <Button
+          variant={activeTab === "souvenir" ? "default" : "ghost"}
+          onClick={() => setActiveTab("souvenir")}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
+            activeTab === "souvenir" 
+              ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg transform scale-105" 
+              : "hover:bg-green-50 hover:text-green-700"
+          }`}
+        >
+          🎁 รับของที่ระลึก
+        </Button>
+        <Button
+          variant={activeTab === "family" ? "default" : "ghost"}
+          onClick={() => setActiveTab("family")}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
+            activeTab === "family" 
+              ? "bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg transform scale-105" 
+              : "hover:bg-purple-50 hover:text-purple-700"
+          }`}
+        >
+          👨‍👩‍👧‍👦 เยี่ยมครอบครัว
+        </Button>
+        <Button
+          variant={activeTab === "company" ? "default" : "ghost"}
+          onClick={() => setActiveTab("company")}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
+            activeTab === "company" 
+              ? "bg-gradient-to-r from-blue-500 to-indigo-600 text-white shadow-lg transform scale-105" 
+              : "hover:bg-blue-50 hover:text-blue-700"
+          }`}
+        >
+          🎉 ร่วมงานวันพนักงาน
+        </Button>
+        <Button
+          variant={activeTab === "rotation" ? "default" : "ghost"}
+          onClick={() => setActiveTab("rotation")}
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
+            activeTab === "rotation" 
+              ? "bg-gradient-to-r from-orange-500 to-yellow-600 text-white shadow-lg transform scale-105" 
+              : "hover:bg-orange-50 hover:text-orange-700"
+          }`}
+        >
+          🔄 หมุนเวียนงาน ผจศ.
+        </Button>
       </div>
-    );
-  };
+    </div>
+  );
 
   const renderTabContent = () => {
-    const activeEmployees = (employees as Employee[]).filter((employee: Employee) => employee.status === "Active");
-    const level7Employees = (employees as Employee[]).filter((employee: Employee) => employee.level === "7");
-
     if (activeTab === "souvenir") {
       return (
         <div className="space-y-6">
-          <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-4 rounded-xl border border-green-200">
-            <h3 className="font-bold text-lg text-green-800 mb-4 flex items-center gap-2">
-              <div className="bg-green-500 p-2 rounded-lg">
-                <div className="h-5 w-5 text-white">🎁</div>
-              </div>
-              ค่าเดินทางเพื่อรับของที่ระลึก
-            </h3>
-            <Table className="bg-white rounded-lg overflow-hidden shadow-sm">
-              <TableHeader className="bg-gradient-to-r from-green-100 to-emerald-100">
-                <TableRow>
-                  <TableHead className="text-center font-semibold text-green-800">ลำดับ</TableHead>
-                  <TableHead className="text-center font-semibold text-green-800">ชื่อ-นามสกุล</TableHead>
-                  <TableHead className="text-center font-semibold text-green-800">จังหวัด</TableHead>
-                  <TableHead className="text-center font-semibold text-green-800">ค่ารถทัวร์ ไป-กลับ</TableHead>
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-2xl border-l-4 border-green-500 shadow-sm">
+            <h2 className="text-xl font-semibold text-green-800 mb-2">สรุปค่าใช้จ่ายเดินทางเพื่อรับของที่ระลึก</h2>
+            <p className="text-green-600 text-sm">พนักงานที่มีอายุงาน 20, 25, 30, 35, 40 ปี</p>
+          </div>
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <Table>
+              <TableHeader className="bg-gradient-to-r from-green-100 to-blue-100">
+                <TableRow className="border-b border-gray-200">
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ลำดับ</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ชื่อ-นามสกุล</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">อายุงาน (ปี)</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">วันทำงาน</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่าเบี้ยเลี้ยง</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่าที่พัก</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่ารถโดยสาร<br/>โคราช-กทม ไปกลับ</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่ารถรับจ้าง<br/>ไป-กลับ</TableHead>
+                  <TableHead className="text-center font-semibold text-green-800">รวม</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {activeEmployees.map((employee: Employee, index: number) => {
-                  const baseTourCost = (employee as any).tourCost || 0;
-                  const roundTripCost = baseTourCost * 2;
+                {eligibleEmployees.map((employee: Employee, index: number) => {
+                  const serviceYears = currentYear - employee.startYear;
+                  const currentWorkDays = workDays[employee.id] || 1;
+                  const allowanceDays = 2 + currentWorkDays;
+                  const accommodationDays = 1 + currentWorkDays;
+                  const allowanceCost = allowanceDays * (employee.level === "7" || employee.level === "6" ? 500 : 450);
+                  const accommodationCost = accommodationDays * (employee.level === "7" || employee.level === "6" ? 2100 : 1800);
+                  const busCost = 300 * 2;
+                  const taxiCost = 250 * 2;
+                  const total = allowanceCost + accommodationCost + busCost + taxiCost;
                   
                   return (
                     <TableRow key={employee.id} className="hover:bg-gray-50 transition-colors">
-                      <TableCell className="text-center">{index + 1}</TableCell>
-                      <TableCell>{employee.fullName}</TableCell>
-                      <TableCell className="text-center">{employee.province || "-"}</TableCell>
-                      <TableCell className="text-center font-semibold text-green-700">
-                        {roundTripCost.toLocaleString()}<br/>
-                        <span className="text-xs text-gray-500">({baseTourCost.toLocaleString()} × 2)</span>
+                      <TableCell className="border-r border-gray-200 text-center">{index + 1}</TableCell>
+                      <TableCell className="border-r border-gray-200">{employee.fullName}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">{serviceYears}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        <Input 
+                          type="number" 
+                          value={currentWorkDays} 
+                          onChange={(e) => setWorkDays(prev => ({
+                            ...prev,
+                            [employee.id]: parseInt(e.target.value) || 1
+                          }))}
+                          className="w-16 text-center mx-auto bg-gray-50 border-gray-300" 
+                          min="1"
+                        />
                       </TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        {allowanceCost.toLocaleString()}<br/>
+                        <span className="text-xs text-gray-500">({allowanceDays} วัน)</span>
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        {accommodationCost.toLocaleString()}<br/>
+                        <span className="text-xs text-gray-500">({accommodationDays} วัน)</span>
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">{busCost.toLocaleString()}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">{taxiCost.toLocaleString()}</TableCell>
+                      <TableCell className="text-center font-semibold text-green-700">{total.toLocaleString()}</TableCell>
                     </TableRow>
                   );
                 })}
-                <TableRow className="bg-gradient-to-r from-green-50 to-emerald-50 border-t-2 border-green-200">
-                  <TableCell colSpan={3} className="text-center font-bold text-green-800">รวมทั้งหมด</TableCell>
+                <TableRow className="bg-gradient-to-r from-green-50 to-blue-50 border-t-2 border-green-200">
+                  <TableCell colSpan={8} className="text-center font-bold text-green-800">รวมทั้งหมด</TableCell>
                   <TableCell className="text-center font-bold text-lg text-green-700">
-                    {activeEmployees.reduce((sum: number, emp: Employee) => {
-                      const baseTourCost = (emp as any).tourCost || 0;
-                      return sum + (baseTourCost * 2);
+                    {eligibleEmployees.reduce((sum: number, emp: Employee) => {
+                      const currentWorkDays = workDays[emp.id] || 1;
+                      const allowanceDays = 2 + currentWorkDays;
+                      const accommodationDays = 1 + currentWorkDays;
+                      const allowanceCost = allowanceDays * (emp.level === "7" || emp.level === "6" ? 500 : 450);
+                      const accommodationCost = accommodationDays * (emp.level === "7" || emp.level === "6" ? 2100 : 1800);
+                      const busCost = 300 * 2;
+                      const taxiCost = 250 * 2;
+                      return sum + allowanceCost + accommodationCost + busCost + taxiCost;
                     }, 0).toLocaleString()}
                   </TableCell>
                 </TableRow>
@@ -147,57 +224,57 @@ export default function TravelModule() {
     if (activeTab === "family") {
       return (
         <div className="space-y-6">
-          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-xl border border-blue-200">
-            <h3 className="font-bold text-lg text-blue-800 mb-4 flex items-center gap-2">
-              <div className="bg-blue-500 p-2 rounded-lg">
-                <div className="h-5 w-5 text-white">🏠</div>
-              </div>
-              ค่าเดินทางเยี่ยมบ้าน
-            </h3>
-            <Table className="bg-white rounded-lg overflow-hidden shadow-sm">
-              <TableHeader className="bg-gradient-to-r from-blue-100 to-cyan-100">
-                <TableRow>
-                  <TableHead className="text-center font-semibold text-blue-800">ลำดับ</TableHead>
-                  <TableHead className="text-center font-semibold text-blue-800">ชื่อ-นามสกุล</TableHead>
-                  <TableHead className="text-center font-semibold text-blue-800">จังหวัด</TableHead>
-                  <TableHead className="text-center font-semibold text-blue-800">จำนวนครั้ง</TableHead>
-                  <TableHead className="text-center font-semibold text-blue-800">ค่ารถทัวร์ไป-กลับ</TableHead>
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-2xl border-l-4 border-purple-500 shadow-sm">
+            <h2 className="text-xl font-semibold text-purple-800 mb-2">เยี่ยมครอบครัว</h2>
+            <p className="text-purple-600 text-sm">ค่าใช้จ่ายเดินทางเยี่ยมครอบครัวสำหรับพนักงานที่มีสถานะ Active</p>
+          </div>
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <Table>
+              <TableHeader className="bg-gradient-to-r from-purple-100 to-pink-100">
+                <TableRow className="border-b border-gray-200">
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-purple-800">ลำดับ</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-purple-800">ชื่อ-นามสกุล</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-purple-800">ค่ารถทัวร์ไป-กลับ</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-purple-800">จำนวนครั้ง</TableHead>
+                  <TableHead className="text-center font-semibold text-purple-800">รวม</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {activeEmployees.map((employee: Employee, index: number) => {
-                  const baseTourCost = (employee as any).tourCost || 5000;
-                  const roundTripCost = baseTourCost * 2;
+                  // ดึงค่ารถทัวร์จากข้อมูลพนักงาน (tourCost) และคูณ 2 สำหรับไป-กลับ
+                  const baseTourCost = (employee as any).tourCost || 5000; // ค่า default หากไม่มีข้อมูล
+                  const roundTripCost = baseTourCost * 2; // ไป-กลับ
                   const tripCount = workDays[`trip_${employee.id}`] || 1;
-                  const total = roundTripCost * tripCount;
+                  const totalCost = roundTripCost * tripCount;
                   
                   return (
                     <TableRow key={employee.id} className="hover:bg-gray-50 transition-colors">
-                      <TableCell className="text-center">{index + 1}</TableCell>
-                      <TableCell>{employee.fullName}</TableCell>
-                      <TableCell className="text-center">{employee.province || "-"}</TableCell>
-                      <TableCell className="text-center">
+                      <TableCell className="border-r border-gray-200 text-center">{index + 1}</TableCell>
+                      <TableCell className="border-r border-gray-200">{employee.fullName}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        {roundTripCost.toLocaleString()}
+                        <br/>
+                        <span className="text-xs text-gray-500">({baseTourCost.toLocaleString()} × 2)</span>
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
                         <Input 
                           type="number" 
                           value={tripCount} 
-                          onChange={(e) => setWorkDays(prev => ({
-                            ...prev,
-                            [`trip_${employee.id}`]: parseInt(e.target.value) || 1
+                          onChange={(e) => setWorkDays(prev => ({ 
+                            ...prev, 
+                            [`trip_${employee.id}`]: parseInt(e.target.value) || 1 
                           }))}
-                          className="w-16 text-center mx-auto bg-gray-50 border-gray-300" 
+                          className="w-16 text-center mx-auto bg-gray-50 border-gray-300"
                           min="1"
                         />
                       </TableCell>
-                      <TableCell className="text-center font-semibold text-blue-700">
-                        {total.toLocaleString()}<br/>
-                        <span className="text-xs text-gray-500">({roundTripCost.toLocaleString()} × {tripCount})</span>
-                      </TableCell>
+                      <TableCell className="text-center font-semibold text-purple-700">{totalCost.toLocaleString()}</TableCell>
                     </TableRow>
                   );
                 })}
-                <TableRow className="bg-gradient-to-r from-blue-50 to-cyan-50 border-t-2 border-blue-200">
-                  <TableCell colSpan={4} className="text-center font-bold text-blue-800">รวมทั้งหมด</TableCell>
-                  <TableCell className="text-center font-bold text-lg text-blue-700">
+                <TableRow className="bg-gradient-to-r from-purple-50 to-pink-50 border-t-2 border-purple-200">
+                  <TableCell colSpan={4} className="text-center font-bold text-purple-800">รวมทั้งหมด</TableCell>
+                  <TableCell className="text-center font-bold text-lg text-purple-700">
                     {activeEmployees.reduce((sum: number, emp: Employee) => {
                       const baseTourCost = (emp as any).tourCost || 5000;
                       const roundTripCost = baseTourCost * 2;
@@ -214,47 +291,133 @@ export default function TravelModule() {
     }
 
     if (activeTab === "company") {
+      // คำนวณค่าที่พักตามเงื่อนไข
+      const calculateAccommodation = (employee: Employee, maleCount: number, femaleCount: number) => {
+        const level = employee.level;
+        const employeeProvince = employee.province;
+        
+        // ถ้าระดับ 7 พักคนเดียว
+        if (level === "7") {
+          if (employeeProvince === companyEventDestination) {
+            return 0; // ไม่ได้ค่าที่พักถ้าจังหวัดเดียวกัน
+          }
+          return level === "7" ? 2100 : 1800; // อัตรามาตรฐานตามระดับ
+        }
+        
+        // ระดับอื่นๆ
+        if (employeeProvince === companyEventDestination) {
+          return 0; // ไม่ได้ค่าที่พักถ้าจังหวัดเดียวกัน
+        }
+        
+        // แยกชาย หญิง แล้วจับคู่หารค่าที่พัก
+        const standardRate = level === "7" || level === "6" ? 2100 : 1800;
+        if (employee.gender === "ชาย") {
+          return Math.ceil(maleCount / 2) > 0 ? standardRate / 2 : standardRate;
+        } else {
+          return Math.ceil(femaleCount / 2) > 0 ? standardRate / 2 : standardRate;
+        }
+      };
+
+      // นับจำนวนชาย หญิง
+      const maleEmployees = activeEmployees.filter((emp: Employee) => emp.gender === "ชาย");
+      const femaleEmployees = activeEmployees.filter((emp: Employee) => emp.gender === "หญิง");
+
       return (
         <div className="space-y-6">
-          <div className="bg-gradient-to-r from-purple-50 to-violet-50 p-4 rounded-xl border border-purple-200">
-            <h3 className="font-bold text-lg text-purple-800 mb-4 flex items-center gap-2">
-              <div className="bg-purple-500 p-2 rounded-lg">
-                <div className="h-5 w-5 text-white">🏢</div>
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border-l-4 border-blue-500 shadow-sm">
+            <h2 className="text-xl font-semibold text-blue-800 mb-2">ร่วมงานวันพนักงาน</h2>
+            <p className="text-blue-600 text-sm">ค่าใช้จ่ายเดินทางร่วมงานวันพนักงานประจำปี</p>
+          </div>
+          
+          {/* การตั้งค่า */}
+          <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 rounded-xl border border-blue-200 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-blue-800 mb-2">จังหวัดปลายทาง:</label>
+                <Input
+                  value={companyEventDestination}
+                  onChange={(e) => setCompanyEventDestination(e.target.value)}
+                  className="bg-white border-blue-300"
+                  placeholder="กรุงเทพมหานคร"
+                />
               </div>
-              ค่าเดินทางงานบริษัท
-            </h3>
-            <Table className="bg-white rounded-lg overflow-hidden shadow-sm">
-              <TableHeader className="bg-gradient-to-r from-purple-100 to-violet-100">
-                <TableRow>
-                  <TableHead className="text-center font-semibold text-purple-800">ลำดับ</TableHead>
-                  <TableHead className="text-center font-semibold text-purple-800">ชื่อ-นามสกุล</TableHead>
-                  <TableHead className="text-center font-semibold text-purple-800">ค่าเบี้ยเลี้ยง</TableHead>
-                  <TableHead className="text-center font-semibold text-purple-800">ค่าที่พัก</TableHead>
-                  <TableHead className="text-center font-semibold text-purple-800">ค่ารถโดยสาร ไป-กลับ</TableHead>
-                  <TableHead className="text-center font-semibold text-purple-800">รวม</TableHead>
+              <div>
+                <label className="block text-sm font-semibold text-blue-800 mb-2">อัตราค่าโดยสาร (ไป-กลับ):</label>
+                <Input
+                  type="number"
+                  value={busFareRate}
+                  onChange={(e) => setBusFareRate(Number(e.target.value))}
+                  className="bg-white border-blue-300"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <Table>
+              <TableHeader className="bg-gradient-to-r from-blue-100 to-indigo-100">
+                <TableRow className="border-b border-gray-200">
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">ลำดับ</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">ชื่อ-นามสกุล</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">ระดับ</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">เพศ</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">จังหวัดเยี่ยมบ้าน</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">ค่ารถโดยสาร ไป-กลับ</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">ค่าที่พัก</TableHead>
+                  <TableHead className="text-center font-semibold text-blue-800">รวม</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {activeEmployees.map((employee: Employee, index: number) => {
-                  const level = employee.level;
-                  const allowanceCost = level === "7" || level === "6" ? 500 : 450;
-                  const accommodationCost = level === "7" || level === "6" ? 2100 : 1800;
-                  const busCost = busFareRate * 2;
-                  const total = allowanceCost + accommodationCost + busCost;
+                  const busCost = busFareRate;
+                  const accommodationCost = calculateAccommodation(employee, maleEmployees.length, femaleEmployees.length);
+                  const total = busCost + accommodationCost;
                   
                   return (
                     <TableRow key={employee.id} className="hover:bg-gray-50 transition-colors">
-                      <TableCell className="text-center">{index + 1}</TableCell>
-                      <TableCell>{employee.fullName}</TableCell>
-                      <TableCell className="text-center">{allowanceCost.toLocaleString()}</TableCell>
-                      <TableCell className="text-center">{accommodationCost.toLocaleString()}</TableCell>
-                      <TableCell className="text-center">{busCost.toLocaleString()}</TableCell>
-                      <TableCell className="text-center font-semibold text-purple-700">{total.toLocaleString()}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">{index + 1}</TableCell>
+                      <TableCell className="border-r border-gray-200">{employee.fullName}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">{employee.level}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">{employee.gender}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">{employee.province}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">{busCost.toLocaleString()}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        <div>
+                          {accommodationCost.toLocaleString()}
+                          {employee.province === companyEventDestination && (
+                            <div className="text-xs text-red-500">(จังหวัดเดียวกัน)</div>
+                          )}
+                          {employee.level !== "7" && employee.province !== companyEventDestination && (
+                            <div className="text-xs text-gray-500">(หารคู่)</div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-center font-semibold text-blue-700">{total.toLocaleString()}</TableCell>
                     </TableRow>
                   );
                 })}
+                <TableRow className="bg-gradient-to-r from-blue-50 to-indigo-50 border-t-2 border-blue-200">
+                  <TableCell colSpan={7} className="text-center font-bold text-blue-800">รวมทั้งหมด</TableCell>
+                  <TableCell className="text-center font-bold text-lg text-blue-700">
+                    {activeEmployees.reduce((sum: number, emp: Employee) => {
+                      const busCost = busFareRate;
+                      const accommodationCost = calculateAccommodation(emp, maleEmployees.length, femaleEmployees.length);
+                      return sum + busCost + accommodationCost;
+                    }, 0).toLocaleString()}
+                  </TableCell>
+                </TableRow>
               </TableBody>
             </Table>
+          </div>
+          
+          <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+            <h3 className="font-semibold text-yellow-800 mb-2">หมายเหตุ:</h3>
+            <ul className="text-sm text-yellow-700 space-y-1">
+              <li>• ระดับ 7 พักคนเดียวตามอัตรามาตรฐาน</li>
+              <li>• ระดับอื่นๆ แยกชาย-หญิง จับคู่หารค่าที่พัก</li>
+              <li>• ถ้าจังหวัดปลายทางตรงกับจังหวัดเยี่ยมบ้าน จะไม่ได้ค่าที่พัก</li>
+              <li>• พนักงานชาย: {maleEmployees.length} คน, พนักงานหญิง: {femaleEmployees.length} คน</li>
+            </ul>
           </div>
         </div>
       );
@@ -263,14 +426,12 @@ export default function TravelModule() {
     if (activeTab === "rotation") {
       return (
         <div className="space-y-6">
-          <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-xl border border-orange-200">
-            <h3 className="font-bold text-lg text-orange-800 mb-4 flex items-center gap-2">
-              <div className="bg-orange-500 p-2 rounded-lg">
-                <div className="h-5 w-5 text-white">🔄</div>
-              </div>
-              ร่วมงานวันพนักงาน (ระดับ 7 เท่านั้น)
-            </h3>
-            <Table className="bg-white rounded-lg overflow-hidden shadow-sm">
+          <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-6 rounded-2xl border-l-4 border-orange-500 shadow-sm">
+            <h2 className="text-xl font-semibold text-orange-800 mb-2">หมุนเวียนงาน ผจศ.</h2>
+            <p className="text-orange-600 text-sm">ค่าใช้จ่ายเดินทางหมุนเวียนงานสำหรับผู้จัดการศูนย์ (ระดับ 7)</p>
+          </div>
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+            <Table>
               <TableHeader className="bg-gradient-to-r from-orange-100 to-yellow-100">
                 <TableRow className="border-b border-gray-200">
                   <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">ลำดับ</TableHead>
@@ -291,10 +452,7 @@ export default function TravelModule() {
                   const allowanceDays = 2 + currentWorkDays;
                   const accommodationDays = 1 + currentWorkDays;
                   const allowanceCost = allowanceDays * 500;
-                  const customAccommodationCost = accommodationCosts[employee.id];
-                  const accommodationCost = customAccommodationCost !== undefined 
-                    ? customAccommodationCost 
-                    : accommodationDays * 2100;
+                  const accommodationCost = accommodationDays * 2100;
                   const busCost = 300 * 2;
                   const taxiCost = 250 * 2;
                   const otherVehicleCost = otherVehicleCosts[employee.id] || 0;
@@ -321,18 +479,8 @@ export default function TravelModule() {
                         <span className="text-xs text-gray-500">({allowanceDays} วัน)</span>
                       </TableCell>
                       <TableCell className="border-r border-gray-200 text-center">
-                        <Input 
-                          type="number" 
-                          value={customAccommodationCost !== undefined ? customAccommodationCost : accommodationDays * 2100} 
-                          onChange={(e) => setAccommodationCosts(prev => ({
-                            ...prev,
-                            [employee.id]: parseInt(e.target.value) || 0
-                          }))}
-                          className="w-24 text-center mx-auto bg-gray-50 border-gray-300" 
-                          min="0"
-                          placeholder="0"
-                        />
-                        <span className="text-xs text-gray-500 block mt-1">({accommodationDays} วัน)</span>
+                        {accommodationCost.toLocaleString()}<br/>
+                        <span className="text-xs text-gray-500">({accommodationDays} วัน)</span>
                       </TableCell>
                       <TableCell className="border-r border-gray-200 text-center">{busCost.toLocaleString()}</TableCell>
                       <TableCell className="border-r border-gray-200 text-center">{taxiCost.toLocaleString()}</TableCell>
@@ -373,10 +521,7 @@ export default function TravelModule() {
                       const allowanceDays = 2 + currentWorkDays;
                       const accommodationDays = 1 + currentWorkDays;
                       const allowanceCost = allowanceDays * 500;
-                      const customAccommodationCost = accommodationCosts[emp.id];
-                      const accommodationCost = customAccommodationCost !== undefined 
-                        ? customAccommodationCost 
-                        : accommodationDays * 2100;
+                      const accommodationCost = accommodationDays * 2100;
                       const busCost = 300 * 2;
                       const taxiCost = 250 * 2;
                       const otherVehicleCost = otherVehicleCosts[emp.id] || 0;
@@ -393,6 +538,14 @@ export default function TravelModule() {
 
     return null;
   };
+
+  if (employeeLoading || travelLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="text-lg text-gray-500">กำลังโหลดข้อมูล...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100" style={{ fontFamily: 'Sarabun' }}>
