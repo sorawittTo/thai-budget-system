@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { Employee, BudgetItem, AssistancePayment, TravelExpense, OvertimePayment, MasterRate } from "@/../../shared/schema";
+import { calculateTravelTotals } from "@/components/TravelModule";
 
 export default function SummaryModule() {
   const [currentYear, setCurrentYear] = useState(2569);
@@ -55,18 +56,29 @@ export default function SummaryModule() {
 
   // คำนวณสรุปค่าใช้จ่ายเดินทาง (ใช้ข้อมูลจากการคำนวณจริง)
   const calculateTravelExpenses = () => {
-    // ตอนนี้ใช้ค่าตายตัวก่อน จะปรับปรุงให้ดึงจาก Travel Module ภายหลัง
-    const souvenirTotal = 24950000; // ค่าเดินทางรับของที่ระลึก
-    const familyVisitTotal = 21700000; // ค่าเดินทางเยี่ยมครอบครัว
-    const meetingTotal = 52800000; // ค่าเดินทางร่วมงานวันพนักงาน
-    const studentTripTotal = 19500000; // ค่าเดินทางผจศ.หมุนเวียนงาน
+    if (!employees) {
+      return {
+        souvenir: 0,
+        meeting: 0,
+        studentTrip: 0,
+        familyVisit: 0,
+        total: 0
+      };
+    }
+
+    // ใช้ค่าเริ่มต้นสำหรับ workDays และ state อื่นๆ
+    const defaultWorkDays: {[key: number]: number} = {};
+    const defaultOtherVehicleCosts: {[key: number]: number} = {};
+    const defaultAccommodationCosts: {[key: number]: number} = {};
+    
+    const travelTotals = calculateTravelTotals(employees, defaultWorkDays, defaultOtherVehicleCosts, defaultAccommodationCosts);
 
     return {
-      souvenir: souvenirTotal,
-      meeting: meetingTotal,
-      studentTrip: studentTripTotal,
-      familyVisit: familyVisitTotal,
-      total: souvenirTotal + meetingTotal + studentTripTotal + familyVisitTotal
+      souvenir: travelTotals.souvenir,
+      meeting: travelTotals.companyEvent,
+      studentTrip: travelTotals.rotation,
+      familyVisit: travelTotals.familyVisit,
+      total: travelTotals.total
     };
   };
 

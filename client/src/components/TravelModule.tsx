@@ -11,6 +11,79 @@ import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 import type { Employee, TravelExpense, InsertTravelExpense } from "@shared/schema";
 
+// ฟังก์ชันคำนวณยอดรวมของแต่ละ tab
+export function calculateTravelTotals(employees: Employee[] = [], workDays: {[key: number]: number} = {}, otherVehicleCosts: {[key: number]: number} = {}, accommodationCosts: {[key: number]: number} = {}) {
+  const activeEmployees = employees.filter(emp => emp.status === "Active");
+  const level7Employees = employees.filter(emp => emp.level === "7");
+  const eligibleEmployees = employees.filter((employee: Employee) => {
+    // คำนวณจากอายุงาน - ถ้าทำงานมากกว่า 25 ปีถือว่าจะเกษียณ
+    const currentYear = new Date().getFullYear() + 543;
+    const serviceYears = currentYear - employee.startYear;
+    return serviceYears < 25; // พนักงานที่ยังไม่เกษียณ
+  });
+
+  // 1. ซื้อของฝาก
+  const souvenirTotal = eligibleEmployees.reduce((sum: number, emp: Employee) => {
+    const currentWorkDays = workDays[emp.id] || 1;
+    const allowanceDays = 2 + currentWorkDays;
+    const accommodationDays = 1 + currentWorkDays;
+    const allowanceCost = allowanceDays * (emp.level === "7" || emp.level === "6" ? 500 : 450);
+    const accommodationCost = accommodationDays * (emp.level === "7" || emp.level === "6" ? 2100 : 1800);
+    const busCost = 300 * 2;
+    const taxiCost = 250 * 2;
+    return sum + allowanceCost + accommodationCost + busCost + taxiCost;
+  }, 0);
+
+  // 2. เยี่ยมครอบครัว
+  const familyVisitTotal = activeEmployees.reduce((sum: number, emp: Employee) => {
+    const baseTourCost = emp.tourCost || 5000;
+    const roundTripCost = baseTourCost * 2;
+    const tripCount = workDays[`trip_${emp.id}` as keyof typeof workDays] || 1;
+    return sum + (roundTripCost * tripCount);
+  }, 0);
+
+  // 3. ร่วมงานวันพนักงาน
+  const companyEventTotal = activeEmployees.reduce((sum: number, emp: Employee) => {
+    const busCost = 600 * 2; // ค่าเริ่มต้น
+    const customAccommodation = accommodationCosts[emp.id];
+    let accommodationCost = 0;
+    
+    if (customAccommodation !== undefined) {
+      accommodationCost = customAccommodation;
+    } else {
+      const maleCount = activeEmployees.filter(e => e.gender === "ชาย").length;
+      const femaleCount = activeEmployees.filter(e => e.gender === "หญิง").length;
+      accommodationCost = emp.gender === "ชาย" ? 
+        (maleCount > 1 ? 600 : 1200) : (femaleCount > 1 ? 600 : 1200);
+    }
+    
+    return sum + busCost + accommodationCost;
+  }, 0);
+
+  // 4. หมุนเวียนงาน ผจศ.
+  const rotationTotal = level7Employees.reduce((sum: number, emp: Employee) => {
+    const currentWorkDays = workDays[emp.id] || 15;
+    const maleCount = level7Employees.filter(e => e.gender === "ชาย").length;
+    const femaleCount = level7Employees.filter(e => e.gender === "หญิง").length;
+    
+    const accommodationCost = emp.gender === "ชาย" ? 
+      (maleCount > 1 ? 600 : 1200) : (femaleCount > 1 ? 600 : 1200);
+    
+    const transportCost = 600 * 2; // ค่าโดยสาร ไป-กลับ
+    const otherVehicle = otherVehicleCosts[emp.id] || 0;
+    
+    return sum + (transportCost) + (accommodationCost * currentWorkDays) + otherVehicle;
+  }, 0);
+
+  return {
+    souvenir: souvenirTotal,
+    familyVisit: familyVisitTotal,
+    companyEvent: companyEventTotal,
+    rotation: rotationTotal,
+    total: souvenirTotal + familyVisitTotal + companyEventTotal + rotationTotal
+  };
+}
+
 export default function TravelModule() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear() + 543);
   const [activeTab, setActiveTab] = useState("souvenir");
