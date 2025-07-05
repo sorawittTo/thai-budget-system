@@ -62,17 +62,16 @@ export function calculateTravelTotals(employees: Employee[] = [], workDays: {[ke
 
   // 4. หมุนเวียนงาน ผจศ.
   const rotationTotal = level7Employees.reduce((sum: number, emp: Employee) => {
-    const currentWorkDays = workDays[emp.id] || 15;
-    const maleCount = level7Employees.filter(e => e.gender === "ชาย").length;
-    const femaleCount = level7Employees.filter(e => e.gender === "หญิง").length;
-    
-    const accommodationCost = emp.gender === "ชาย" ? 
-      (maleCount > 1 ? 600 : 1200) : (femaleCount > 1 ? 600 : 1200);
-    
-    const transportCost = 600 * 2; // ค่าโดยสาร ไป-กลับ
+    const currentWorkDays = workDays[emp.id] || 1;
+    const allowanceDays = 2 + currentWorkDays;
+    const accommodationDays = 1 + currentWorkDays;
+    const allowanceCost = allowanceDays * 500;
+    const accommodationCost = accommodationDays * 2100;
+    const busCost = 300 * 2;
+    const taxiCost = 250 * 2;
     const otherVehicle = otherVehicleCosts[emp.id] || 0;
     
-    return sum + (transportCost) + (accommodationCost * currentWorkDays) + otherVehicle;
+    return sum + allowanceCost + accommodationCost + busCost + taxiCost + otherVehicle;
   }, 0);
 
   return {
