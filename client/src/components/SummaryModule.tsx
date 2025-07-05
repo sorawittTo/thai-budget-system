@@ -84,9 +84,61 @@ export default function SummaryModule() {
 
   // คำนวณสรุปเงินช่วยเหลือ
   const calculateAssistanceTotal = () => {
-    const otherAssistance = 2727000000; // เงินช่วยเหลืออื่น ๆ
-    const specialAssistance = 159700000; // เงินช่วยเหลือพิเศษ
-    const overtime = 0; // ค่าจ้างชั่วโมงเพิ่ม
+    if (!employees || !masterRates) {
+      return {
+        other: 0,
+        special: 0,
+        overtime: 0,
+        total: 0
+      };
+    }
+
+    const activeEmployees = employees.filter(emp => emp.status === "Active");
+    
+    // 1. เงินช่วยเหลืออื่น ๆ (คำนวณจากข้อมูลจริง)
+    const otherAssistance = activeEmployees.reduce((sum, emp) => {
+      const level = emp.level;
+      const months = 12;
+      
+      // หาอัตรามาตรฐานจาก master rates ตามระดับ
+      let houseRent = 0;
+      let monthlyAssistance = 0;
+      let oneTimePurchase = 0;
+      
+      // หาอัตรามาตรฐานจากตาราง master rates
+      if (level === "7") {
+        const level7Rate = masterRates.find(rate => rate.category === "level_7");
+        if (level7Rate) {
+          houseRent = 12000; // ค่าที่พักระดับ 7
+          monthlyAssistance = 7500; // เงินช่วยเหลือรายเดือนระดับ 7
+          oneTimePurchase = 10000; // ค่าซื้อของครั้งเดียว
+        }
+      } else if (level === "6") {
+        houseRent = 8000; // ค่าที่พักระดับ 6
+        monthlyAssistance = 6250; // เงินช่วยเหลือรายเดือนระดับ 6
+        oneTimePurchase = 8000; // ค่าซื้อของครั้งเดียว
+      } else if (level === "5.5") {
+        houseRent = 9500; // ค่าที่พักระดับ 5.5
+        monthlyAssistance = 6250; // เงินช่วยเหลือรายเดือนระดับ 5.5
+        oneTimePurchase = 6000; // ค่าซื้อของครั้งเดียว
+      } else if (level === "5") {
+        houseRent = 8000; // ค่าที่พักระดับ 5
+        monthlyAssistance = 5500; // เงินช่วยเหลือรายเดือนระดับ 5
+        oneTimePurchase = 6000; // ค่าซื้อของครั้งเดียว
+      } else {
+        houseRent = 6000; // ค่าที่พักระดับอื่นๆ
+        monthlyAssistance = 4500; // เงินช่วยเหลือรายเดือนระดับอื่นๆ
+        oneTimePurchase = 5000; // ค่าซื้อของครั้งเดียว
+      }
+      
+      return sum + (houseRent * months) + (monthlyAssistance * months) + oneTimePurchase;
+    }, 0);
+
+    // 2. เงินช่วยเหลือพิเศษ (ค่าตายตัว)
+    const specialAssistance = 159700000;
+
+    // 3. ค่าจ้างชั่วโมงเพิ่ม (ค่าตายตัว)
+    const overtime = 0;
 
     return {
       other: otherAssistance,
