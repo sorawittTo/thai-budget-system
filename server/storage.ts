@@ -432,7 +432,20 @@ export class MemStorage implements IStorage {
 
 // Database Storage Implementation
 export class DatabaseStorage implements IStorage {
+  private initialized = false;
+
+  private async ensureInitialized() {
+    if (!this.initialized) {
+      const existingItems = await db.select().from(budgetItems);
+      if (existingItems.length === 0) {
+        await this.initializeDefaultData();
+      }
+      this.initialized = true;
+    }
+  }
+
   async getBudgetItems(): Promise<BudgetItem[]> {
+    await this.ensureInitialized();
     return await db.select().from(budgetItems);
   }
 
@@ -582,14 +595,13 @@ export class DatabaseStorage implements IStorage {
         employeeCode: emp.employeeCode,
         fullName: emp.fullName,
         level: emp.level,
-        salary: emp.salary,
-        positionAllowance: emp.positionAllowance,
-        specialAllowance: emp.specialAllowance,
-        workExperience: emp.workExperience,
+        salary: emp.salary || 0,
+        allowance: (emp as any).positionAllowance || 0,
+        startYear: (emp as any).workExperience || 2020,
         status: emp.status,
         gender: emp.gender,
         province: emp.province,
-        tourCost: emp.tourCost
+        tourCost: emp.tourCost || 0
       })));
     }
     
@@ -598,6 +610,7 @@ export class DatabaseStorage implements IStorage {
         category: rate.category,
         subcategory: rate.subcategory,
         rate: rate.rate,
+        unit: (rate as any).unit || "บาท",
         description: rate.description
       })));
     }
