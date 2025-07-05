@@ -267,19 +267,16 @@ export default function TravelModule() {
                   <td className="px-4 py-3 border border-gray-300 text-center">{taxiCost.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center font-semibold">{total.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      <Input 
-                        type="text"
-                        placeholder="หมายเหตุ"
-                        value={workDays[`note_${employee.id}`] || ""}
-                        onChange={(e) => setWorkDays(prev => ({
-                          ...prev,
-                          [`note_${employee.id}`]: e.target.value
-                        }))}
-                        className="w-32 text-center text-sm"
-                      />
-                      <Edit2 className="h-4 w-4 text-gray-400" />
-                    </div>
+                    <Input 
+                      type="text"
+                      placeholder="หมายเหตุ"
+                      value={workDays[`note_${employee.id}`] || ""}
+                      onChange={(e) => setWorkDays(prev => ({
+                        ...prev,
+                        [`note_${employee.id}`]: e.target.value
+                      }))}
+                      className="w-32 text-center text-sm"
+                    />
                   </td>
                 </tr>
               );
@@ -361,22 +358,30 @@ export default function TravelModule() {
                     </span>
                   </td>
                   <td className="px-4 py-3 border border-gray-300 text-center">{roundTripCost.toLocaleString()}</td>
-                  <td className="px-4 py-3 border border-gray-300 text-center">{tripCount}</td>
-                  <td className="px-4 py-3 border border-gray-300 text-center font-semibold">{totalCost.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
                     <div className="flex items-center justify-center gap-1">
-                      <Input 
-                        type="text"
-                        placeholder="หมายเหตุ"
-                        value={workDays[`note_${employee.id}`] || ""}
-                        onChange={(e) => setWorkDays(prev => ({
-                          ...prev,
-                          [`note_${employee.id}`]: e.target.value
-                        }))}
-                        className="w-32 text-center text-sm"
+                      <Input
+                        type="number"
+                        value={tripCount}
+                        onChange={(e) => setWorkDays(prev => ({ ...prev, [`trip_${employee.id}`]: parseInt(e.target.value) || 1 }))}
+                        className="w-16 text-center"
+                        min="1"
                       />
-                      <Edit2 className="h-4 w-4 text-gray-400" />
+                      <Edit2 className="h-3 w-3 text-gray-400" />
                     </div>
+                  </td>
+                  <td className="px-4 py-3 border border-gray-300 text-center font-semibold">{totalCost.toLocaleString()}</td>
+                  <td className="px-4 py-3 border border-gray-300 text-center">
+                    <Input 
+                      type="text"
+                      placeholder="หมายเหตุ"
+                      value={workDays[`note_${employee.id}`] || ""}
+                      onChange={(e) => setWorkDays(prev => ({
+                        ...prev,
+                        [`note_${employee.id}`]: e.target.value
+                      }))}
+                      className="w-32 text-center text-sm"
+                    />
                   </td>
                 </tr>
               );
@@ -503,19 +508,16 @@ export default function TravelModule() {
                     {total.toLocaleString()}
                   </td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      <Input 
-                        type="text"
-                        placeholder="หมายเหตุ"
-                        value={workDays[`note_${employee.id}`] || ""}
-                        onChange={(e) => setWorkDays(prev => ({
-                          ...prev,
-                          [`note_${employee.id}`]: e.target.value
-                        }))}
-                        className="w-32 text-center text-sm"
-                      />
-                      <Edit2 className="h-4 w-4 text-gray-400" />
-                    </div>
+                    <Input 
+                      type="text"
+                      placeholder="หมายเหตุ"
+                      value={workDays[`note_${employee.id}`] || ""}
+                      onChange={(e) => setWorkDays(prev => ({
+                        ...prev,
+                        [`note_${employee.id}`]: e.target.value
+                      }))}
+                      className="w-32 text-center text-sm"
+                    />
                   </td>
                 </tr>
               );
@@ -635,19 +637,16 @@ export default function TravelModule() {
                     {total.toLocaleString()}
                   </td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
-                    <div className="flex items-center justify-center gap-1">
-                      <Input 
-                        type="text"
-                        placeholder="หมายเหตุ"
-                        value={workDays[`note_${employee.id}`] || ""}
-                        onChange={(e) => setWorkDays(prev => ({
-                          ...prev,
-                          [`note_${employee.id}`]: e.target.value
-                        }))}
-                        className="w-32 text-center text-sm"
-                      />
-                      <Edit2 className="h-4 w-4 text-gray-400" />
-                    </div>
+                    <Input 
+                      type="text"
+                      placeholder="หมายเหตุ"
+                      value={workDays[`note_${employee.id}`] || ""}
+                      onChange={(e) => setWorkDays(prev => ({
+                        ...prev,
+                        [`note_${employee.id}`]: e.target.value
+                      }))}
+                      className="w-32 text-center text-sm"
+                    />
                   </td>
                 </tr>
               );
