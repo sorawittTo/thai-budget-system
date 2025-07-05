@@ -129,19 +129,19 @@ export default function AssistanceModule() {
   ]);
 
   // ฟังก์ชันดึงอัตรามาตรฐานจากตารางมาตรฐาน
-  const getStandardRate = (category: string, subcategory: string): number => {
-    const rate = masterRates?.find(r => r.category === category && r.subcategory === subcategory);
+  const getStandardRate = (category: string, description: string): number => {
+    const rate = masterRates?.find(r => r.category === category && r.description === description);
     return rate?.rate || 0;
   };
 
   const updateAssistanceItem = (employeeId: number, field: string, value: any) => {
     setAssistanceData(prev => {
       const employee = employees?.find((emp: Employee) => emp.id === employeeId) as Employee;
-      const level = employee?.level || "1";
+      const level = employee?.level || "level_1";
       
-      // ดึงค่าจากตารางมาตรฐาน
-      const standardHouseRent = getStandardRate(level === "7" || level === "6" ? "level_6_7" : "other_levels", "ค่าที่พัก");
-      const standardMonthlyAssistance = getStandardRate("assistance", "ค่าช่วยเหลือรายเดือน");
+      // ดึงค่าจากตารางมาตรฐาน - ตามที่ระบุในหน้าพนักงาน
+      const standardHouseRent = getStandardRate(level, "ค่าเช่า");
+      const standardMonthlyAssistance = getStandardRate(level, "เงินช่วยเหลือรายเดือน");
       
       const currentData = prev[employeeId] || {
         id: employeeId,
@@ -323,9 +323,9 @@ export default function AssistanceModule() {
                 <TableBody>
                   {(employees as Employee[]).filter(emp => emp.status === "Active").map((employee: Employee) => {
                     const level = employee.level;
-                    // ดึงค่าจากตารางมาตรฐาน
-                    const standardHouseRent = getStandardRate(level === "7" || level === "6" ? "level_6_7" : "other_levels", "ค่าที่พัก");
-                    const standardMonthlyAssistance = getStandardRate("assistance", "ค่าช่วยเหลือรายเดือน");
+                    // ดึงค่าจากตารางมาตรฐาน - ตามที่ระบุในหน้าพนักงาน
+                    const standardHouseRent = getStandardRate(level, "ค่าเช่า");
+                    const standardMonthlyAssistance = getStandardRate(level, "เงินช่วยเหลือรายเดือน");
                     
                     const assistanceItem = assistanceData[employee.id] || {
                       id: employee.id,
