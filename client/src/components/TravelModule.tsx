@@ -614,7 +614,7 @@ export default function TravelModule() {
               const accommodationCost = accommodationDays * 2100; // Level 7 rate
               const busCost = 300 * 2; // ค่ารถโดยสาร โคราช-กทม ไปกลับ (x2)
               const taxiCost = 250 * 2; // ค่ารถรับจ้าง ไป-กลับ (x2)
-              const otherVehicleCost = 2000; // ค่าพาหนะอื่นๆ
+              const otherVehicleCost = workDays[`other_${employee.id}`] || 2000; // ค่าพาหนะอื่นๆ (แก้ไขได้)
               const total = allowanceCost + accommodationCost + busCost + taxiCost + otherVehicleCost;
               
               return (
@@ -640,7 +640,15 @@ export default function TravelModule() {
                   </td>
                   <td className="px-4 py-3 border border-gray-300 text-center">{busCost.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">{taxiCost.toLocaleString()}</td>
-                  <td className="px-4 py-3 border border-gray-300 text-center">{otherVehicleCost.toLocaleString()}</td>
+                  <td className="px-4 py-3 border border-gray-300 text-center">
+                    <Input
+                      type="number"
+                      value={otherVehicleCost}
+                      onChange={(e) => setWorkDays(prev => ({ ...prev, [`other_${employee.id}`]: parseInt(e.target.value) || 2000 }))}
+                      className="w-20 text-center"
+                      min="0"
+                    />
+                  </td>
                   <td className="px-4 py-3 border border-gray-300 text-center font-semibold">
                     {total.toLocaleString()}
                   </td>
@@ -688,7 +696,7 @@ export default function TravelModule() {
             const accommodationCost = accommodationDays * 2100;
             const busCost = 300 * 2;
             const taxiCost = 250 * 2;
-            const otherVehicleCost = 2000;
+            const otherVehicleCost = workDays[`other_${emp.id}`] || 2000;
             return sum + allowanceCost + accommodationCost + busCost + taxiCost + otherVehicleCost;
           }, 0).toLocaleString()} บาท
         </div>
