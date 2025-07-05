@@ -2,11 +2,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plane, Car, MapPin } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { Employee, TravelExpense } from "@shared/schema";
 
 export default function TravelModule() {
+  const [activeTab, setActiveTab] = useState<"local" | "outside" | "students">("local");
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear() + 543);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [travelExpenses, setTravelExpenses] = useState<TravelExpense[]>([]);
@@ -48,88 +49,11 @@ export default function TravelModule() {
     }
   };
 
-  const calculateSouvenirTravel = () => {
-    // Calculate souvenir travel expenses based on employee service years
-    return employees.map(employee => {
-      const serviceYears = currentYear - employee.startYear;
-      const days = Math.min(serviceYears, 10); // Max 10 days
-      const accommodation = days * 800; // 800 per night
-      const allowance = days * 240; // 240 per day
-      const transportation = 500; // Fixed transportation cost
-      const taxi = 200; // Fixed taxi cost
-      const total = accommodation + allowance + transportation + taxi;
-      
-      return {
-        ...employee,
-        serviceYears,
-        days,
-        accommodation,
-        allowance,
-        transportation,
-        taxi,
-        total,
-      };
-    });
-  };
-
-  const calculateFamilyVisit = () => {
-    // Calculate family visit expenses
-    return employees.map(employee => ({
-      ...employee,
-      total: employee.tourCost,
-    }));
-  };
-
-  const calculateCompanyTrip = () => {
-    // Calculate company trip expenses
-    return employees.map(employee => ({
-      ...employee,
-      busFare: companyTripBusFare,
-      accommodation: 800, // Fixed accommodation cost
-      total: companyTripBusFare + 800,
-    }));
-  };
-
-  const calculateManagerRotation = () => {
-    // Calculate manager rotation travel expenses
-    return employees.filter(emp => emp.level.includes("ผู้จัดการ") || emp.level.includes("ผู้อำนวยการ")).map(employee => {
-      const allowance = 240 * 30; // 30 days per year
-      const accommodation = 800 * 30; // 30 nights per year
-      const transportation = 5000; // Fixed transportation cost
-      const others = 2000; // Other vehicle costs
-      const total = allowance + accommodation + transportation + others;
-      
-      return {
-        ...employee,
-        allowance,
-        accommodation,
-        transportation,
-        others,
-        total,
-      };
-    });
-  };
-
-  const souvenirTravelData = calculateSouvenirTravel();
-  const familyVisitData = calculateFamilyVisit();
-  const companyTripData = calculateCompanyTrip();
-  const managerRotationData = calculateManagerRotation();
-
-  const getTotalSouvenirTravel = () => {
-    return souvenirTravelData.reduce((sum, item) => sum + item.total, 0);
-  };
-
-  const getTotalFamilyVisit = () => {
-    return familyVisitData.reduce((sum, item) => sum + item.total, 0);
-  };
-
-  const getTotalCompanyTrip = () => {
-    return companyTripData.reduce((sum, item) => sum + item.total, 0);
-  };
-
-  const getTotalManagerRotation = () => {
-    return managerRotationData.reduce((sum, item) => sum + item.total, 0);
-  };
+  const tabs = [
+    { id: "local", label: "เดินทางในพื้นที่", icon: MapPin, description: "การเดินทางในพื้นที่ราชการ" },
+    { id: "outside", label: "เดินทางนอกพื้นที่", icon: Car, description: "การเดินทางนอกพื้นที่ราชการ" },
+    { id: "students", label: "นำนักเรียน", icon: Plane, description: "การเดินทางพานักเรียนทัศนศึกษา" },
+  ];
 
   if (employeeLoading || travelLoading) {
     return (
@@ -141,245 +65,254 @@ export default function TravelModule() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Souvenir Travel */}
-      <div className="bg-white p-6 rounded-xl shadow-lg">
-        <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
-          <h2 className="text-2xl font-bold text-gray-800">สรุปค่าใช้จ่ายเดินทางเพื่อรับของที่ระลึก</h2>
-          <div className="flex items-center justify-end flex-grow gap-4">
+    <div id="view-travel" className="main-view bg-white rounded-xl shadow-lg">
+      <header className="bg-white text-gray-800 p-4 rounded-t-xl border-b">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-bold">ค่าใช้จ่ายการเดินทาง</h2>
+            <p className="text-sm text-gray-500">จัดการค่าใช้จ่ายการเดินทางประเภทต่างๆ</p>
+          </div>
+          <div className="flex items-center gap-2">
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => handleYearChange("prev")}
-              className="p-2 rounded-full bg-gray-200 hover:bg-indigo-200"
             >
-              <ChevronLeft className="h-6 w-6" />
+              <ChevronLeft className="h-4 w-4" />
             </Button>
-            <div className="text-center">
-              <div className="text-sm text-gray-600">คำนวณสำหรับปี พ.ศ.</div>
-              <div className="text-2xl font-bold text-indigo-600">{currentYear}</div>
-            </div>
+            <span className="text-lg font-semibold px-4">
+              ปี พ.ศ. {currentYear}
+            </span>
             <Button
-              variant="ghost"
+              variant="outline"
               size="sm"
               onClick={() => handleYearChange("next")}
-              className="p-2 rounded-full bg-gray-200 hover:bg-indigo-200"
             >
-              <ChevronRight className="h-6 w-6" />
+              <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
         </div>
-        
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ชื่อ-สกุล</TableHead>
-                <TableHead className="text-center">อายุงาน</TableHead>
-                <TableHead className="text-center">วันตามกำหนดการ</TableHead>
-                <TableHead className="text-right">ค่าที่พัก</TableHead>
-                <TableHead className="text-right">ค่าเบี้ยเลี้ยง</TableHead>
-                <TableHead className="text-right">ค่ารถประจำทาง</TableHead>
-                <TableHead className="text-right">ค่ารถรับจ้าง</TableHead>
-                <TableHead className="text-right font-bold">รวม</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {souvenirTravelData.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.fullName}</TableCell>
-                  <TableCell className="text-center">{item.serviceYears}</TableCell>
-                  <TableCell className="text-center">{item.days}</TableCell>
-                  <TableCell className="text-right">{item.accommodation.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">{item.allowance.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">{item.transportation.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">{item.taxi.toLocaleString()}</TableCell>
-                  <TableCell className="text-right font-bold">{item.total.toLocaleString()}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        
-        <div className="mt-6 pt-6 border-t-2 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-4">
-            <span className="text-lg font-bold">ยอดรวม:</span>
-            <span className="text-2xl font-bold text-indigo-600">{getTotalSouvenirTravel().toLocaleString()} บาท</span>
-          </div>
-          <Button className="bg-purple-600 hover:bg-purple-700 text-white">นำยอดรวมไปตั้งงบ</Button>
+      </header>
+
+      {/* Tab Navigation */}
+      <div className="border-b bg-gray-50">
+        <div className="flex gap-0 p-4">
+          {tabs.map(({ id, label, icon: Icon, description }) => (
+            <button
+              key={id}
+              onClick={() => setActiveTab(id as any)}
+              className={`flex items-center gap-2 px-6 py-3 rounded-t-lg transition-all ${
+                activeTab === id
+                  ? "bg-white text-blue-700 border-l border-t border-r border-blue-200 shadow-sm -mb-px"
+                  : "bg-gray-100 hover:bg-gray-200 text-gray-600 border border-transparent"
+              }`}
+            >
+              <Icon className="h-4 w-4" />
+              <div className="text-left">
+                <div className="font-medium">{label}</div>
+                <div className="text-xs opacity-70">{description}</div>
+              </div>
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Family Visit */}
-      <div className="bg-white p-6 rounded-xl shadow-lg">
-        <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
-          <h2 className="text-2xl font-bold text-gray-800">สรุปค่าเดินทางเยี่ยมครอบครัว</h2>
-          <div className="flex items-center justify-end flex-grow gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleYearChange("prev")}
-              className="p-2 rounded-full bg-gray-200 hover:bg-indigo-200"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </Button>
-            <div className="text-center">
-              <div className="text-sm text-gray-600">คำนวณสำหรับปี พ.ศ.</div>
-              <div className="text-2xl font-bold text-indigo-600">{currentYear}</div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleYearChange("next")}
-              className="p-2 rounded-full bg-gray-200 hover:bg-indigo-200"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </Button>
-          </div>
-        </div>
-        
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>รหัสพนักงาน</TableHead>
-                <TableHead>ชื่อ-สกุล</TableHead>
-                <TableHead>จังหวัด</TableHead>
-                <TableHead className="text-right">ค่ารถทัวร์</TableHead>
-                <TableHead className="text-right font-bold">รวม (บาท)</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {familyVisitData.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.employeeCode}</TableCell>
-                  <TableCell>{item.fullName}</TableCell>
-                  <TableCell>{item.province}</TableCell>
-                  <TableCell className="text-right">{item.tourCost.toLocaleString()}</TableCell>
-                  <TableCell className="text-right font-bold">{item.total.toLocaleString()}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        
-        <div className="mt-6 pt-6 border-t-2 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-4">
-            <span className="text-lg font-bold">ยอดรวม:</span>
-            <span className="text-2xl font-bold text-indigo-600">{getTotalFamilyVisit().toLocaleString()} บาท</span>
-          </div>
-          <Button className="bg-purple-600 hover:bg-purple-700 text-white">นำยอดรวมไปตั้งงบ</Button>
+      <div className="p-6">
+        {activeTab === "local" && (
+          <LocalTravelTab 
+            employees={employees} 
+            currentYear={currentYear}
+            travelExpenses={travelExpenses}
+          />
+        )}
+
+        {activeTab === "outside" && (
+          <OutsideTravelTab 
+            employees={employees} 
+            currentYear={currentYear}
+            travelExpenses={travelExpenses}
+          />
+        )}
+
+        {activeTab === "students" && (
+          <StudentTravelTab 
+            employees={employees} 
+            currentYear={currentYear}
+            companyTripBusFare={companyTripBusFare}
+            setCompanyTripBusFare={setCompanyTripBusFare}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Local Travel Tab Component
+function LocalTravelTab({ employees, currentYear, travelExpenses }: {
+  employees: Employee[];
+  currentYear: number;
+  travelExpenses: TravelExpense[];
+}) {
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4">การเดินทางในพื้นที่ราชการ</h3>
+      <p className="text-gray-600 mb-6">
+        การเดินทางภายในพื้นที่ปฏิบัติงานประจำ เช่น การไปราชการ ประชุม ติดต่อหน่วยงาน
+      </p>
+      
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm border-collapse border border-gray-300">
+          <thead className="bg-blue-600 text-white">
+            <tr>
+              <th className="px-4 py-3 text-left border border-gray-300">รหัสพนักงาน</th>
+              <th className="px-4 py-3 text-left border border-gray-300">ชื่อ-สกุล</th>
+              <th className="px-4 py-3 text-center border border-gray-300">จำนวนครั้ง</th>
+              <th className="px-4 py-3 text-right border border-gray-300">ค่าน้ำมัน</th>
+              <th className="px-4 py-3 text-right border border-gray-300">ค่าเบี้ยเลี้ยง</th>
+              <th className="px-4 py-3 text-right border border-gray-300">รวม</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employees.map((employee) => (
+              <tr key={employee.id} className="border-b hover:bg-gray-50">
+                <td className="px-4 py-3 border border-gray-300">{employee.employeeCode}</td>
+                <td className="px-4 py-3 border border-gray-300">{employee.fullName}</td>
+                <td className="px-4 py-3 border border-gray-300 text-center">
+                  <Input type="number" defaultValue="0" className="w-20 text-center" />
+                </td>
+                <td className="px-4 py-3 border border-gray-300 text-right">
+                  <Input type="number" defaultValue="0" className="w-24 text-right" />
+                </td>
+                <td className="px-4 py-3 border border-gray-300 text-right">
+                  <Input type="number" defaultValue="0" className="w-24 text-right" />
+                </td>
+                <td className="px-4 py-3 border border-gray-300 text-right font-semibold">
+                  0
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// Outside Travel Tab Component  
+function OutsideTravelTab({ employees, currentYear, travelExpenses }: {
+  employees: Employee[];
+  currentYear: number;
+  travelExpenses: TravelExpense[];
+}) {
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4">การเดินทางนอกพื้นที่ราชการ</h3>
+      <p className="text-gray-600 mb-6">
+        การเดินทางไปปฏิบัติงานนอกพื้นที่ เช่น อบรม สัมมนา ดูงาน ประชุมภายนอก
+      </p>
+      
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm border-collapse border border-gray-300">
+          <thead className="bg-green-600 text-white">
+            <tr>
+              <th className="px-4 py-3 text-left border border-gray-300">รหัสพนักงาน</th>
+              <th className="px-4 py-3 text-left border border-gray-300">ชื่อ-สกุล</th>
+              <th className="px-4 py-3 text-center border border-gray-300">จำนวนครั้ง</th>
+              <th className="px-4 py-3 text-right border border-gray-300">ค่าเดินทาง</th>
+              <th className="px-4 py-3 text-right border border-gray-300">ค่าเบี้ยเลี้ยง</th>
+              <th className="px-4 py-3 text-right border border-gray-300">ค่าที่พัก</th>
+              <th className="px-4 py-3 text-right border border-gray-300">รวม</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employees.map((employee) => (
+              <tr key={employee.id} className="border-b hover:bg-gray-50">
+                <td className="px-4 py-3 border border-gray-300">{employee.employeeCode}</td>
+                <td className="px-4 py-3 border border-gray-300">{employee.fullName}</td>
+                <td className="px-4 py-3 border border-gray-300 text-center">
+                  <Input type="number" defaultValue="0" className="w-20 text-center" />
+                </td>
+                <td className="px-4 py-3 border border-gray-300 text-right">
+                  <Input type="number" defaultValue="0" className="w-24 text-right" />
+                </td>
+                <td className="px-4 py-3 border border-gray-300 text-right">
+                  <Input type="number" defaultValue="0" className="w-24 text-right" />
+                </td>
+                <td className="px-4 py-3 border border-gray-300 text-right">
+                  <Input type="number" defaultValue="0" className="w-24 text-right" />
+                </td>
+                <td className="px-4 py-3 border border-gray-300 text-right font-semibold">
+                  0
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// Student Travel Tab Component
+function StudentTravelTab({ employees, currentYear, companyTripBusFare, setCompanyTripBusFare }: {
+  employees: Employee[];
+  currentYear: number;
+  companyTripBusFare: number;
+  setCompanyTripBusFare: (value: number) => void;
+}) {
+  return (
+    <div>
+      <h3 className="text-lg font-semibold mb-4">การเดินทางพานักเรียนทัศนศึกษา</h3>
+      <p className="text-gray-600 mb-6">
+        ค่าใช้จ่ายในการพานักเรียนไปทัศนศึกษา ดูงาน หรือกิจกรรมนอกสถานที่
+      </p>
+
+      {/* Company Trip Bus Fare Setting */}
+      <div className="bg-orange-50 p-4 rounded-lg mb-6 border border-orange-200">
+        <h4 className="font-medium text-orange-800 mb-2">ค่ารถทัวร์เยี่ยมบ้าน</h4>
+        <div className="flex items-center gap-2">
+          <Input
+            type="number"
+            value={companyTripBusFare}
+            onChange={(e) => setCompanyTripBusFare(Number(e.target.value))}
+            className="w-32"
+            placeholder="0"
+          />
+          <span className="text-gray-600">บาท</span>
         </div>
       </div>
-
-      {/* Company Trip */}
-      <div className="bg-white p-6 rounded-xl shadow-lg">
-        <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
-          <h2 className="text-2xl font-bold text-gray-800">สรุปค่าเดินทางร่วมงานวันพนักงาน</h2>
-          <div className="flex items-center gap-4">
-            <label className="font-semibold">ค่ารถทัวร์ (ไป-กลับ):</label>
-            <Input
-              type="number"
-              value={companyTripBusFare}
-              onChange={(e) => setCompanyTripBusFare(parseFloat(e.target.value) || 0)}
-              className="w-28"
-            />
-          </div>
-        </div>
-        
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ชื่อ-สกุล</TableHead>
-                <TableHead className="text-right">ค่ารถทัวร์</TableHead>
-                <TableHead className="text-right">ค่าที่พัก</TableHead>
-                <TableHead className="text-right font-bold">รวม (บาท)</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {companyTripData.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.fullName}</TableCell>
-                  <TableCell className="text-right">{item.busFare.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">{item.accommodation.toLocaleString()}</TableCell>
-                  <TableCell className="text-right font-bold">{item.total.toLocaleString()}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        
-        <div className="mt-6 pt-6 border-t-2 flex justify-between items-center gap-4">
-          <div className="flex items-center gap-4">
-            <span className="text-lg font-bold">ยอดรวม:</span>
-            <span className="text-2xl font-bold text-indigo-600">{getTotalCompanyTrip().toLocaleString()} บาท</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Manager Rotation */}
-      <div className="bg-white p-6 rounded-xl shadow-lg">
-        <div className="flex flex-wrap justify-between items-center mb-6 gap-4">
-          <h2 className="text-2xl font-bold text-gray-800">สรุปค่าเดินทางหมุนเวียนงาน ผจศ.</h2>
-          <div className="flex items-center justify-end flex-grow gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleYearChange("prev")}
-              className="p-2 rounded-full bg-gray-200 hover:bg-indigo-200"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </Button>
-            <div className="text-center">
-              <div className="text-sm text-gray-600">คำนวณสำหรับปี พ.ศ.</div>
-              <div className="text-2xl font-bold text-indigo-600">{currentYear}</div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => handleYearChange("next")}
-              className="p-2 rounded-full bg-gray-200 hover:bg-indigo-200"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </Button>
-          </div>
-        </div>
-        
-        <div className="overflow-x-auto">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>ชื่อ-สกุล</TableHead>
-                <TableHead className="text-right">ค่าเบี้ยเลี้ยง</TableHead>
-                <TableHead className="text-right">ค่าที่พัก</TableHead>
-                <TableHead className="text-right">ค่าเดินทาง (คงที่)</TableHead>
-                <TableHead className="text-right">ค่าพาหนะอื่นๆ</TableHead>
-                <TableHead className="text-right font-bold">รวม</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {managerRotationData.map((item) => (
-                <TableRow key={item.id}>
-                  <TableCell className="font-medium">{item.fullName}</TableCell>
-                  <TableCell className="text-right">{item.allowance.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">{item.accommodation.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">{item.transportation.toLocaleString()}</TableCell>
-                  <TableCell className="text-right">{item.others.toLocaleString()}</TableCell>
-                  <TableCell className="text-right font-bold">{item.total.toLocaleString()}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-        
-        <div className="mt-6 pt-6 border-t-2 flex flex-col sm:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-4">
-            <span className="text-lg font-bold">ยอดรวม:</span>
-            <span className="text-2xl font-bold text-indigo-600">{getTotalManagerRotation().toLocaleString()} บาท</span>
-          </div>
-          <Button className="bg-purple-600 hover:bg-purple-700 text-white">นำยอดรวมไปตั้งงบ</Button>
-        </div>
+      
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm border-collapse border border-gray-300">
+          <thead className="bg-orange-600 text-white">
+            <tr>
+              <th className="px-4 py-3 text-left border border-gray-300">รหัสพนักงาน</th>
+              <th className="px-4 py-3 text-left border border-gray-300">ชื่อ-สกุล</th>
+              <th className="px-4 py-3 text-left border border-gray-300">จังหวัดเยี่ยมบ้าน</th>
+              <th className="px-4 py-3 text-right border border-gray-300">ค่ารถทัวร์</th>
+              <th className="px-4 py-3 text-center border border-gray-300">จำนวนครั้ง</th>
+              <th className="px-4 py-3 text-right border border-gray-300">รวม</th>
+            </tr>
+          </thead>
+          <tbody>
+            {employees.map((employee) => (
+              <tr key={employee.id} className="border-b hover:bg-gray-50">
+                <td className="px-4 py-3 border border-gray-300">{employee.employeeCode}</td>
+                <td className="px-4 py-3 border border-gray-300">{employee.fullName}</td>
+                <td className="px-4 py-3 border border-gray-300">{employee.province || '-'}</td>
+                <td className="px-4 py-3 border border-gray-300 text-right">
+                  {employee.tourCost?.toLocaleString('th-TH') || '0'}
+                </td>
+                <td className="px-4 py-3 border border-gray-300 text-center">
+                  <Input type="number" defaultValue="0" className="w-20 text-center" />
+                </td>
+                <td className="px-4 py-3 border border-gray-300 text-right font-semibold">
+                  0
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
