@@ -20,6 +20,8 @@ export default function TravelModule() {
   const [showInfo, setShowInfo] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [editFormData, setEditFormData] = useState<any>({});
+  const [companyEventDestination, setCompanyEventDestination] = useState("กรุงเทพมหานคร");
+  const [busFareRate, setBusFareRate] = useState(600);
   const queryClient = useQueryClient();
 
   const { data: employees = [], isLoading: employeeLoading } = useQuery({
@@ -287,47 +289,133 @@ export default function TravelModule() {
     }
 
     if (activeTab === "company") {
+      // คำนวณค่าที่พักตามเงื่อนไข
+      const calculateAccommodation = (employee: Employee, maleCount: number, femaleCount: number) => {
+        const level = employee.level;
+        const employeeProvince = employee.province;
+        
+        // ถ้าระดับ 7 พักคนเดียว
+        if (level === "7") {
+          if (employeeProvince === companyEventDestination) {
+            return 0; // ไม่ได้ค่าที่พักถ้าจังหวัดเดียวกัน
+          }
+          return level === "7" ? 2100 : 1800; // อัตรามาตรฐานตามระดับ
+        }
+        
+        // ระดับอื่นๆ
+        if (employeeProvince === companyEventDestination) {
+          return 0; // ไม่ได้ค่าที่พักถ้าจังหวัดเดียวกัน
+        }
+        
+        // แยกชาย หญิง แล้วจับคู่หารค่าที่พัก
+        const standardRate = level === "7" || level === "6" ? 2100 : 1800;
+        if (employee.gender === "ชาย") {
+          return Math.ceil(maleCount / 2) > 0 ? standardRate / 2 : standardRate;
+        } else {
+          return Math.ceil(femaleCount / 2) > 0 ? standardRate / 2 : standardRate;
+        }
+      };
+
+      // นับจำนวนชาย หญิง
+      const maleEmployees = activeEmployees.filter((emp: Employee) => emp.gender === "ชาย");
+      const femaleEmployees = activeEmployees.filter((emp: Employee) => emp.gender === "หญิง");
+
       return (
         <div className="space-y-6">
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border-l-4 border-blue-500 shadow-sm">
             <h2 className="text-xl font-semibold text-blue-800 mb-2">ร่วมงานวันพนักงาน</h2>
             <p className="text-blue-600 text-sm">ค่าใช้จ่ายเดินทางร่วมงานวันพนักงานประจำปี</p>
           </div>
+          
+          {/* การตั้งค่า */}
+          <div className="bg-gradient-to-r from-cyan-50 to-blue-50 p-4 rounded-xl border border-blue-200 shadow-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold text-blue-800 mb-2">จังหวัดปลายทาง:</label>
+                <Input
+                  value={companyEventDestination}
+                  onChange={(e) => setCompanyEventDestination(e.target.value)}
+                  className="bg-white border-blue-300"
+                  placeholder="กรุงเทพมหานคร"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-blue-800 mb-2">อัตราค่าโดยสาร (ไป-กลับ):</label>
+                <Input
+                  type="number"
+                  value={busFareRate}
+                  onChange={(e) => setBusFareRate(Number(e.target.value))}
+                  className="bg-white border-blue-300"
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             <Table>
               <TableHeader className="bg-gradient-to-r from-blue-100 to-indigo-100">
                 <TableRow className="border-b border-gray-200">
                   <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">ลำดับ</TableHead>
                   <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">ชื่อ-นามสกุล</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">ระดับ</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">เพศ</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">จังหวัดเยี่ยมบ้าน</TableHead>
                   <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">ค่ารถโดยสาร ไป-กลับ</TableHead>
-                  <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">ค่าที่พัก (ต่อคน)</TableHead>
+                  <TableHead className="border-r border-gray-200 text-center font-semibold text-blue-800">ค่าที่พัก</TableHead>
                   <TableHead className="text-center font-semibold text-blue-800">รวม</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {activeEmployees.map((employee: Employee, index: number) => {
-                  const busCost = 600;
-                  const accommodationCost = 2100;
+                  const busCost = busFareRate;
+                  const accommodationCost = calculateAccommodation(employee, maleEmployees.length, femaleEmployees.length);
                   const total = busCost + accommodationCost;
                   
                   return (
                     <TableRow key={employee.id} className="hover:bg-gray-50 transition-colors">
                       <TableCell className="border-r border-gray-200 text-center">{index + 1}</TableCell>
                       <TableCell className="border-r border-gray-200">{employee.fullName}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">{employee.level}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">{employee.gender}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">{employee.province}</TableCell>
                       <TableCell className="border-r border-gray-200 text-center">{busCost.toLocaleString()}</TableCell>
-                      <TableCell className="border-r border-gray-200 text-center">{accommodationCost.toLocaleString()}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        <div>
+                          {accommodationCost.toLocaleString()}
+                          {employee.province === companyEventDestination && (
+                            <div className="text-xs text-red-500">(จังหวัดเดียวกัน)</div>
+                          )}
+                          {employee.level !== "7" && employee.province !== companyEventDestination && (
+                            <div className="text-xs text-gray-500">(หารคู่)</div>
+                          )}
+                        </div>
+                      </TableCell>
                       <TableCell className="text-center font-semibold text-blue-700">{total.toLocaleString()}</TableCell>
                     </TableRow>
                   );
                 })}
                 <TableRow className="bg-gradient-to-r from-blue-50 to-indigo-50 border-t-2 border-blue-200">
-                  <TableCell colSpan={4} className="text-center font-bold text-blue-800">รวมทั้งหมด</TableCell>
+                  <TableCell colSpan={7} className="text-center font-bold text-blue-800">รวมทั้งหมด</TableCell>
                   <TableCell className="text-center font-bold text-lg text-blue-700">
-                    {(activeEmployees.length * (600 + 2100)).toLocaleString()}
+                    {activeEmployees.reduce((sum: number, emp: Employee) => {
+                      const busCost = busFareRate;
+                      const accommodationCost = calculateAccommodation(emp, maleEmployees.length, femaleEmployees.length);
+                      return sum + busCost + accommodationCost;
+                    }, 0).toLocaleString()}
                   </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
+          </div>
+          
+          <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+            <h3 className="font-semibold text-yellow-800 mb-2">หมายเหตุ:</h3>
+            <ul className="text-sm text-yellow-700 space-y-1">
+              <li>• ระดับ 7 พักคนเดียวตามอัตรามาตรฐาน</li>
+              <li>• ระดับอื่นๆ แยกชาย-หญิง จับคู่หารค่าที่พัก</li>
+              <li>• ถ้าจังหวัดปลายทางตรงกับจังหวัดเยี่ยมบ้าน จะไม่ได้ค่าที่พัก</li>
+              <li>• พนักงานชาย: {maleEmployees.length} คน, พนักงานหญิง: {femaleEmployees.length} คน</li>
+            </ul>
           </div>
         </div>
       );
