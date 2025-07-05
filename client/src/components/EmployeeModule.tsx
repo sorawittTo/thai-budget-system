@@ -342,31 +342,48 @@ export default function EmployeeModule() {
 
         {activeTab === "rates" && (
           <div>
-            <h3 className="text-lg font-semibold mb-4">อัตรามาตรฐานค่าใช้จ่าย</h3>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm border-collapse border border-gray-300">
-                <thead className="bg-violet-600 text-white">
-                  <tr>
-                    <th className="px-4 py-3 text-left border border-gray-300">ประเภท</th>
-                    <th className="px-4 py-3 text-left border border-gray-300">รายละเอียด</th>
-                    <th className="px-4 py-3 text-right border border-gray-300">อัตรา</th>
-                    <th className="px-4 py-3 text-left border border-gray-300">หน่วย</th>
-                    <th className="px-4 py-3 text-left border border-gray-300">หมายเหตุ</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {masterRates.map((rate) => (
-                    <tr key={rate.id} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3 border border-gray-300">{rate.category}</td>
-                      <td className="px-4 py-3 border border-gray-300">{rate.subcategory}</td>
-                      <td className="px-4 py-3 border border-gray-300 text-right">{rate.rate.toLocaleString('th-TH')}</td>
-                      <td className="px-4 py-3 border border-gray-300">{rate.unit}</td>
-                      <td className="px-4 py-3 border border-gray-300">{rate.description}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <h3 className="text-lg font-semibold mb-6">อัตรามาตรฐานค่าใช้จ่าย</h3>
+            
+            {/* Group rates by category */}
+            {Object.entries(
+              masterRates.reduce((groups: { [key: string]: typeof masterRates }, rate) => {
+                const categoryName = rate.category.replace('level_', 'ระดับ ');
+                if (!groups[categoryName]) groups[categoryName] = [];
+                groups[categoryName].push(rate);
+                return groups;
+              }, {})
+            ).map(([categoryName, rates]) => (
+              <div key={categoryName} className="mb-8">
+                <div className="bg-gradient-to-r from-violet-100 to-purple-100 px-4 py-3 rounded-t-lg border-l-4 border-violet-600">
+                  <h4 className="text-lg font-semibold text-violet-800">{categoryName}</h4>
+                </div>
+                
+                <div className="bg-white rounded-b-lg shadow-sm border border-gray-200">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
+                    {rates.map((rate) => (
+                      <div key={rate.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
+                        <div className="flex justify-between items-start mb-2">
+                          <h5 className="font-medium text-gray-800 text-sm leading-tight">{rate.subcategory}</h5>
+                          <span className="bg-violet-100 text-violet-700 px-2 py-1 rounded-full text-xs font-medium">
+                            {rate.unit}
+                          </span>
+                        </div>
+                        
+                        <div className="text-2xl font-bold text-violet-600 mb-2">
+                          {rate.rate.toLocaleString('th-TH')}
+                        </div>
+                        
+                        {rate.description && (
+                          <p className="text-gray-600 text-xs leading-relaxed">
+                            {rate.description}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
