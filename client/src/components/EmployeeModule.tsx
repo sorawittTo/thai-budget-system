@@ -342,48 +342,104 @@ export default function EmployeeModule() {
 
         {activeTab === "rates" && (
           <div>
-            <h3 className="text-lg font-semibold mb-6">อัตรามาตรฐานค่าใช้จ่าย</h3>
+            <h3 className="text-lg font-semibold mb-6">ตารางอัตราค่าใช้จ่ายมาตรฐาน</h3>
             
-            {/* Group rates by category */}
-            {Object.entries(
-              masterRates.reduce((groups: { [key: string]: typeof masterRates }, rate) => {
-                const categoryName = rate.category.replace('level_', 'ระดับ ');
-                if (!groups[categoryName]) groups[categoryName] = [];
-                groups[categoryName].push(rate);
-                return groups;
-              }, {})
-            ).map(([categoryName, rates]) => (
-              <div key={categoryName} className="mb-8">
-                <div className="bg-gradient-to-r from-violet-100 to-purple-100 px-4 py-3 rounded-t-lg border-l-4 border-violet-600">
-                  <h4 className="text-lg font-semibold text-violet-800">{categoryName}</h4>
-                </div>
-                
-                <div className="bg-white rounded-b-lg shadow-sm border border-gray-200">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-6">
-                    {rates.map((rate) => (
-                      <div key={rate.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200 hover:shadow-md transition-shadow">
-                        <div className="flex justify-between items-start mb-2">
-                          <h5 className="font-medium text-gray-800 text-sm leading-tight">{rate.subcategory}</h5>
-                          <span className="bg-violet-100 text-violet-700 px-2 py-1 rounded-full text-xs font-medium">
-                            {rate.unit}
-                          </span>
-                        </div>
-                        
-                        <div className="text-2xl font-bold text-violet-600 mb-2">
-                          {rate.rate.toLocaleString('th-TH')}
-                        </div>
-                        
-                        {rate.description && (
-                          <p className="text-gray-600 text-xs leading-relaxed">
-                            {rate.description}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            ))}
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse border border-gray-300 bg-white">
+                <thead className="bg-gray-200">
+                  <tr>
+                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ตำแหน่ง</th>
+                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ระดับ</th>
+                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าเช่าบ้าน</th>
+                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">เงินช่วยเหลือค่ารักษาพยาบาล</th>
+                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าเดินทางสายงานนอกพื้นที่</th>
+                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าเดินทางประชุมการปฏิบัติงาน/เดินทาง</th>
+                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าเดินทางนำนักเรียน</th>
+                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าเบี้ยเลี้ยง</th>
+                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าที่พัก</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 border border-gray-300">ผู้บริหารส่วน</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">7</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">9500</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">6250</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">8000</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">300</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">250</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">500</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">2100</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 border border-gray-300">ผู้บริหารทีม</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">6</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">9500</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">6250</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">8000</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">300</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">250</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">500</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">2100</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 border border-gray-300">เจ้าหน้าที่ชำนาญงาน (ควบ)</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">5.5</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">9500</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">6250</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">6000</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">300</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">250</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">500</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">2100</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 border border-gray-300">เจ้าหน้าที่ชำนาญงาน</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">5</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">8000</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">5500</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">6000</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">300</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">250</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">450</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">1800</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 border border-gray-300">เจ้าหน้าที่ (ควบ)</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">4.5</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">8000</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">5500</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">6000</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">300</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">250</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">450</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">1800</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 border border-gray-300">เจ้าหน้าที่</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">4</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">8000</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">5500</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">6000</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">300</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">250</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">450</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">1800</td>
+                  </tr>
+                  <tr className="hover:bg-gray-50">
+                    <td className="px-4 py-3 border border-gray-300">พนักงานปฏิบัติการ</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">3</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">6500</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">4750</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">5000</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">300</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">250</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">450</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">1800</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
       </div>
