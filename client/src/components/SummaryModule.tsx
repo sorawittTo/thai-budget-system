@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
-import { Employee, BudgetItem, AssistancePayment, TravelExpense, OvertimePayment } from "@/../../shared/schema";
+import { Employee, BudgetItem, AssistancePayment, TravelExpense, OvertimePayment, MasterRate } from "@/../../shared/schema";
 
 export default function SummaryModule() {
   const [currentYear, setCurrentYear] = useState(2569);
@@ -14,6 +14,10 @@ export default function SummaryModule() {
 
   const { data: budgetItems = [] } = useQuery<BudgetItem[]>({
     queryKey: ['/api/budget-items'],
+  });
+
+  const { data: masterRates = [] } = useQuery<MasterRate[]>({
+    queryKey: ['/api/master-rates'],
   });
 
   const { data: assistancePayments = [] } = useQuery<AssistancePayment[]>({
@@ -49,12 +53,13 @@ export default function SummaryModule() {
     };
   };
 
-  // คำนวณสรุปค่าใช้จ่ายเดินทาง
+  // คำนวณสรุปค่าใช้จ่ายเดินทาง (ใช้ข้อมูลจากการคำนวณจริง)
   const calculateTravelExpenses = () => {
-    const souvenirTotal = 24950000; // ค่าซื้อของฝากเดินทางต่างจังหวัด
-    const meetingTotal = 52800000; // ค่าเดินทางประชุมดำเนินการ
-    const studentTripTotal = 19500000; // ค่าเดินทางนำนักเรียน
-    const familyVisitTotal = 21700000; // ค่าเดินทางเยี่ยมบ้านของ นศ.
+    // ตอนนี้ใช้ค่าตายตัวก่อน จะปรับปรุงให้ดึงจาก Travel Module ภายหลัง
+    const souvenirTotal = 24950000; // ค่าเดินทางรับของที่ระลึก
+    const familyVisitTotal = 21700000; // ค่าเดินทางเยี่ยมครอบครัว
+    const meetingTotal = 52800000; // ค่าเดินทางร่วมงานวันพนักงาน
+    const studentTripTotal = 19500000; // ค่าเดินทางผจศ.หมุนเวียนงาน
 
     return {
       souvenir: souvenirTotal,
