@@ -20,6 +20,7 @@ export default function AssistanceModule() {
     { id: 6, description: "พนักงานทำบุญการพระสงฆ์โบสถ์รูปพระสำราญ", quantity: 1, days: 20, recipients: 1, amountPerPerson: 300, total: 6000.00 },
     { id: 7, description: "ความคุ้มครองสมัยประธา", quantity: 1, days: 2, recipients: 1, amountPerPerson: 250, total: 500.00 }
   ]);
+  const [specialAssistanceNotes, setSpecialAssistanceNotes] = useState("");
 
   const { data: employeeData, isLoading: employeeLoading } = useQuery({
     queryKey: ["/api/employees"],
@@ -284,21 +285,21 @@ export default function AssistanceModule() {
               <TableHeader>
                 <TableRow>
                   <TableHead className="text-center border font-semibold">รายการ</TableHead>
-                  <TableHead className="text-center border font-semibold">จำนวน</TableHead>
-                  <TableHead className="text-center border font-semibold">วันที่</TableHead>
-                  <TableHead className="text-center border font-semibold">คนที่ได้รับ</TableHead>
-                  <TableHead className="text-center border font-semibold">ช่วยเหลือ/คน</TableHead>
+                  <TableHead className="text-center border font-semibold">ครั้ง/ปี</TableHead>
+                  <TableHead className="text-center border font-semibold">วัน/ครั้ง</TableHead>
+                  <TableHead className="text-center border font-semibold">คน/ครั้ง</TableHead>
+                  <TableHead className="text-center border font-semibold">อัตราเงินช่วยเหลือ/วัน</TableHead>
                   <TableHead className="text-center border font-semibold">รวมเงิน</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {specialAssistanceData.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell className="text-left border">
+                    <TableCell className="text-left border min-w-[300px]">
                       <Input
                         value={item.description}
                         onChange={(e) => updateSpecialAssistanceData(item.id, 'description', e.target.value)}
-                        className="flat-input border-none bg-transparent"
+                        className="flat-input border-none bg-transparent w-full"
                       />
                     </TableCell>
                     <TableCell className="text-center border">
@@ -358,7 +359,17 @@ export default function AssistanceModule() {
             </Table>
           </div>
           <div className="mt-6">
-            <p className="font-semibold">หมายเหตุ:</p>
+            <div className="flex items-start gap-2">
+              <p className="font-semibold pt-2">หมายเหตุ:</p>
+              <div className="flex-1">
+                <Input
+                  value={specialAssistanceNotes}
+                  onChange={(e) => setSpecialAssistanceNotes(e.target.value)}
+                  placeholder="กรอกหมายเหตุเพิ่มเติม..."
+                  className="flat-input w-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}
