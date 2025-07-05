@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, Plus, Edit2, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, Edit2, Trash2, Info } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import type { Employee, TravelExpense, InsertTravelExpense } from "@shared/schema";
@@ -12,6 +12,8 @@ export default function TravelModule() {
   const [activeTab, setActiveTab] = useState("souvenir");
   const [editingItem, setEditingItem] = useState<TravelExpense | null>(null);
   const [travelProvince, setTravelProvince] = useState("กรุงเทพมหานคร");
+  const [workDays, setWorkDays] = useState<{[key: number]: number}>({});
+  const [showInfo, setShowInfo] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: employees = [], isLoading: employeeLoading } = useQuery({
@@ -67,6 +69,25 @@ export default function TravelModule() {
   // Calculate active employees (for family visit)
   const activeEmployees = employees.filter((employee: Employee) => employee.status === "Active");
 
+  // Filter level 7 employees (for rotation work)
+  const level7Employees = employees.filter((employee: any) => employee.level === "7");
+
+  // Handle edit/delete functions
+  const handleEdit = (employeeId: number, tabType: string) => {
+    // Implementation for editing
+    console.log(`Edit ${tabType} for employee ${employeeId}`);
+  };
+
+  const handleDelete = (employeeId: number, tabType: string) => {
+    // Implementation for deleting specific to current tab
+    console.log(`Delete ${tabType} for employee ${employeeId}`);
+  };
+
+  const handleAdd = (tabType: string) => {
+    // Implementation for adding new entry
+    console.log(`Add new ${tabType} entry`);
+  };
+
   const renderTabs = () => (
     <div className="flex flex-wrap gap-2 mb-6">
       <Button
@@ -102,7 +123,18 @@ export default function TravelModule() {
 
   const renderSouvenirTab = () => (
     <div>
-      <h3 className="text-lg font-semibold mb-4">สรุปค่าใช้จ่ายเดินทางเพื่อรับของที่ระลึก</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">สรุปค่าใช้จ่ายเดินทางเพื่อรับของที่ระลึก</h3>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          title="ข้อมูลเพิ่มเติม"
+        >
+          <Info className="h-4 w-4" />
+          <span className="text-xs">เงื่อนไข</span>
+        </Button>
+      </div>
       
       <div className="mb-4 p-4 bg-blue-50 rounded-lg">
         <p className="text-sm text-gray-700 mb-2">
@@ -135,9 +167,9 @@ export default function TravelModule() {
           <tbody>
             {eligibleEmployees.map((employee: Employee, index: number) => {
               const serviceYears = currentYear - employee.startYear;
-              const workDays = 1; // Default 1 day, can be edited
-              const allowanceDays = 2 + workDays; // Base 3 days for 1 work day
-              const accommodationDays = 1 + workDays; // Base 2 days for 1 work day
+              const currentWorkDays = workDays[employee.id] || 1; // Default 1 day, can be edited
+              const allowanceDays = 2 + currentWorkDays; // Base 3 days for 1 work day
+              const accommodationDays = 1 + currentWorkDays; // Base 2 days for 1 work day
               const allowanceCost = allowanceDays * 500;
               const accommodationCost = accommodationDays * 2100;
               const transportCost = 8000;
@@ -151,7 +183,11 @@ export default function TravelModule() {
                   <td className="px-4 py-3 border border-gray-300 text-center">
                     <Input 
                       type="number" 
-                      value={workDays} 
+                      value={currentWorkDays} 
+                      onChange={(e) => setWorkDays(prev => ({
+                        ...prev,
+                        [employee.id]: parseInt(e.target.value) || 1
+                      }))}
                       className="w-16 text-center" 
                       min="1"
                     />
@@ -168,10 +204,20 @@ export default function TravelModule() {
                   <td className="px-4 py-3 border border-gray-300 text-center font-semibold">{total.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
                     <div className="flex justify-center gap-2">
-                      <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-8 w-8 p-0"
+                        onClick={() => handleEdit(employee.id, "souvenir")}
+                      >
                         <Edit2 className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-red-600">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-8 w-8 p-0 text-red-600"
+                        onClick={() => handleDelete(employee.id, "souvenir")}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -184,15 +230,18 @@ export default function TravelModule() {
       </div>
       
       <div className="mt-4 flex justify-between items-center">
-        <Button className="flex items-center gap-2">
+        <Button 
+          className="flex items-center gap-2"
+          onClick={() => handleAdd("souvenir")}
+        >
           <Plus className="h-4 w-4" />
           เพิ่มรายการ
         </Button>
         <div className="text-lg font-semibold">
-          รวมทั้งสิ้น: {eligibleEmployees.reduce((sum, emp) => {
-            const workDays = 1;
-            const allowanceDays = 2 + workDays;
-            const accommodationDays = 1 + workDays;
+          รวมทั้งสิ้น: {eligibleEmployees.reduce((sum: number, emp: any) => {
+            const currentWorkDays = workDays[emp.id] || 1;
+            const allowanceDays = 2 + currentWorkDays;
+            const accommodationDays = 1 + currentWorkDays;
             return sum + (allowanceDays * 500) + (accommodationDays * 2100) + 8000;
           }, 0).toLocaleString()} บาท
         </div>
@@ -202,7 +251,18 @@ export default function TravelModule() {
 
   const renderFamilyTab = () => (
     <div>
-      <h3 className="text-lg font-semibold mb-4">สรุปค่าเดินทางเยี่ยมครอบครัว</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">สรุปค่าเดินทางเยี่ยมครอบครัว</h3>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          title="ข้อมูลเพิ่มเติม"
+        >
+          <Info className="h-4 w-4" />
+          <span className="text-xs">เงื่อนไข</span>
+        </Button>
+      </div>
       
       <div className="mb-4 p-4 bg-green-50 rounded-lg">
         <p className="text-sm text-gray-700 mb-2">
@@ -242,10 +302,20 @@ export default function TravelModule() {
                   <td className="px-4 py-3 border border-gray-300 text-center font-semibold">{tourCost.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
                     <div className="flex justify-center gap-2">
-                      <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-8 w-8 p-0"
+                        onClick={() => handleEdit(employee.id, "family")}
+                      >
                         <Edit2 className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-red-600">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-8 w-8 p-0 text-red-600"
+                        onClick={() => handleDelete(employee.id, "family")}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -258,7 +328,10 @@ export default function TravelModule() {
       </div>
       
       <div className="mt-4 flex justify-between items-center">
-        <Button className="flex items-center gap-2">
+        <Button 
+          className="flex items-center gap-2"
+          onClick={() => handleAdd("family")}
+        >
           <Plus className="h-4 w-4" />
           เพิ่มรายการ
         </Button>
@@ -271,7 +344,18 @@ export default function TravelModule() {
 
   const renderCompanyTab = () => (
     <div>
-      <h3 className="text-lg font-semibold mb-4">สรุปค่าเดินทางร่วมงานวันพนักงาน</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">สรุปค่าเดินทางร่วมงานวันพนักงาน</h3>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          title="ข้อมูลเพิ่มเติม"
+        >
+          <Info className="h-4 w-4" />
+          <span className="text-xs">เงื่อนไข</span>
+        </Button>
+      </div>
       
       <div className="mb-4 p-4 bg-purple-50 rounded-lg">
         <p className="text-sm text-gray-700 mb-2">
@@ -303,7 +387,6 @@ export default function TravelModule() {
               <th className="px-4 py-3 text-left border border-gray-300">ชื่อ-นามสกุล</th>
               <th className="px-4 py-3 text-center border border-gray-300">ระดับ</th>
               <th className="px-4 py-3 text-center border border-gray-300">เพศ</th>
-              <th className="px-4 py-3 text-center border border-gray-300">จังหวัดบ้าน</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่าที่พัก</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่าพาหนะ</th>
               <th className="px-4 py-3 text-center border border-gray-300">รวม</th>
@@ -325,7 +408,6 @@ export default function TravelModule() {
                   <td className="px-4 py-3 border border-gray-300">{employee.fullName}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">{employee.level}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">{employee.gender}</td>
-                  <td className="px-4 py-3 border border-gray-300 text-center">{employee.province}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
                     {sameProvince ? (
                       <span className="text-gray-400">ไม่ได้</span>
@@ -339,10 +421,20 @@ export default function TravelModule() {
                   </td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
                     <div className="flex justify-center gap-2">
-                      <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-8 w-8 p-0"
+                        onClick={() => handleEdit(employee.id, "company")}
+                      >
                         <Edit2 className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-red-600">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-8 w-8 p-0 text-red-600"
+                        onClick={() => handleDelete(employee.id, "company")}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -355,7 +447,10 @@ export default function TravelModule() {
       </div>
       
       <div className="mt-4 flex justify-between items-center">
-        <Button className="flex items-center gap-2">
+        <Button 
+          className="flex items-center gap-2"
+          onClick={() => handleAdd("company")}
+        >
           <Plus className="h-4 w-4" />
           เพิ่มรายการ
         </Button>
@@ -373,10 +468,24 @@ export default function TravelModule() {
 
   const renderRotationTab = () => (
     <div>
-      <h3 className="text-lg font-semibold mb-4">สรุปค่าเดินทางหมุนเวียนงาน ผจศ.</h3>
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">สรุปค่าเดินทางหมุนเวียนงาน ผจศ.</h3>
+        <Button
+          variant="outline"
+          size="sm"
+          className="flex items-center gap-2"
+          title="ข้อมูลเพิ่มเติม"
+        >
+          <Info className="h-4 w-4" />
+          <span className="text-xs">เงื่อนไข</span>
+        </Button>
+      </div>
       
       <div className="mb-4 p-4 bg-orange-50 rounded-lg">
-        <p className="text-sm text-gray-700">
+        <p className="text-sm text-gray-700 mb-2">
+          <strong>เงื่อนไข:</strong> แสดงเฉพาะพนักงานระดับ 7 เท่านั้น
+        </p>
+        <p className="text-sm text-gray-600">
           <strong>หมายเหตุ:</strong> ไม่มีช่องอายุงาน แต่เพิ่มช่องค่าพาหนะอื่นๆ
         </p>
       </div>
@@ -387,6 +496,7 @@ export default function TravelModule() {
             <tr>
               <th className="px-4 py-3 text-left border border-gray-300">ลำดับ</th>
               <th className="px-4 py-3 text-left border border-gray-300">ชื่อ-นามสกุล</th>
+              <th className="px-4 py-3 text-center border border-gray-300">ระดับ</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่าเบี้ยเลี้ยง</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่าที่พัก</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่าพาหนะ</th>
@@ -396,13 +506,14 @@ export default function TravelModule() {
             </tr>
           </thead>
           <tbody>
-            {employees.map((employee: Employee, index: number) => {
+            {level7Employees.map((employee: any, index: number) => {
               const total = 500 + 2100 + 8000 + 2000; // Including other vehicle costs
               
               return (
                 <tr key={employee.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 border border-gray-300">{index + 1}</td>
                   <td className="px-4 py-3 border border-gray-300">{employee.fullName}</td>
+                  <td className="px-4 py-3 border border-gray-300 text-center">{employee.level}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">500</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">2,100</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">8,000</td>
@@ -412,10 +523,20 @@ export default function TravelModule() {
                   </td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
                     <div className="flex justify-center gap-2">
-                      <Button size="sm" variant="outline" className="h-8 w-8 p-0">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-8 w-8 p-0"
+                        onClick={() => handleEdit(employee.id, "rotation")}
+                      >
                         <Edit2 className="h-4 w-4" />
                       </Button>
-                      <Button size="sm" variant="outline" className="h-8 w-8 p-0 text-red-600">
+                      <Button 
+                        size="sm" 
+                        variant="outline" 
+                        className="h-8 w-8 p-0 text-red-600"
+                        onClick={() => handleDelete(employee.id, "rotation")}
+                      >
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -428,12 +549,15 @@ export default function TravelModule() {
       </div>
       
       <div className="mt-4 flex justify-between items-center">
-        <Button className="flex items-center gap-2">
+        <Button 
+          className="flex items-center gap-2"
+          onClick={() => handleAdd("rotation")}
+        >
           <Plus className="h-4 w-4" />
           เพิ่มรายการ
         </Button>
         <div className="text-lg font-semibold">
-          รวมทั้งสิ้น: {(employees.length * 12600).toLocaleString()} บาท
+          รวมทั้งสิ้น: {(level7Employees.length * 12600).toLocaleString()} บาท
         </div>
       </div>
     </div>
