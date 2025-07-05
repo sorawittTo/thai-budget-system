@@ -28,7 +28,7 @@ interface SpecialAssistanceItem {
 
 interface OvertimeItem {
   id: number;
-  description: string;
+  days: number;
   hours: number;
   ratePerHour: number;
   total: number;
@@ -151,7 +151,7 @@ export default function AssistanceModule() {
   const [overtimeItems, setOvertimeItems] = useState<OvertimeItem[]>([
     {
       id: 1,
-      description: "ค่าล่วงเวลา",
+      days: 30,
       hours: 120,
       ratePerHour: 75,
       total: 9000
@@ -289,7 +289,7 @@ export default function AssistanceModule() {
                 ปีก่อน
               </Button>
               <div className="bg-white px-4 py-2 rounded-lg shadow-sm border">
-                <span className="text-lg font-semibold text-gray-800">ปีงบประมาณ {currentYear}</span>
+                <span className="text-lg font-semibold text-gray-800">ปีงบประมาณ พ.ศ. {currentYear}</span>
               </div>
               <Button
                 variant="outline"
@@ -565,7 +565,7 @@ export default function AssistanceModule() {
               <Table>
                 <TableHeader className="bg-gradient-to-r from-orange-100 to-yellow-100">
                   <TableRow className="border-b border-gray-200">
-                    <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">รายการ</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">จำนวนวัน</TableHead>
                     <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">จำนวนชั่วโมง</TableHead>
                     <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">อัตราต่อชั่วโมง</TableHead>
                     <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">หมายเหตุ</TableHead>
@@ -575,7 +575,14 @@ export default function AssistanceModule() {
                 <TableBody>
                   {overtimeItems.map((item) => (
                     <TableRow key={item.id} className="hover:bg-gray-50 transition-colors">
-                      <TableCell className="border-r border-gray-200 font-medium">{item.description}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        <Input
+                          type="number"
+                          value={item.days}
+                          onChange={(e) => updateOvertimeItem(item.id, 'days', Number(e.target.value))}
+                          className="text-center w-20 mx-auto bg-gray-50 border-gray-300"
+                        />
+                      </TableCell>
                       <TableCell className="border-r border-gray-200 text-center">
                         <Input
                           type="number"
