@@ -472,7 +472,14 @@ export default function AssistanceModule() {
                 <TableBody>
                   {specialAssistanceItems.map((item) => (
                     <TableRow key={item.id} className="hover:bg-gray-50 transition-colors">
-                      <TableCell className="border-r border-gray-200 font-medium">{item.description}</TableCell>
+                      <TableCell className="border-r border-gray-200">
+                        <Input
+                          type="text"
+                          value={item.description}
+                          onChange={(e) => updateSpecialAssistanceItem(item.id, 'description', e.target.value)}
+                          className="w-full bg-gray-50 border-gray-300 font-medium"
+                        />
+                      </TableCell>
                       <TableCell className="border-r border-gray-200 text-center">
                         <Input
                           type="number"
