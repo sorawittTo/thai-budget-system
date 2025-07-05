@@ -92,45 +92,8 @@ export default function BudgetSystem() {
       default:
         return (
           <div className="bg-white rounded-xl shadow-sm p-8 text-center">
-            <img 
-              src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=400" 
-              alt="Office budget planning scene" 
-              className="rounded-xl shadow-lg w-full h-64 object-cover mb-6" 
-            />
-            
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">
-              ยินดีต้อนรับสู่ระบบจัดทำงบประมาณประจำปี
-            </h2>
-            <p className="text-gray-600 mb-6">
-              เลือกเมนูด้านบนเพื่อเริ่มต้นการใช้งาน
-            </p>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-              <div className="bg-gradient-to-r from-indigo-50 to-blue-50 p-6 rounded-lg">
-                <img 
-                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=300" 
-                  alt="Financial spreadsheet" 
-                  className="rounded-lg shadow-md w-full h-32 object-cover mb-4" 
-                />
-                
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">จัดการงบประมาณ</h3>
-                <p className="text-gray-600 text-sm">
-                  สร้างและจัดการงบประมาณประจำปีอย่างมีประสิทธิภาพ
-                </p>
-              </div>
-              
-              <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-lg">
-                <img 
-                  src="https://images.unsplash.com/photo-1577962917302-cd874c4e31d2?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=600&h=300" 
-                  alt="Thai government office" 
-                  className="rounded-lg shadow-md w-full h-32 object-cover mb-4" 
-                />
-                
-                <h3 className="text-lg font-semibold text-gray-800 mb-2">ระบบครบครัน</h3>
-                <p className="text-gray-600 text-sm">
-                  ระบบจัดการพนักงาน การเดินทาง และเงินช่วยเหลือ
-                </p>
-              </div>
+            <div className="text-gray-400 text-lg">
+              เลือกเมนูด้านบนเพื่อเริ่มการใช้งาน
             </div>
           </div>
         );
@@ -146,9 +109,7 @@ export default function BudgetSystem() {
             <h1 className="text-3xl sm:text-4xl font-extrabold text-indigo-600">
               ระบบจัดทำงบประมาณประจำปี
             </h1>
-            <p className="text-gray-500 mt-2">
-              ระบบจัดการและคำนวณงบประมาณอย่างมีประสิทธิภาพ
-            </p>
+
           </div>
           
           <div className="flex flex-wrap items-center justify-center gap-3">
