@@ -1,0 +1,172 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 100%);
+  --foreground: hsl(20, 14.3%, 4.1%);
+  --muted: hsl(60, 4.8%, 95.9%);
+  --muted-foreground: hsl(25, 5.3%, 44.7%);
+  --popover: hsl(0, 0%, 100%);
+  --popover-foreground: hsl(20, 14.3%, 4.1%);
+  --card: hsl(0, 0%, 100%);
+  --card-foreground: hsl(20, 14.3%, 4.1%);
+  --border: hsl(20, 5.9%, 90%);
+  --input: hsl(20, 5.9%, 90%);
+  --primary: hsl(238, 77%, 59%);
+  --primary-foreground: hsl(224, 91%, 95%);
+  --secondary: hsl(60, 4.8%, 95.9%);
+  --secondary-foreground: hsl(24, 9.8%, 10%);
+  --accent: hsl(60, 4.8%, 95.9%);
+  --accent-foreground: hsl(24, 9.8%, 10%);
+  --destructive: hsl(0, 84.2%, 60.2%);
+  --destructive-foreground: hsl(60, 9.1%, 97.8%);
+  --ring: hsl(20, 14.3%, 4.1%);
+  --radius: 0.5rem;
+}
+
+.dark {
+  --background: hsl(240, 10%, 3.9%);
+  --foreground: hsl(0, 0%, 98%);
+  --muted: hsl(240, 3.7%, 15.9%);
+  --muted-foreground: hsl(240, 5%, 64.9%);
+  --popover: hsl(240, 10%, 3.9%);
+  --popover-foreground: hsl(0, 0%, 98%);
+  --card: hsl(240, 10%, 3.9%);
+  --card-foreground: hsl(0, 0%, 98%);
+  --border: hsl(240, 3.7%, 15.9%);
+  --input: hsl(240, 3.7%, 15.9%);
+  --primary: hsl(238, 77%, 59%);
+  --primary-foreground: hsl(224, 91%, 95%);
+  --secondary: hsl(240, 3.7%, 15.9%);
+  --secondary-foreground: hsl(0, 0%, 98%);
+  --accent: hsl(240, 3.7%, 15.9%);
+  --accent-foreground: hsl(0, 0%, 98%);
+  --destructive: hsl(0, 62.8%, 30.6%);
+  --destructive-foreground: hsl(0, 0%, 98%);
+  --ring: hsl(240, 4.9%, 83.9%);
+  --radius: 0.5rem;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    font-family: 'Sarabun', sans-serif;
+    background-color: hsl(220, 13%, 94%);
+  }
+}
+
+/* Thai Budget System Custom Styles */
+.main-nav-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.main-nav-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.main-nav-card.active {
+  background-color: hsl(238, 77%, 59%);
+  color: white;
+  box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.4), 0 4px 6px -2px rgba(79, 70, 229, 0.1);
+}
+
+.main-nav-card.active .nav-card-subtitle {
+  color: hsl(224, 91%, 95%);
+}
+
+.sub-nav-button {
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.sub-nav-button.active {
+  color: hsl(271, 81%, 56%);
+  border-color: hsl(271, 81%, 56%);
+}
+
+.modal { 
+  transition: opacity 0.25s ease; 
+}
+
+.saving-indicator { 
+  transition: opacity 0.5s ease; 
+}
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] { 
+  -moz-appearance: textfield; 
+}
+
+.flat-input {
+  background-color: transparent;
+  border: none;
+  outline: none;
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  width: 100%;
+}
+
+.flat-input.text-right { 
+  text-align: right; 
+}
+
+.flat-input.text-left { 
+  text-align: left; 
+}
+
+.flat-input:focus, .flat-input:hover {
+  background-color: rgba(0,0,0,0.05);
+}
+
+.has-tooltip {
+  cursor: help;
+  border-bottom: 1px dotted hsl(210, 4%, 58%);
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  .print-area, .print-area * {
+    visibility: visible;
+  }
+  
+  .print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+  
+  .no-print {
+    display: none;
+  }
+  
+  .flat-input {
+    border: none !important;
+    background-color: transparent !important;
+  }
+  
+  .bg-blue-600 {
+    background-color: hsl(219, 100%, 55%) !important;
+    -webkit-print-color-adjust: exact; 
+    print-color-adjust: exact;
+  }
+  
+  .bg-gray-200 {
+    background-color: hsl(210, 11%, 91%) !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+}
