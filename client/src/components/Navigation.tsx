@@ -1,4 +1,4 @@
-import { FileText, Users, MapPin, DollarSign, Calendar } from "lucide-react";
+import { FileText, Users, MapPin, DollarSign, Calendar, BarChart3 } from "lucide-react";
 
 interface NavigationProps {
   activeModule: string;
@@ -37,10 +37,16 @@ export default function Navigation({ activeModule, setActiveModule }: Navigation
       subtitle: "คำนวณวันทำงานและวันหยุด",
       icon: Calendar,
     },
+    {
+      id: "summary",
+      title: "สรุปงบประมาณ",
+      subtitle: "สรุปงบประมาণประจำปี",
+      icon: BarChart3,
+    },
   ];
 
   return (
-    <nav className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-8 no-print">
+    <nav className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8 no-print">
       {navItems.map((item) => {
         const Icon = item.icon;
         return (

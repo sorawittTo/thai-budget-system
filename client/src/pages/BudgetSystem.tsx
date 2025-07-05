@@ -5,13 +5,14 @@ import EmployeeModule from "@/components/EmployeeModule";
 import TravelModule from "@/components/TravelModule";
 import AssistanceModule from "@/components/AssistanceModule";
 import WorkdayModule from "@/components/WorkdayModule";
+import SummaryModule from "@/components/SummaryModule";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Download, Upload, RotateCcw, Save } from "lucide-react";
 import { exportToExcel } from "@/utils/excelUtils";
 import { saveToLocalStorage } from "@/utils/localStorage";
 
-type ActiveModule = "welcome" | "budget" | "config" | "travel" | "assistance" | "workday";
+type ActiveModule = "welcome" | "budget" | "config" | "travel" | "assistance" | "workday" | "summary";
 
 export default function BudgetSystem() {
   const [activeModule, setActiveModule] = useState<ActiveModule>("welcome");
@@ -89,6 +90,8 @@ export default function BudgetSystem() {
         return <AssistanceModule />;
       case "workday":
         return <WorkdayModule />;
+      case "summary":
+        return <SummaryModule />;
       default:
         return (
           <div className="bg-white rounded-xl shadow-sm p-8 text-center">
