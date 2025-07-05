@@ -1,153 +1,220 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, HelpCircle, Heart, Clock, Edit2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
-import type { Employee, MasterRate } from "@shared/schema";
+import { Heart, HelpCircle, Clock, ChevronLeft, ChevronRight } from "lucide-react";
+import { Employee, MasterRate } from "@/../../shared/schema";
+
+interface AssistanceItem {
+  id: number;
+  description: string;
+  months: number;
+  houseRent: number;
+  monthlyAssistance: number;
+  oneTimePurchase: number;
+  total: number;
+}
+
+interface SpecialAssistanceItem {
+  id: number;
+  description: string;
+  timesPerYear: number;
+  daysPerTime: number;
+  peoplePerTime: number;
+  assistanceRatePerDay: number;
+  total: number;
+}
+
+interface OvertimeItem {
+  id: number;
+  description: string;
+  hours: number;
+  ratePerHour: number;
+  total: number;
+}
 
 export default function AssistanceModule() {
-  const [currentYear, setCurrentYear] = useState(new Date().getFullYear() + 543);
   const [activeTab, setActiveTab] = useState<"other" | "special" | "overtime">("other");
-  const [employees, setEmployees] = useState<Employee[]>([]);
-  const [assistanceSettings, setAssistanceSettings] = useState<{[key: string]: {months: number, oneTimeAmount: number}}>({});
-  const [specialAssistanceData, setSpecialAssistanceData] = useState([
-    { id: 1, description: "ความคุ้มครองประกันภัยอุบัติเหตุกลุ่มพนักงาน", quantity: 1, days: 2, recipients: 1, amountPerPerson: 250, total: 500.00 },
-    { id: 2, description: "ความคุ้มครองประกันภัยรถเจ้าหน้าที่แล้วเซ็นคุม", quantity: 2, days: 2, recipients: 1, amountPerPerson: 250, total: 1000.00 },
-    { id: 3, description: "PM เครื่องดื่ม M7", quantity: 12, days: 2, recipients: 1, amountPerPerson: 250, total: 6000.00 },
-    { id: 4, description: "Mini Overhaul เครื่อง M7", quantity: 1, days: 2, recipients: 1, amountPerPerson: 250, total: 500.00 },
-    { id: 5, description: "พนักงานข้างแดด", quantity: 1, days: 242, recipients: 2, amountPerPerson: 300, total: 145200.00 },
-    { id: 6, description: "พนักงานทำบุญการพระสงฆ์โบสถ์รูปพระสำราญ", quantity: 1, days: 20, recipients: 1, amountPerPerson: 300, total: 6000.00 },
-    { id: 7, description: "ความคุ้มครองสมัยประธา", quantity: 1, days: 2, recipients: 1, amountPerPerson: 250, total: 500.00 }
-  ]);
-  const [specialAssistanceNotes, setSpecialAssistanceNotes] = useState("");
+  const [currentYear, setCurrentYear] = useState(2025);
+  const [overtimeRatePerHour, setOvertimeRatePerHour] = useState(18000);
+  const [otherNotes, setOtherNotes] = useState("");
+  const [specialNotes, setSpecialNotes] = useState("");
   const [overtimeNotes, setOvertimeNotes] = useState("");
 
-  const { data: employeeData, isLoading: employeeLoading } = useQuery({
-    queryKey: ["/api/employees"],
-    queryFn: async () => {
-      const response = await fetch("/api/employees");
-      return response.json();
-    },
+  const { data: employees, isLoading: employeeLoading } = useQuery<Employee[]>({
+    queryKey: ['/api/employees'],
   });
 
-  const { data: masterRatesData, isLoading: ratesLoading } = useQuery({
-    queryKey: ["/api/master-rates"],
-    queryFn: async () => {
-      const response = await fetch("/api/master-rates");
-      return response.json();
-    },
+  const { data: masterRates, isLoading: ratesLoading } = useQuery<MasterRate[]>({
+    queryKey: ['/api/master-rates'],
   });
 
-  useEffect(() => {
-    if (employeeData) {
-      setEmployees(employeeData);
-      // Initialize assistance settings for each employee
-      const initialSettings: {[key: string]: {months: number, oneTimeAmount: number}} = {};
-      employeeData.forEach((emp: Employee) => {
-        initialSettings[emp.id] = { months: 12, oneTimeAmount: 0 };
-      });
-      setAssistanceSettings(initialSettings);
+  const [assistanceItems, setAssistanceItems] = useState<AssistanceItem[]>([
+    {
+      id: 1,
+      description: "ค่าที่พัก",
+      months: 12,
+      houseRent: 12000,
+      monthlyAssistance: 0,
+      oneTimePurchase: 0,
+      total: 144000
+    },
+    {
+      id: 2,
+      description: "ค่าช่วยเหลือรายเดือน",
+      months: 12,
+      houseRent: 0,
+      monthlyAssistance: 5000,
+      oneTimePurchase: 0,
+      total: 60000
+    },
+    {
+      id: 3,
+      description: "ค่าซื้อของเหมาจ่าย",
+      months: 12,
+      houseRent: 0,
+      monthlyAssistance: 0,
+      oneTimePurchase: 0,
+      total: 0
     }
-  }, [employeeData]);
-
-  const handleYearChange = (direction: "prev" | "next") => {
-    if (direction === "prev") {
-      setCurrentYear(prev => prev - 1);
-    } else {
-      setCurrentYear(prev => prev + 1);
-    }
-  };
-
-  const getMasterRateValue = (level: string, description: string): number => {
-    if (!masterRatesData) return 0;
-    const rate = masterRatesData.find((r: MasterRate) => 
-      r.category === `level_${level.replace('.', '_')}` && r.description === description
-    );
-    return rate ? rate.rate : 0;
-  };
-
-  const updateAssistanceSettings = (employeeId: number, field: 'months' | 'oneTimeAmount', value: number) => {
-    setAssistanceSettings(prev => ({
-      ...prev,
-      [employeeId]: {
-        ...prev[employeeId],
-        [field]: value
-      }
-    }));
-  };
-
-  const updateSpecialAssistanceData = (id: number, field: string, value: number | string) => {
-    setSpecialAssistanceData(prev => 
-      prev.map(item => {
-        if (item.id === id) {
-          const updated = { ...item, [field]: value };
-          // Recalculate total when any field changes
-          if (field !== 'description' && field !== 'total') {
-            updated.total = updated.quantity * updated.days * updated.recipients * updated.amountPerPerson;
-          }
-          return updated;
-        }
-        return item;
-      })
-    );
-  };
-
-  const calculateAssistanceData = () => {
-    return employees.map(employee => {
-      const settings = assistanceSettings[employee.id] || { months: 12, oneTimeAmount: 0 };
-      const rentAssistance = getMasterRateValue(employee.level, "ค่าเช่า");
-      const monthlyAssistance = getMasterRateValue(employee.level, "เงินช่วยเหลือรายเดือน");
-      const totalMonthlyAssistance = monthlyAssistance * settings.months;
-      const total = (rentAssistance * settings.months) + totalMonthlyAssistance + settings.oneTimeAmount;
-      
-      return {
-        id: employee.id,
-        employeeCode: employee.employeeCode,
-        fullName: employee.fullName,
-        level: employee.level,
-        rentAssistance,
-        monthlyAssistance,
-        months: settings.months,
-        totalMonthlyAssistance,
-        oneTimeAmount: settings.oneTimeAmount,
-        total,
-      };
-    });
-  };
-
-  const [overtimeData, setOvertimeData] = useState([
-    { id: 1, employees: 0, hours: 8, hoursPerEmployee: 1, ratePerHour: 71.43, total: 0.00 }
   ]);
-  
-  const [overtimeRatePerHour, setOvertimeRatePerHour] = useState(15000);
-  
-  const updateOvertimeData = (id: number, field: string, value: number) => {
-    setOvertimeData(prev => 
+
+  const [specialAssistanceItems, setSpecialAssistanceItems] = useState<SpecialAssistanceItem[]>([
+    {
+      id: 1,
+      description: "งานบุญประจำปี",
+      timesPerYear: 5,
+      daysPerTime: 1,
+      peoplePerTime: 5,
+      assistanceRatePerDay: 300,
+      total: 7500
+    },
+    {
+      id: 2,
+      description: "งานบุญปีใหม่",
+      timesPerYear: 1,
+      daysPerTime: 1,
+      peoplePerTime: 5,
+      assistanceRatePerDay: 300,
+      total: 1500
+    },
+    {
+      id: 3,
+      description: "งานบุญสงกรานต์",
+      timesPerYear: 1,
+      daysPerTime: 3,
+      peoplePerTime: 5,
+      assistanceRatePerDay: 300,
+      total: 4500
+    },
+    {
+      id: 4,
+      description: "งานบุญผู้สูงอายุ",
+      timesPerYear: 1,
+      daysPerTime: 1,
+      peoplePerTime: 5,
+      assistanceRatePerDay: 300,
+      total: 1500
+    },
+    {
+      id: 5,
+      description: "งานบุญท้าวเวสสุวรรณ",
+      timesPerYear: 1,
+      daysPerTime: 1,
+      peoplePerTime: 5,
+      assistanceRatePerDay: 300,
+      total: 1500
+    },
+    {
+      id: 6,
+      description: "งานบุญลอยกระทง",
+      timesPerYear: 1,
+      daysPerTime: 1,
+      peoplePerTime: 5,
+      assistanceRatePerDay: 300,
+      total: 1500
+    },
+    {
+      id: 7,
+      description: "งานบุญเข้าพรรษา",
+      timesPerYear: 1,
+      daysPerTime: 1,
+      peoplePerTime: 5,
+      assistanceRatePerDay: 300,
+      total: 1500
+    }
+  ]);
+
+  const [overtimeItems, setOvertimeItems] = useState<OvertimeItem[]>([
+    {
+      id: 1,
+      description: "ค่าล่วงเวลา",
+      hours: 120,
+      ratePerHour: 75,
+      total: 9000
+    }
+  ]);
+
+  const updateAssistanceItem = (id: number, field: keyof AssistanceItem, value: any) => {
+    setAssistanceItems(prev => 
       prev.map(item => {
         if (item.id === id) {
-          const updated = { ...item, [field]: value };
-          // Recalculate total: employees × hours × hoursPerEmployee × ratePerHour
-          updated.total = updated.employees * updated.hours * updated.hoursPerEmployee * updated.ratePerHour;
-          return updated;
+          const updatedItem = { ...item, [field]: value };
+          if (field === 'months' || field === 'houseRent' || field === 'monthlyAssistance' || field === 'oneTimePurchase') {
+            updatedItem.total = (updatedItem.months * (updatedItem.houseRent + updatedItem.monthlyAssistance)) + updatedItem.oneTimePurchase;
+          }
+          return updatedItem;
         }
         return item;
       })
     );
   };
 
-  const assistanceData = calculateAssistanceData();
+  const updateSpecialAssistanceItem = (id: number, field: keyof SpecialAssistanceItem, value: any) => {
+    setSpecialAssistanceItems(prev => 
+      prev.map(item => {
+        if (item.id === id) {
+          const updatedItem = { ...item, [field]: value };
+          if (field === 'timesPerYear' || field === 'daysPerTime' || field === 'peoplePerTime' || field === 'assistanceRatePerDay') {
+            updatedItem.total = updatedItem.timesPerYear * updatedItem.daysPerTime * updatedItem.peoplePerTime * updatedItem.assistanceRatePerDay;
+          }
+          return updatedItem;
+        }
+        return item;
+      })
+    );
+  };
+
+  const updateOvertimeItem = (id: number, field: keyof OvertimeItem, value: any) => {
+    setOvertimeItems(prev => 
+      prev.map(item => {
+        if (item.id === id) {
+          const updatedItem = { ...item, [field]: value };
+          if (field === 'hours' || field === 'ratePerHour') {
+            updatedItem.total = updatedItem.hours * updatedItem.ratePerHour;
+          }
+          return updatedItem;
+        }
+        return item;
+      })
+    );
+  };
 
   const getTotalAssistance = () => {
-    return assistanceData.reduce((sum, item) => sum + item.total, 0);
-  };
-
-  const getTotalOvertime = () => {
-    return overtimeData.reduce((sum, item) => sum + item.total, 0);
+    return assistanceItems.reduce((sum, item) => sum + item.total, 0);
   };
 
   const getTotalSpecialAssistance = () => {
-    return specialAssistanceData.reduce((sum, item) => sum + item.total, 0);
+    return specialAssistanceItems.reduce((sum, item) => sum + item.total, 0);
+  };
+
+  const getTotalOvertime = () => {
+    return overtimeItems.reduce((sum, item) => sum + item.total, 0);
+  };
+
+  const handleYearChange = (direction: "prev" | "next") => {
+    setCurrentYear(prev => direction === "prev" ? prev - 1 : prev + 1);
   };
 
   if (employeeLoading || ratesLoading) {
@@ -155,330 +222,345 @@ export default function AssistanceModule() {
   }
 
   return (
-    <div className="w-full p-6 bg-white" style={{ fontFamily: 'Sarabun' }}>
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-4">
-          <div className="bg-blue-100 p-2 rounded-lg">
-            <Heart className="h-6 w-6 text-blue-600" />
+    <div className="w-full min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100" style={{ fontFamily: 'Sarabun' }}>
+      <div className="p-6 space-y-8">
+        {/* Header */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="bg-gradient-to-br from-blue-500 to-purple-600 p-3 rounded-xl shadow-lg">
+                <Heart className="h-7 w-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  เงินช่วยเหลือ
+                </h1>
+                <p className="text-gray-600 text-sm mt-1">ระบบจัดการเงินช่วยเหลือและสวัสดิการพนักงาน</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-xl">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleYearChange("prev")}
+                className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                ปีก่อน
+              </Button>
+              <div className="bg-white px-4 py-2 rounded-lg shadow-sm border">
+                <span className="text-lg font-semibold text-gray-800">ปีงบประมาณ {currentYear}</span>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleYearChange("next")}
+                className="flex items-center gap-2 hover:bg-blue-50 hover:border-blue-300 transition-colors"
+              >
+                ปีหน้า
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold">เงินช่วยเหลือ</h1>
         </div>
-        <div className="flex items-center gap-4">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleYearChange("prev")}
-            className="flex items-center gap-2"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            ปีก่อน
-          </Button>
-          <span className="text-lg font-semibold">ปีงบประมาณ {currentYear}</span>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => handleYearChange("next")}
-            className="flex items-center gap-2"
-          >
-            ปีหน้า
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        </div>
-      </div>
 
-      {/* Navigation Tabs */}
-      <div className="flex gap-2 mb-6">
-        <Button
-          variant={activeTab === "other" ? "default" : "outline"}
-          onClick={() => setActiveTab("other")}
-          className="flex items-center gap-2"
-        >
-          <Heart className="h-4 w-4" />
-          เงินช่วยเหลืออื่น ๆ
-        </Button>
-        <Button
-          variant={activeTab === "special" ? "default" : "outline"}
-          onClick={() => setActiveTab("special")}
-          className="flex items-center gap-2"
-        >
-          <HelpCircle className="h-4 w-4" />
-          เงินช่วยเหลือพิเศษ
-        </Button>
-        <Button
-          variant={activeTab === "overtime" ? "default" : "outline"}
-          onClick={() => setActiveTab("overtime")}
-          className="flex items-center gap-2"
-        >
-          <Clock className="h-4 w-4" />
-          ค่าล่วงเวลา
-        </Button>
-      </div>
-
-      {/* Tab Content */}
-      {activeTab === "other" && (
-        <div className="space-y-6">
-          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border-l-4 border-green-500">
-            <h2 className="text-xl font-semibold text-green-800 mb-2">เงินช่วยเหลืออื่น ๆ</h2>
-            <p className="text-green-600 text-sm">ข้อมูลการช่วยเหลือรายเดือนและค่าใช้จ่ายอื่นๆ สำหรับพนักงาน</p>
+        {/* Navigation Tabs */}
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-2">
+          <div className="flex gap-2">
+            <Button
+              variant={activeTab === "other" ? "default" : "ghost"}
+              onClick={() => setActiveTab("other")}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
+                activeTab === "other" 
+                  ? "bg-gradient-to-r from-green-500 to-emerald-600 text-white shadow-lg transform scale-105" 
+                  : "hover:bg-green-50 hover:text-green-700"
+              }`}
+            >
+              <Heart className="h-4 w-4" />
+              เงินช่วยเหลืออื่น ๆ
+            </Button>
+            <Button
+              variant={activeTab === "special" ? "default" : "ghost"}
+              onClick={() => setActiveTab("special")}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
+                activeTab === "special" 
+                  ? "bg-gradient-to-r from-purple-500 to-pink-600 text-white shadow-lg transform scale-105" 
+                  : "hover:bg-purple-50 hover:text-purple-700"
+              }`}
+            >
+              <HelpCircle className="h-4 w-4" />
+              เงินช่วยเหลือพิเศษ
+            </Button>
+            <Button
+              variant={activeTab === "overtime" ? "default" : "ghost"}
+              onClick={() => setActiveTab("overtime")}
+              className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-300 ${
+                activeTab === "overtime" 
+                  ? "bg-gradient-to-r from-orange-500 to-yellow-600 text-white shadow-lg transform scale-105" 
+                  : "hover:bg-orange-50 hover:text-orange-700"
+              }`}
+            >
+              <Clock className="h-4 w-4" />
+              ค่าล่วงเวลา
+            </Button>
           </div>
-          <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-center border font-semibold">ลำดับ</TableHead>
-                  <TableHead className="text-center border font-semibold">รหัสพนักงาน</TableHead>
-                  <TableHead className="text-center border font-semibold">ชื่อ-นามสกุล</TableHead>
-                  <TableHead className="text-center border font-semibold">ระดับ</TableHead>
-                  <TableHead className="text-center border font-semibold">จำนวนเดือน</TableHead>
-                  <TableHead className="text-center border font-semibold">ค่าเช่าบ้าน</TableHead>
-                  <TableHead className="text-center border font-semibold">เงินช่วยเหลือรายเดือน</TableHead>
-                  <TableHead className="text-center border font-semibold">ค่าซื้อของ ครั้งเดียว</TableHead>
-                  <TableHead className="text-center border font-semibold">รวม</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {assistanceData.map((item, index) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="text-center border">{index + 1}</TableCell>
-                    <TableCell className="text-center border">{item.employeeCode}</TableCell>
-                    <TableCell className="text-left border">{item.fullName}</TableCell>
-                    <TableCell className="text-center border">{item.level}</TableCell>
-                    <TableCell className="text-center border">
-                      <div className="flex items-center gap-1">
+        </div>
+
+        {/* Tab Content */}
+        {activeTab === "other" && (
+          <div className="space-y-6">
+            <div className="bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-2xl border-l-4 border-green-500 shadow-sm">
+              <h2 className="text-xl font-semibold text-green-800 mb-2">เงินช่วยเหลืออื่น ๆ</h2>
+              <p className="text-green-600 text-sm">ข้อมูลการช่วยเหลือรายเดือนและค่าใช้จ่ายอื่นๆ สำหรับพนักงาน</p>
+            </div>
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+              <Table>
+                <TableHeader className="bg-gradient-to-r from-green-100 to-blue-100">
+                  <TableRow className="border-b border-gray-200">
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">รายการ</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">จำนวนเดือน</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่าที่พัก</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่าช่วยเหลือรายเดือน</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่าซื้อของเหมาจ่าย</TableHead>
+                    <TableHead className="text-center font-semibold text-green-800">รวม</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {assistanceItems.map((item) => (
+                    <TableRow key={item.id} className="hover:bg-gray-50 transition-colors">
+                      <TableCell className="border-r border-gray-200 font-medium">{item.description}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
                         <Input
                           type="number"
                           value={item.months}
-                          onChange={(e) => updateAssistanceSettings(item.id, 'months', Number(e.target.value))}
-                          className="w-16 text-center flat-input"
+                          onChange={(e) => updateAssistanceItem(item.id, 'months', Number(e.target.value))}
+                          className="text-center w-20 mx-auto bg-gray-50 border-gray-300"
                         />
-                        <Edit2 className="h-3 w-3 text-gray-400" />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right border">{item.rentAssistance.toLocaleString()}</TableCell>
-                    <TableCell className="text-right border">{item.monthlyAssistance.toLocaleString()}</TableCell>
-                    <TableCell className="text-center border">
-                      <div className="flex items-center gap-1">
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
                         <Input
                           type="number"
-                          value={item.oneTimeAmount}
-                          onChange={(e) => updateAssistanceSettings(item.id, 'oneTimeAmount', Number(e.target.value))}
-                          className="w-24 text-center flat-input"
+                          value={item.houseRent}
+                          onChange={(e) => updateAssistanceItem(item.id, 'houseRent', Number(e.target.value))}
+                          className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
                         />
-                        <Edit2 className="h-3 w-3 text-gray-400" />
-                      </div>
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        <Input
+                          type="number"
+                          value={item.monthlyAssistance}
+                          onChange={(e) => updateAssistanceItem(item.id, 'monthlyAssistance', Number(e.target.value))}
+                          className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
+                        />
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        <Input
+                          type="number"
+                          value={item.oneTimePurchase}
+                          onChange={(e) => updateAssistanceItem(item.id, 'oneTimePurchase', Number(e.target.value))}
+                          className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
+                        />
+                      </TableCell>
+                      <TableCell className="text-right font-semibold text-green-700">{item.total.toFixed(2)}</TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow className="bg-gradient-to-r from-green-50 to-blue-50 border-t-2 border-green-200">
+                    <TableCell colSpan={5} className="text-center font-bold text-green-800">ยอดรวมทั้งหมด</TableCell>
+                    <TableCell className="text-right font-bold text-lg text-green-700">
+                      {getTotalAssistance().toFixed(2)}
                     </TableCell>
-                    <TableCell className="text-right border font-semibold">{item.total.toLocaleString()}</TableCell>
                   </TableRow>
-                ))}
-                <TableRow className="bg-gray-50">
-                  <TableCell colSpan={8} className="text-center border font-semibold">รวมทั้งหมด</TableCell>
-                  <TableCell className="text-right border font-semibold text-lg">
-                    {getTotalAssistance().toLocaleString()} บาท
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-        </div>
-      )}
-
-      {activeTab === "special" && (
-        <div className="space-y-6">
-          <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border-l-4 border-purple-500">
-            <h2 className="text-xl font-semibold text-purple-800 mb-2">เงินช่วยเหลือพิเศษ</h2>
-            <p className="text-purple-600 text-sm">รายการเงินช่วยเหลือพิเศษในกรณีต่างๆ และค่าใช้จ่ายเฉพาะกิจ</p>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-center border font-semibold">รายการ</TableHead>
-                  <TableHead className="text-center border font-semibold">ครั้ง/ปี</TableHead>
-                  <TableHead className="text-center border font-semibold">วัน/ครั้ง</TableHead>
-                  <TableHead className="text-center border font-semibold">คน/ครั้ง</TableHead>
-                  <TableHead className="text-center border font-semibold">อัตราเงินช่วยเหลือ/วัน</TableHead>
-                  <TableHead className="text-center border font-semibold">รวมเงิน</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {specialAssistanceData.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="text-left border min-w-[300px]">
-                      <Input
-                        value={item.description}
-                        onChange={(e) => updateSpecialAssistanceData(item.id, 'description', e.target.value)}
-                        className="flat-input border-none bg-transparent w-full"
-                      />
-                    </TableCell>
-                    <TableCell className="text-center border">
-                      <div className="flex items-center gap-1">
-                        <Input
-                          type="number"
-                          value={item.quantity}
-                          onChange={(e) => updateSpecialAssistanceData(item.id, 'quantity', Number(e.target.value))}
-                          className="w-16 text-center flat-input"
-                        />
-                        <Edit2 className="h-3 w-3 text-gray-400" />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center border">
-                      <div className="flex items-center gap-1">
-                        <Input
-                          type="number"
-                          value={item.days}
-                          onChange={(e) => updateSpecialAssistanceData(item.id, 'days', Number(e.target.value))}
-                          className="w-16 text-center flat-input"
-                        />
-                        <Edit2 className="h-3 w-3 text-gray-400" />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center border">
-                      <div className="flex items-center gap-1">
-                        <Input
-                          type="number"
-                          value={item.recipients}
-                          onChange={(e) => updateSpecialAssistanceData(item.id, 'recipients', Number(e.target.value))}
-                          className="w-16 text-center flat-input"
-                        />
-                        <Edit2 className="h-3 w-3 text-gray-400" />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center border">
-                      <div className="flex items-center gap-1">
-                        <Input
-                          type="number"
-                          value={item.amountPerPerson}
-                          onChange={(e) => updateSpecialAssistanceData(item.id, 'amountPerPerson', Number(e.target.value))}
-                          className="w-20 text-center flat-input"
-                        />
-                        <Edit2 className="h-3 w-3 text-gray-400" />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right border font-semibold">{item.total.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</TableCell>
-                  </TableRow>
-                ))}
-                <TableRow className="bg-gray-50">
-                  <TableCell colSpan={5} className="text-center border font-semibold">ยอดรวม</TableCell>
-                  <TableCell className="text-right border font-semibold text-lg">
-                    {getTotalSpecialAssistance().toLocaleString('th-TH', { minimumFractionDigits: 2 })}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-          <div className="mt-6">
-            <div className="flex items-start gap-2">
-              <p className="font-semibold pt-2">หมายเหตุ:</p>
-              <div className="flex-1">
-                <Input
-                  value={specialAssistanceNotes}
-                  onChange={(e) => setSpecialAssistanceNotes(e.target.value)}
-                  placeholder="กรอกหมายเหตุเพิ่มเติม..."
-                  className="flat-input w-full"
-                />
+                </TableBody>
+              </Table>
+            </div>
+            
+            <div className="bg-gray-50 p-4 rounded-xl border">
+              <div className="flex items-start gap-3">
+                <p className="font-semibold text-gray-700 pt-2">หมายเหตุ:</p>
+                <div className="flex-1">
+                  <Input
+                    value={otherNotes}
+                    onChange={(e) => setOtherNotes(e.target.value)}
+                    placeholder="กรอกหมายเหตุเพิ่มเติม..."
+                    className="w-full bg-white border-gray-300"
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {activeTab === "overtime" && (
-        <div className="space-y-6">
-          <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg border-l-4 border-orange-500">
-            <h2 className="text-xl font-semibold text-orange-800 mb-2">ค่าล่วงเวลา</h2>
-            <p className="text-orange-600 text-sm">การคำนวณค่าล่วงเวลาสำหรับพนักงานตามชั่วโมงการทำงาน</p>
-          </div>
-          
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-            <div className="flex items-center gap-2">
-              <span className="font-semibold text-blue-800">เงินเดือน (สำหรับคำนวณอัตราต่อชั่วโมง):</span>
-              <Input
-                type="number"
-                value={overtimeRatePerHour}
-                onChange={(e) => setOvertimeRatePerHour(Number(e.target.value))}
-                className="w-32 flat-input bg-white"
-              />
-              <span className="text-blue-600 text-sm">บาท</span>
+        {activeTab === "special" && (
+          <div className="space-y-6">
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-2xl border-l-4 border-purple-500 shadow-sm">
+              <h2 className="text-xl font-semibold text-purple-800 mb-2">เงินช่วยเหลือพิเศษ</h2>
+              <p className="text-purple-600 text-sm">รายการเงินช่วยเหลือพิเศษในกรณีต่างๆ และค่าใช้จ่ายเฉพาะกิจ</p>
             </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="text-center border font-semibold">จำนวนคน</TableHead>
-                  <TableHead className="text-center border font-semibold">ชม./วัน</TableHead>
-                  <TableHead className="text-center border font-semibold">จำนวน</TableHead>
-                  <TableHead className="text-center border font-semibold">อัตราชั่วโมง</TableHead>
-                  <TableHead className="text-center border font-semibold">รวม</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {overtimeData.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell className="text-center border">
-                      <div className="flex items-center gap-1">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+              <Table>
+                <TableHeader className="bg-gradient-to-r from-purple-100 to-pink-100">
+                  <TableRow className="border-b border-gray-200">
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-purple-800">รายการ</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-purple-800">จำนวนครั้ง/ปี</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-purple-800">จำนวนวัน/ครั้ง</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-purple-800">จำนวนคน/ครั้ง</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-purple-800">อัตราค่าช่วยเหลือ/วัน</TableHead>
+                    <TableHead className="text-center font-semibold text-purple-800">รวม</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {specialAssistanceItems.map((item) => (
+                    <TableRow key={item.id} className="hover:bg-gray-50 transition-colors">
+                      <TableCell className="border-r border-gray-200 font-medium">{item.description}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
                         <Input
                           type="number"
-                          value={item.employees}
-                          onChange={(e) => updateOvertimeData(item.id, 'employees', Number(e.target.value))}
-                          className="w-16 text-center flat-input"
+                          value={item.timesPerYear}
+                          onChange={(e) => updateSpecialAssistanceItem(item.id, 'timesPerYear', Number(e.target.value))}
+                          className="text-center w-20 mx-auto bg-gray-50 border-gray-300"
                         />
-                        <Edit2 className="h-3 w-3 text-gray-400" />
-                      </div>
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        <Input
+                          type="number"
+                          value={item.daysPerTime}
+                          onChange={(e) => updateSpecialAssistanceItem(item.id, 'daysPerTime', Number(e.target.value))}
+                          className="text-center w-20 mx-auto bg-gray-50 border-gray-300"
+                        />
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        <Input
+                          type="number"
+                          value={item.peoplePerTime}
+                          onChange={(e) => updateSpecialAssistanceItem(item.id, 'peoplePerTime', Number(e.target.value))}
+                          className="text-center w-20 mx-auto bg-gray-50 border-gray-300"
+                        />
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        <Input
+                          type="number"
+                          value={item.assistanceRatePerDay}
+                          onChange={(e) => updateSpecialAssistanceItem(item.id, 'assistanceRatePerDay', Number(e.target.value))}
+                          className="text-center w-20 mx-auto bg-gray-50 border-gray-300"
+                        />
+                      </TableCell>
+                      <TableCell className="text-right font-semibold text-purple-700">{item.total.toFixed(2)}</TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow className="bg-gradient-to-r from-purple-50 to-pink-50 border-t-2 border-purple-200">
+                    <TableCell colSpan={5} className="text-center font-bold text-purple-800">ยอดรวมทั้งหมด</TableCell>
+                    <TableCell className="text-right font-bold text-lg text-purple-700">
+                      {getTotalSpecialAssistance().toFixed(2)}
                     </TableCell>
-                    <TableCell className="text-center border">
-                      <div className="flex items-center gap-1">
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+            
+            <div className="bg-gray-50 p-4 rounded-xl border">
+              <div className="flex items-start gap-3">
+                <p className="font-semibold text-gray-700 pt-2">หมายเหตุ:</p>
+                <div className="flex-1">
+                  <Input
+                    value={specialNotes}
+                    onChange={(e) => setSpecialNotes(e.target.value)}
+                    placeholder="กรอกหมายเหตุเพิ่มเติม..."
+                    className="w-full bg-white border-gray-300"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {activeTab === "overtime" && (
+          <div className="space-y-6">
+            <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-6 rounded-2xl border-l-4 border-orange-500 shadow-sm">
+              <h2 className="text-xl font-semibold text-orange-800 mb-2">ค่าล่วงเวลา</h2>
+              <p className="text-orange-600 text-sm">การคำนวณค่าล่วงเวลาสำหรับพนักงานตามชั่วโมงการทำงาน</p>
+            </div>
+            
+            <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-4 rounded-xl border border-blue-200 shadow-sm">
+              <div className="flex items-center gap-3">
+                <span className="font-semibold text-blue-800">เงินเดือน (สำหรับคำนวณอัตราต่อชั่วโมง):</span>
+                <Input
+                  type="number"
+                  value={overtimeRatePerHour}
+                  onChange={(e) => setOvertimeRatePerHour(Number(e.target.value))}
+                  className="w-32 bg-white border-blue-300"
+                />
+                <span className="text-blue-600 text-sm font-medium">บาท</span>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+              <Table>
+                <TableHeader className="bg-gradient-to-r from-orange-100 to-yellow-100">
+                  <TableRow className="border-b border-gray-200">
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">รายการ</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">จำนวนชั่วโมง</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">อัตราต่อชั่วโมง</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">หมายเหตุ</TableHead>
+                    <TableHead className="text-center font-semibold text-orange-800">รวม</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {overtimeItems.map((item) => (
+                    <TableRow key={item.id} className="hover:bg-gray-50 transition-colors">
+                      <TableCell className="border-r border-gray-200 font-medium">{item.description}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
                         <Input
                           type="number"
                           value={item.hours}
-                          onChange={(e) => updateOvertimeData(item.id, 'hours', Number(e.target.value))}
-                          className="w-16 text-center flat-input"
+                          onChange={(e) => updateOvertimeItem(item.id, 'hours', Number(e.target.value))}
+                          className="text-center w-20 mx-auto bg-gray-50 border-gray-300"
                         />
-                        <Edit2 className="h-3 w-3 text-gray-400" />
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-center border">
-                      <div className="flex items-center gap-1">
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
                         <Input
                           type="number"
-                          value={item.hoursPerEmployee}
-                          onChange={(e) => updateOvertimeData(item.id, 'hoursPerEmployee', Number(e.target.value))}
-                          className="w-16 text-center flat-input"
+                          value={item.ratePerHour}
+                          onChange={(e) => updateOvertimeItem(item.id, 'ratePerHour', Number(e.target.value))}
+                          className="text-center w-20 mx-auto bg-gray-50 border-gray-300"
                         />
-                        <Edit2 className="h-3 w-3 text-gray-400" />
-                      </div>
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        <Input
+                          value={overtimeNotes}
+                          onChange={(e) => setOvertimeNotes(e.target.value)}
+                          placeholder="หมายเหตุ..."
+                          className="w-full bg-gray-50 border-gray-300"
+                        />
+                      </TableCell>
+                      <TableCell className="text-right font-semibold text-orange-700">{item.total.toFixed(2)}</TableCell>
+                    </TableRow>
+                  ))}
+                  <TableRow className="bg-gradient-to-r from-orange-50 to-yellow-50 border-t-2 border-orange-200">
+                    <TableCell colSpan={4} className="text-center font-bold text-orange-800">ยอดรวมทั้งหมด</TableCell>
+                    <TableCell className="text-right font-bold text-lg text-orange-700">
+                      {getTotalOvertime().toFixed(2)}
                     </TableCell>
-                    <TableCell className="text-right border">{item.ratePerHour.toFixed(2)}</TableCell>
-                    <TableCell className="text-right border font-semibold">{item.total.toFixed(2)}</TableCell>
                   </TableRow>
-                ))}
-                <TableRow className="bg-gray-50">
-                  <TableCell colSpan={4} className="text-center border font-semibold">ยอดรวมทั้งหมด</TableCell>
-                  <TableCell className="text-right border font-semibold text-lg">
-                    {getTotalOvertime().toFixed(2)}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
-          
-          <div className="mt-6">
-            <div className="flex items-start gap-2">
-              <p className="font-semibold pt-2">หมายเหตุ:</p>
-              <div className="flex-1">
-                <Input
-                  value={overtimeNotes}
-                  onChange={(e) => setOvertimeNotes(e.target.value)}
-                  placeholder="กรอกหมายเหตุเพิ่มเติม..."
-                  className="flat-input w-full"
-                />
+                </TableBody>
+              </Table>
+            </div>
+            
+            <div className="bg-gray-50 p-4 rounded-xl border">
+              <div className="flex items-start gap-3">
+                <p className="font-semibold text-gray-700 pt-2">หมายเหตุ:</p>
+                <div className="flex-1">
+                  <Input
+                    value={overtimeNotes}
+                    onChange={(e) => setOvertimeNotes(e.target.value)}
+                    placeholder="กรอกหมายเหตุเพิ่มเติม..."
+                    className="w-full bg-white border-gray-300"
+                  />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
