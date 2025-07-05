@@ -316,14 +316,18 @@ export default function TravelModule() {
               <th className="px-4 py-3 text-left border border-gray-300">ลำดับ</th>
               <th className="px-4 py-3 text-left border border-gray-300">ชื่อ-นามสกุล</th>
               <th className="px-4 py-3 text-center border border-gray-300">สถานะ</th>
-              <th className="px-4 py-3 text-center border border-gray-300">ค่ารถทัวร์เยี่ยมบ้าน</th>
+              <th className="px-4 py-3 text-center border border-gray-300">ค่ารถทัวร์<br/>ไป-กลับ</th>
+              <th className="px-4 py-3 text-center border border-gray-300">จำนวนครั้ง</th>
               <th className="px-4 py-3 text-center border border-gray-300">รวม</th>
               <th className="px-4 py-3 text-center border border-gray-300">จัดการ</th>
             </tr>
           </thead>
           <tbody>
             {activeEmployees.map((employee: any, index: number) => {
-              const tourCost = employee.tourCost || 5000; // Default tour cost if not set
+              const baseTourCost = employee.tourCost || 5000; // ค่ารถเที่ยวเยี่ยมบ้าน จากตารางพนักงาน
+              const roundTripCost = baseTourCost * 2; // ค่ารถทัวร์ไป-กลับ (x2)
+              const tripCount = employee.tripCount || 1; // จำนวนครั้ง (default 1)
+              const totalCost = roundTripCost * tripCount; // รวม
               
               return (
                 <tr key={employee.id} className="hover:bg-gray-50">
@@ -334,8 +338,9 @@ export default function TravelModule() {
                       {employee.status}
                     </span>
                   </td>
-                  <td className="px-4 py-3 border border-gray-300 text-center">{tourCost.toLocaleString()}</td>
-                  <td className="px-4 py-3 border border-gray-300 text-center font-semibold">{tourCost.toLocaleString()}</td>
+                  <td className="px-4 py-3 border border-gray-300 text-center">{roundTripCost.toLocaleString()}</td>
+                  <td className="px-4 py-3 border border-gray-300 text-center">{tripCount}</td>
+                  <td className="px-4 py-3 border border-gray-300 text-center font-semibold">{totalCost.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
                     <div className="flex justify-center gap-2">
                       <Button 
@@ -372,7 +377,12 @@ export default function TravelModule() {
           เพิ่มรายการ
         </Button>
         <div className="text-lg font-semibold">
-          รวมทั้งสิ้น: {activeEmployees.reduce((sum: number, emp: any) => sum + (emp.tourCost || 5000), 0).toLocaleString()} บาท
+          รวมทั้งสิ้น: {activeEmployees.reduce((sum: number, emp: any) => {
+            const baseTourCost = emp.tourCost || 5000;
+            const roundTripCost = baseTourCost * 2;
+            const tripCount = emp.tripCount || 1;
+            return sum + (roundTripCost * tripCount);
+          }, 0).toLocaleString()} บาท
         </div>
       </div>
     </div>
