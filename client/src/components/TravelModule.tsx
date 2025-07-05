@@ -222,7 +222,7 @@ export default function TravelModule() {
         <div className="space-y-6">
           <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-2xl border-l-4 border-purple-500 shadow-sm">
             <h2 className="text-xl font-semibold text-purple-800 mb-2">เยี่ยมครอบครัว</h2>
-            <p className="text-purple-600 text-sm">ค่าใช้จ่ายเดินทางเยี่ยมครอบครัวสำหรับพนักงานที่ทำงานอยู่</p>
+            <p className="text-purple-600 text-sm">ค่าใช้จ่ายเดินทางเยี่ยมครอบครัวสำหรับพนักงานที่มีสถานะ Active</p>
           </div>
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
             <Table>
@@ -237,8 +237,9 @@ export default function TravelModule() {
               </TableHeader>
               <TableBody>
                 {activeEmployees.map((employee: Employee, index: number) => {
-                  const baseTourCost = 5000;
-                  const roundTripCost = baseTourCost * 2;
+                  // ดึงค่ารถทัวร์จากข้อมูลพนักงาน (tourCost) และคูณ 2 สำหรับไป-กลับ
+                  const baseTourCost = (employee as any).tourCost || 5000; // ค่า default หากไม่มีข้อมูล
+                  const roundTripCost = baseTourCost * 2; // ไป-กลับ
                   const tripCount = workDays[`trip_${employee.id}`] || 1;
                   const totalCost = roundTripCost * tripCount;
                   
@@ -246,7 +247,11 @@ export default function TravelModule() {
                     <TableRow key={employee.id} className="hover:bg-gray-50 transition-colors">
                       <TableCell className="border-r border-gray-200 text-center">{index + 1}</TableCell>
                       <TableCell className="border-r border-gray-200">{employee.fullName}</TableCell>
-                      <TableCell className="border-r border-gray-200 text-center">{roundTripCost.toLocaleString()}</TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        {roundTripCost.toLocaleString()}
+                        <br/>
+                        <span className="text-xs text-gray-500">({baseTourCost.toLocaleString()} × 2)</span>
+                      </TableCell>
                       <TableCell className="border-r border-gray-200 text-center">
                         <Input 
                           type="number" 
@@ -267,7 +272,7 @@ export default function TravelModule() {
                   <TableCell colSpan={4} className="text-center font-bold text-purple-800">รวมทั้งหมด</TableCell>
                   <TableCell className="text-center font-bold text-lg text-purple-700">
                     {activeEmployees.reduce((sum: number, emp: Employee) => {
-                      const baseTourCost = 5000;
+                      const baseTourCost = (emp as any).tourCost || 5000;
                       const roundTripCost = baseTourCost * 2;
                       const tripCount = workDays[`trip_${emp.id}`] || 1;
                       return sum + roundTripCost * tripCount;
