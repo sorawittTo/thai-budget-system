@@ -595,10 +595,11 @@ export default function TravelModule() {
             <tr>
               <th className="px-4 py-3 text-left border border-gray-300">ลำดับ</th>
               <th className="px-4 py-3 text-left border border-gray-300">ชื่อ-นามสกุล</th>
-              <th className="px-4 py-3 text-center border border-gray-300">ระดับ</th>
+              <th className="px-4 py-3 text-center border border-gray-300">วันทำงาน</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่าเบี้ยเลี้ยง</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่าที่พัก</th>
-              <th className="px-4 py-3 text-center border border-gray-300">ค่าพาหนะ</th>
+              <th className="px-4 py-3 text-center border border-gray-300">ค่ารถโดยสาร<br/>โคราช-กทม ไปกลับ</th>
+              <th className="px-4 py-3 text-center border border-gray-300">ค่ารถรับจ้าง<br/>ไป-กลับ</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่าพาหนะอื่นๆ</th>
               <th className="px-4 py-3 text-center border border-gray-300">รวม</th>
               <th className="px-4 py-3 text-center border border-gray-300">จัดการ</th>
@@ -606,17 +607,40 @@ export default function TravelModule() {
           </thead>
           <tbody>
             {level7Employees.map((employee: any, index: number) => {
-              const total = 500 + 2100 + 8000 + 2000; // Including other vehicle costs
+              const currentWorkDays = workDays[employee.id] || 1; // Default 1 day, can be edited
+              const allowanceDays = 2 + currentWorkDays; // Base 3 days for 1 work day
+              const accommodationDays = 1 + currentWorkDays; // Base 2 days for 1 work day
+              const allowanceCost = allowanceDays * 500; // Level 7 rate
+              const accommodationCost = accommodationDays * 2100; // Level 7 rate
+              const busCost = 300 * 2; // ค่ารถโดยสาร โคราช-กทม ไปกลับ (x2)
+              const taxiCost = 250 * 2; // ค่ารถรับจ้าง ไป-กลับ (x2)
+              const otherVehicleCost = 2000; // ค่าพาหนะอื่นๆ
+              const total = allowanceCost + accommodationCost + busCost + taxiCost + otherVehicleCost;
               
               return (
                 <tr key={employee.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3 border border-gray-300">{index + 1}</td>
                   <td className="px-4 py-3 border border-gray-300">{employee.fullName}</td>
-                  <td className="px-4 py-3 border border-gray-300 text-center">{employee.level}</td>
-                  <td className="px-4 py-3 border border-gray-300 text-center">500</td>
-                  <td className="px-4 py-3 border border-gray-300 text-center">2,100</td>
-                  <td className="px-4 py-3 border border-gray-300 text-center">8,000</td>
-                  <td className="px-4 py-3 border border-gray-300 text-center">2,000</td>
+                  <td className="px-4 py-3 border border-gray-300 text-center">
+                    <Input
+                      type="number"
+                      value={currentWorkDays}
+                      onChange={(e) => setWorkDays(prev => ({ ...prev, [employee.id]: parseInt(e.target.value) || 1 }))}
+                      className="w-16 text-center"
+                      min="1"
+                    />
+                  </td>
+                  <td className="px-4 py-3 border border-gray-300 text-center">
+                    {allowanceCost.toLocaleString()}<br/>
+                    <span className="text-xs text-gray-500">({allowanceDays} วัน)</span>
+                  </td>
+                  <td className="px-4 py-3 border border-gray-300 text-center">
+                    {accommodationCost.toLocaleString()}<br/>
+                    <span className="text-xs text-gray-500">({accommodationDays} วัน)</span>
+                  </td>
+                  <td className="px-4 py-3 border border-gray-300 text-center">{busCost.toLocaleString()}</td>
+                  <td className="px-4 py-3 border border-gray-300 text-center">{taxiCost.toLocaleString()}</td>
+                  <td className="px-4 py-3 border border-gray-300 text-center">{otherVehicleCost.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center font-semibold">
                     {total.toLocaleString()}
                   </td>
@@ -656,7 +680,17 @@ export default function TravelModule() {
           เพิ่มรายการ
         </Button>
         <div className="text-lg font-semibold">
-          รวมทั้งสิ้น: {(level7Employees.length * 12600).toLocaleString()} บาท
+          รวมทั้งสิ้น: {level7Employees.reduce((sum: number, emp: any) => {
+            const currentWorkDays = workDays[emp.id] || 1;
+            const allowanceDays = 2 + currentWorkDays;
+            const accommodationDays = 1 + currentWorkDays;
+            const allowanceCost = allowanceDays * 500;
+            const accommodationCost = accommodationDays * 2100;
+            const busCost = 300 * 2;
+            const taxiCost = 250 * 2;
+            const otherVehicleCost = 2000;
+            return sum + allowanceCost + accommodationCost + busCost + taxiCost + otherVehicleCost;
+          }, 0).toLocaleString()} บาท
         </div>
       </div>
     </div>
