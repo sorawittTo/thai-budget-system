@@ -352,9 +352,9 @@ export default function EmployeeModule() {
                     <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ระดับ</th>
                     <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าเช่าบ้าน</th>
                     <th className="px-4 py-3 text-center border border-gray-300 font-semibold">เงินช่วยเหลือค่ารักษาพยาบาล</th>
-                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าเดินทางสายงานนอกพื้นที่</th>
-                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าเดินทางประชุมการปฏิบัติงาน/เดินทาง</th>
-                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าเดินทางนำนักเรียน</th>
+                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าซื้อของเหมาจ่าย</th>
+                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่ารถโดยสาร โคราช-กทม./เที่ยว</th>
+                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่ารถรับจ้าง/เที่ยว</th>
                     <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าเบี้ยเลี้ยง</th>
                     <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าที่พัก</th>
                   </tr>
@@ -431,7 +431,7 @@ export default function EmployeeModule() {
                     <td className="px-4 py-3 border border-gray-300 text-center">3</td>
                     <td className="px-4 py-3 border border-gray-300 text-center">6500</td>
                     <td className="px-4 py-3 border border-gray-300 text-center">4750</td>
-                    <td className="px-4 py-3 border border-gray-300 text-center">5000</td>
+                    <td className="px-4 py-3 border border-gray-300 text-center">4500</td>
                     <td className="px-4 py-3 border border-gray-300 text-center">300</td>
                     <td className="px-4 py-3 border border-gray-300 text-center">250</td>
                     <td className="px-4 py-3 border border-gray-300 text-center">450</td>

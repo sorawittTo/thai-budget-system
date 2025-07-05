@@ -99,6 +99,8 @@ The build process:
 - July 05, 2025. Initial setup with Thai budget management system
 - July 05, 2025. Added original data from HTML file (24 budget items, 17 employees, master rates)
 - July 05, 2025. Updated UI to match original design 100% with flat-input styling, proper table layout, and category grouping
+- July 05, 2025. Updated travel module with 4 tabs, working add/edit/delete functions, and tooltip conditions
+- July 05, 2025. Updated master rates table headers: "ค่าเดินทางสายงานนอกพื้นที่" → "ค่าซื้อของเหมาจ่าย", "ค่าเดินทางประชุมการปฏิบัติงาน/เดินทาง" → "ค่ารถโดยสาร โคราช-กทม./เที่ยว", "ค่าเดินทางนำนักเรียน" → "ค่ารถรับจ้าง/เที่ยว"
 
 ## User Preferences
 
