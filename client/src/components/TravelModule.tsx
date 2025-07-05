@@ -90,6 +90,7 @@ export default function TravelModule() {
       tabType,
       workDays: workDays[employeeId] || 1,
       tripCount: employee.tripCount || 1,
+      busCost: workDays[`bus_${employeeId}`] || 300,
     };
     
     setEditFormData(formData);
@@ -116,6 +117,9 @@ export default function TravelModule() {
       
       // For now, we'll use a simple state update approach
       setWorkDays(prev => ({ ...prev, [`trip_${editFormData.employeeId}`]: editFormData.tripCount }));
+    } else if (editFormData.tabType === "company") {
+      // Update bus cost
+      setWorkDays(prev => ({ ...prev, [`bus_${editFormData.employeeId}`]: editFormData.busCost }));
     }
     
     // Force refresh the queries to show updated data
@@ -468,7 +472,7 @@ export default function TravelModule() {
               <th className="px-4 py-3 text-center border border-gray-300">ระดับ</th>
               <th className="px-4 py-3 text-center border border-gray-300">เพศ</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่าที่พัก</th>
-              <th className="px-4 py-3 text-center border border-gray-300">ค่าพาหนะ</th>
+              <th className="px-4 py-3 text-center border border-gray-300">ค่ารถโดยสาร<br/>ไป-กลับ</th>
               <th className="px-4 py-3 text-center border border-gray-300">รวม</th>
               <th className="px-4 py-3 text-center border border-gray-300">จัดการ</th>
             </tr>
@@ -479,7 +483,8 @@ export default function TravelModule() {
               const sameProvince = travelProvince === employee.province;
               const accommodation = sameProvince ? 0 : 
                                   employee.level === "7" ? 2100 : 1050;
-              const transport = 300;
+              const busBaseCost = workDays[`bus_${employee.id}`] || 300; // กรอกค่ารถโดยสารเอง (default 300)
+              const transport = busBaseCost * 2; // ค่ารถโดยสาร ไป-กลับ (x2)
               const total = accommodation + transport;
               
               return (
@@ -539,7 +544,9 @@ export default function TravelModule() {
             const sameProvince = travelProvince === emp.province;
             const accommodation = sameProvince ? 0 : 
                                 emp.level === "7" ? 2100 : 1050;
-            return total + accommodation + 300;
+            const busBaseCost = workDays[`bus_${emp.id}`] || 300;
+            const transport = busBaseCost * 2;
+            return total + accommodation + transport;
           }, 0).toLocaleString()} บาท
         </div>
       </div>
@@ -732,6 +739,20 @@ export default function TravelModule() {
                   type="number"
                   value={editFormData.tripCount || 1}
                   onChange={(e) => setEditFormData(prev => ({ ...prev, tripCount: parseInt(e.target.value) || 1 }))}
+                  className="col-span-3"
+                />
+              </div>
+            )}
+            {editFormData.tabType === "company" && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="busCost" className="text-right">
+                  ค่ารถโดยสาร (เที่ยวเดียว)
+                </Label>
+                <Input
+                  id="busCost"
+                  type="number"
+                  value={editFormData.busCost || 300}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, busCost: parseInt(e.target.value) || 300 }))}
                   className="col-span-3"
                 />
               </div>
