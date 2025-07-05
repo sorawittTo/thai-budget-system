@@ -121,17 +121,42 @@ export default function BudgetModule() {
   };
 
   const handleMoveItem = (id: number, direction: "up" | "down") => {
-    const allItems = budgetGroups.flatMap(group => group.items);
-    const currentIndex = allItems.findIndex(item => item.id === id);
+    // หา item ที่จะเลื่อนและหมวดหมู่ที่อยู่
+    let currentItem: BudgetItem | null = null;
+    let currentGroup: BudgetGroup | null = null;
+    let currentIndex = -1;
+    
+    for (const group of budgetGroups) {
+      const itemIndex = group.items.findIndex(item => item.id === id);
+      if (itemIndex !== -1) {
+        currentItem = group.items[itemIndex];
+        currentGroup = group;
+        currentIndex = itemIndex;
+        break;
+      }
+    }
+    
+    if (!currentItem || !currentGroup) return;
+    
+    // คำนวณตำแหน่งใหม่
     const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
     
-    if (targetIndex >= 0 && targetIndex < allItems.length) {
-      const currentItem = allItems[currentIndex];
-      const targetItem = allItems[targetIndex];
+    // ตรวจสอบว่าตำแหน่งใหม่อยู่ในขอบเขตของหมวดหมู่เดียวกัน
+    if (targetIndex >= 0 && targetIndex < currentGroup.items.length) {
+      const targetItem = currentGroup.items[targetIndex];
       
-      // Swap sort orders
-      updateBudgetItemMutation.mutate({ id: currentItem.id, sortOrder: targetItem.sortOrder });
-      updateBudgetItemMutation.mutate({ id: targetItem.id, sortOrder: currentItem.sortOrder });
+      // สลับ sort orders
+      const currentSortOrder = currentItem.sortOrder || 0;
+      const targetSortOrder = targetItem.sortOrder || 0;
+      
+      updateBudgetItemMutation.mutate({ 
+        id: currentItem.id, 
+        sortOrder: targetSortOrder 
+      });
+      updateBudgetItemMutation.mutate({ 
+        id: targetItem.id, 
+        sortOrder: currentSortOrder 
+      });
     }
   };
 
