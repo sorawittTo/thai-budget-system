@@ -90,7 +90,7 @@ export default function TravelModule() {
       tabType,
       workDays: workDays[employeeId] || 1,
       tripCount: employee.tripCount || 1,
-      busCost: workDays[`bus_${employeeId}`] || 300,
+
     };
     
     setEditFormData(formData);
@@ -117,9 +117,6 @@ export default function TravelModule() {
       
       // For now, we'll use a simple state update approach
       setWorkDays(prev => ({ ...prev, [`trip_${editFormData.employeeId}`]: editFormData.tripCount }));
-    } else if (editFormData.tabType === "company") {
-      // Update bus cost
-      setWorkDays(prev => ({ ...prev, [`bus_${editFormData.employeeId}`]: editFormData.busCost }));
     }
     
     // Force refresh the queries to show updated data
@@ -453,14 +450,27 @@ export default function TravelModule() {
         </TooltipProvider>
       </div>
       
-      <div className="mb-4 flex items-center gap-2">
-        <label className="text-sm font-medium text-gray-700">จังหวัดที่เดินทางไป:</label>
-        <Input 
-          value={travelProvince}
-          onChange={(e) => setTravelProvince(e.target.value)}
-          className="w-48"
-          placeholder="ระบุจังหวัด"
-        />
+      <div className="mb-4 space-y-3">
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">จังหวัดที่เดินทางไป:</label>
+          <Input 
+            value={travelProvince}
+            onChange={(e) => setTravelProvince(e.target.value)}
+            className="w-48"
+            placeholder="ระบุจังหวัด"
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <label className="text-sm font-medium text-gray-700">ค่ารถโดยสาร (เที่ยวเดียว):</label>
+          <Input 
+            type="number"
+            value={workDays['default_bus_cost'] || 300}
+            onChange={(e) => setWorkDays(prev => ({ ...prev, 'default_bus_cost': parseInt(e.target.value) || 300 }))}
+            className="w-32"
+            placeholder="300"
+          />
+          <span className="text-sm text-gray-500">บาท</span>
+        </div>
       </div>
 
       <div className="overflow-x-auto">
@@ -483,8 +493,8 @@ export default function TravelModule() {
               const sameProvince = travelProvince === employee.province;
               const accommodation = sameProvince ? 0 : 
                                   employee.level === "7" ? 2100 : 1050;
-              const busBaseCost = workDays[`bus_${employee.id}`] || 300; // กรอกค่ารถโดยสารเอง (default 300)
-              const transport = busBaseCost * 2; // ค่ารถโดยสาร ไป-กลับ (x2)
+              const defaultBusCost = workDays['default_bus_cost'] || 300; // ค่ารถโดยสารที่กรอกด้านบน
+              const transport = defaultBusCost * 2; // ค่ารถโดยสาร ไป-กลับ (x2)
               const total = accommodation + transport;
               
               return (
@@ -544,8 +554,8 @@ export default function TravelModule() {
             const sameProvince = travelProvince === emp.province;
             const accommodation = sameProvince ? 0 : 
                                 emp.level === "7" ? 2100 : 1050;
-            const busBaseCost = workDays[`bus_${emp.id}`] || 300;
-            const transport = busBaseCost * 2;
+            const defaultBusCost = workDays['default_bus_cost'] || 300;
+            const transport = defaultBusCost * 2;
             return total + accommodation + transport;
           }, 0).toLocaleString()} บาท
         </div>
@@ -743,20 +753,7 @@ export default function TravelModule() {
                 />
               </div>
             )}
-            {editFormData.tabType === "company" && (
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="busCost" className="text-right">
-                  ค่ารถโดยสาร (เที่ยวเดียว)
-                </Label>
-                <Input
-                  id="busCost"
-                  type="number"
-                  value={editFormData.busCost || 300}
-                  onChange={(e) => setEditFormData(prev => ({ ...prev, busCost: parseInt(e.target.value) || 300 }))}
-                  className="col-span-3"
-                />
-              </div>
-            )}
+
           </div>
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={() => setShowEditDialog(false)}>
