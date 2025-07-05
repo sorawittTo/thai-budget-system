@@ -220,7 +220,7 @@ export default function TravelModule() {
               <th className="px-4 py-3 text-center border border-gray-300">ค่ารถโดยสาร<br/>โคราช-กทม ไปกลับ</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่ารถรับจ้าง<br/>ไป-กลับ</th>
               <th className="px-4 py-3 text-center border border-gray-300">รวม</th>
-              <th className="px-4 py-3 text-center border border-gray-300">จัดการ</th>
+              <th className="px-4 py-3 text-center border border-gray-300">หมายเหตุ</th>
             </tr>
           </thead>
           <tbody>
@@ -241,16 +241,19 @@ export default function TravelModule() {
                   <td className="px-4 py-3 border border-gray-300">{employee.fullName}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">{serviceYears}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
-                    <Input 
-                      type="number" 
-                      value={currentWorkDays} 
-                      onChange={(e) => setWorkDays(prev => ({
-                        ...prev,
-                        [employee.id]: parseInt(e.target.value) || 1
-                      }))}
-                      className="w-16 text-center" 
-                      min="1"
-                    />
+                    <div className="flex items-center justify-center gap-1">
+                      <Input 
+                        type="number" 
+                        value={currentWorkDays} 
+                        onChange={(e) => setWorkDays(prev => ({
+                          ...prev,
+                          [employee.id]: parseInt(e.target.value) || 1
+                        }))}
+                        className="w-16 text-center" 
+                        min="1"
+                      />
+                      <Edit2 className="h-3 w-3 text-gray-400" />
+                    </div>
                   </td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
                     {allowanceCost.toLocaleString()}<br/>
@@ -264,15 +267,18 @@ export default function TravelModule() {
                   <td className="px-4 py-3 border border-gray-300 text-center">{taxiCost.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center font-semibold">{total.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
-                    <div className="flex justify-center gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="h-8 w-8 p-0"
-                        onClick={() => handleEdit(employee.id, "souvenir")}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
+                    <div className="flex items-center justify-center gap-1">
+                      <Input 
+                        type="text"
+                        placeholder="หมายเหตุ"
+                        value={workDays[`note_${employee.id}`] || ""}
+                        onChange={(e) => setWorkDays(prev => ({
+                          ...prev,
+                          [`note_${employee.id}`]: e.target.value
+                        }))}
+                        className="w-32 text-center text-sm"
+                      />
+                      <Edit2 className="h-4 w-4 text-gray-400" />
                     </div>
                   </td>
                 </tr>
@@ -335,7 +341,7 @@ export default function TravelModule() {
               <th className="px-4 py-3 text-center border border-gray-300">ค่ารถทัวร์<br/>ไป-กลับ</th>
               <th className="px-4 py-3 text-center border border-gray-300">จำนวนครั้ง</th>
               <th className="px-4 py-3 text-center border border-gray-300">รวม</th>
-              <th className="px-4 py-3 text-center border border-gray-300">จัดการ</th>
+              <th className="px-4 py-3 text-center border border-gray-300">หมายเหตุ</th>
             </tr>
           </thead>
           <tbody>
@@ -358,15 +364,18 @@ export default function TravelModule() {
                   <td className="px-4 py-3 border border-gray-300 text-center">{tripCount}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center font-semibold">{totalCost.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
-                    <div className="flex justify-center gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="h-8 w-8 p-0"
-                        onClick={() => handleEdit(employee.id, "family")}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
+                    <div className="flex items-center justify-center gap-1">
+                      <Input 
+                        type="text"
+                        placeholder="หมายเหตุ"
+                        value={workDays[`note_${employee.id}`] || ""}
+                        onChange={(e) => setWorkDays(prev => ({
+                          ...prev,
+                          [`note_${employee.id}`]: e.target.value
+                        }))}
+                        className="w-32 text-center text-sm"
+                      />
+                      <Edit2 className="h-4 w-4 text-gray-400" />
                     </div>
                   </td>
                 </tr>
@@ -454,7 +463,7 @@ export default function TravelModule() {
               <th className="px-4 py-3 text-center border border-gray-300">ค่าที่พัก</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่ารถโดยสาร<br/>ไป-กลับ</th>
               <th className="px-4 py-3 text-center border border-gray-300">รวม</th>
-              <th className="px-4 py-3 text-center border border-gray-300">จัดการ</th>
+              <th className="px-4 py-3 text-center border border-gray-300">หมายเหตุ</th>
             </tr>
           </thead>
           <tbody>
@@ -477,13 +486,16 @@ export default function TravelModule() {
                     {sameProvince ? (
                       <span className="text-gray-400">ไม่ได้</span>
                     ) : (
-                      <Input
-                        type="number"
-                        value={accommodation}
-                        onChange={(e) => setWorkDays(prev => ({ ...prev, [`accommodation_${employee.id}`]: parseInt(e.target.value) || baseAccommodation }))}
-                        className="w-20 text-center"
-                        min="0"
-                      />
+                      <div className="flex items-center justify-center gap-1">
+                        <Input
+                          type="number"
+                          value={accommodation}
+                          onChange={(e) => setWorkDays(prev => ({ ...prev, [`accommodation_${employee.id}`]: parseInt(e.target.value) || baseAccommodation }))}
+                          className="w-20 text-center"
+                          min="0"
+                        />
+                        <Edit2 className="h-3 w-3 text-gray-400" />
+                      </div>
                     )}
                   </td>
                   <td className="px-4 py-3 border border-gray-300 text-center">{transport.toLocaleString()}</td>
@@ -491,15 +503,18 @@ export default function TravelModule() {
                     {total.toLocaleString()}
                   </td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
-                    <div className="flex justify-center gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="h-8 w-8 p-0"
-                        onClick={() => handleEdit(employee.id, "company")}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
+                    <div className="flex items-center justify-center gap-1">
+                      <Input 
+                        type="text"
+                        placeholder="หมายเหตุ"
+                        value={workDays[`note_${employee.id}`] || ""}
+                        onChange={(e) => setWorkDays(prev => ({
+                          ...prev,
+                          [`note_${employee.id}`]: e.target.value
+                        }))}
+                        className="w-32 text-center text-sm"
+                      />
+                      <Edit2 className="h-4 w-4 text-gray-400" />
                     </div>
                   </td>
                 </tr>
@@ -563,7 +578,7 @@ export default function TravelModule() {
               <th className="px-4 py-3 text-center border border-gray-300">ค่ารถรับจ้าง<br/>ไป-กลับ</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่าพาหนะอื่นๆ</th>
               <th className="px-4 py-3 text-center border border-gray-300">รวม</th>
-              <th className="px-4 py-3 text-center border border-gray-300">จัดการ</th>
+              <th className="px-4 py-3 text-center border border-gray-300">หมายเหตุ</th>
             </tr>
           </thead>
           <tbody>
@@ -583,13 +598,16 @@ export default function TravelModule() {
                   <td className="px-4 py-3 border border-gray-300">{index + 1}</td>
                   <td className="px-4 py-3 border border-gray-300">{employee.fullName}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
-                    <Input
-                      type="number"
-                      value={currentWorkDays}
-                      onChange={(e) => setWorkDays(prev => ({ ...prev, [employee.id]: parseInt(e.target.value) || 1 }))}
-                      className="w-16 text-center"
-                      min="1"
-                    />
+                    <div className="flex items-center justify-center gap-1">
+                      <Input
+                        type="number"
+                        value={currentWorkDays}
+                        onChange={(e) => setWorkDays(prev => ({ ...prev, [employee.id]: parseInt(e.target.value) || 1 }))}
+                        className="w-16 text-center"
+                        min="1"
+                      />
+                      <Edit2 className="h-3 w-3 text-gray-400" />
+                    </div>
                   </td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
                     {allowanceCost.toLocaleString()}<br/>
@@ -602,27 +620,33 @@ export default function TravelModule() {
                   <td className="px-4 py-3 border border-gray-300 text-center">{busCost.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">{taxiCost.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
-                    <Input
-                      type="number"
-                      value={otherVehicleCost}
-                      onChange={(e) => setWorkDays(prev => ({ ...prev, [`other_${employee.id}`]: parseInt(e.target.value) || 2000 }))}
-                      className="w-20 text-center"
-                      min="0"
-                    />
+                    <div className="flex items-center justify-center gap-1">
+                      <Input
+                        type="number"
+                        value={otherVehicleCost}
+                        onChange={(e) => setWorkDays(prev => ({ ...prev, [`other_${employee.id}`]: parseInt(e.target.value) || 2000 }))}
+                        className="w-20 text-center"
+                        min="0"
+                      />
+                      <Edit2 className="h-3 w-3 text-gray-400" />
+                    </div>
                   </td>
                   <td className="px-4 py-3 border border-gray-300 text-center font-semibold">
                     {total.toLocaleString()}
                   </td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
-                    <div className="flex justify-center gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="h-8 w-8 p-0"
-                        onClick={() => handleEdit(employee.id, "rotation")}
-                      >
-                        <Edit2 className="h-4 w-4" />
-                      </Button>
+                    <div className="flex items-center justify-center gap-1">
+                      <Input 
+                        type="text"
+                        placeholder="หมายเหตุ"
+                        value={workDays[`note_${employee.id}`] || ""}
+                        onChange={(e) => setWorkDays(prev => ({
+                          ...prev,
+                          [`note_${employee.id}`]: e.target.value
+                        }))}
+                        className="w-32 text-center text-sm"
+                      />
+                      <Edit2 className="h-4 w-4 text-gray-400" />
                     </div>
                   </td>
                 </tr>
