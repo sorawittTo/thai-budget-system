@@ -15,6 +15,7 @@ export default function BudgetModule() {
   const [newItem, setNewItem] = useState({
     name: "",
     budgetCode: "",
+    accountCode: "",
     currentYearAmount: 0,
     compareYearAmount: 0,
     currentYear: 2568,
@@ -45,6 +46,7 @@ export default function BudgetModule() {
       setNewItem({
         name: "",
         budgetCode: "",
+        accountCode: "",
         currentYearAmount: 0,
         compareYearAmount: 0,
         currentYear: 2568,
@@ -101,6 +103,7 @@ export default function BudgetModule() {
       createBudgetItemMutation.mutate({
         ...newItem,
         budgetCode: newItem.budgetCode || null,
+        accountCode: newItem.accountCode || null,
         notes: newItem.notes || null,
         sortOrder: newItem.sortOrder || 0
       });
@@ -172,7 +175,7 @@ export default function BudgetModule() {
         {showAddForm && (
           <div className="bg-gray-50 p-4 rounded-lg mb-6">
             <h3 className="text-lg font-semibold mb-4">เพิ่มรายการงบประมาณใหม่</h3>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <input
                 type="text"
                 placeholder="ชื่อรายการ"
@@ -185,6 +188,13 @@ export default function BudgetModule() {
                 placeholder="รหัสงบประมาณ"
                 value={newItem.budgetCode}
                 onChange={(e) => setNewItem({ ...newItem, budgetCode: e.target.value })}
+                className="flat-input border border-gray-300 rounded-md"
+              />
+              <input
+                type="text"
+                placeholder="รหัสบัญชี"
+                value={newItem.accountCode}
+                onChange={(e) => setNewItem({ ...newItem, accountCode: e.target.value })}
                 className="flat-input border border-gray-300 rounded-md"
               />
               <select
@@ -216,9 +226,9 @@ export default function BudgetModule() {
                 placeholder="หมายเหตุ"
                 value={newItem.notes}
                 onChange={(e) => setNewItem({ ...newItem, notes: e.target.value })}
-                className="flat-input border border-gray-300 rounded-md"
+                className="flat-input border border-gray-300 rounded-md col-span-2"
               />
-              <div className="flex gap-2">
+              <div className="flex gap-2 col-span-2">
                 <button
                   onClick={handleAddItem}
                   className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
@@ -251,6 +261,7 @@ export default function BudgetModule() {
                   <tr>
                     <th className="px-4 py-3 text-left border border-gray-300">ลำดับ</th>
                     <th className="px-4 py-3 text-left border border-gray-300">รหัสงบประมาณ</th>
+                    <th className="px-4 py-3 text-left border border-gray-300">รหัสบัญชี</th>
                     <th className="px-4 py-3 text-left border border-gray-300">รายการ</th>
                     <th className="px-4 py-3 text-right border border-gray-300">ปี 2568</th>
                     <th className="px-4 py-3 text-right border border-gray-300">ปี 2569</th>
@@ -272,6 +283,15 @@ export default function BudgetModule() {
                           onChange={(e) => handleUpdateItem(item.id, "budgetCode", e.target.value)}
                           className="flat-input w-full"
                           placeholder="รหัสงบประมาณ"
+                        />
+                      </td>
+                      <td className="px-4 py-3 border border-gray-300">
+                        <input
+                          type="text"
+                          value={item.accountCode || ""}
+                          onChange={(e) => handleUpdateItem(item.id, "accountCode", e.target.value)}
+                          className="flat-input w-full"
+                          placeholder="รหัสบัญชี"
                         />
                       </td>
                       <td className="px-4 py-3 border border-gray-300">
