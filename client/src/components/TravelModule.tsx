@@ -24,6 +24,7 @@ export default function TravelModule() {
   const [busFareRate, setBusFareRate] = useState(600);
   const [otherVehicleCosts, setOtherVehicleCosts] = useState<{[key: number]: number}>({});
   const [rotationNotes, setRotationNotes] = useState<{[key: number]: string}>({});
+  const [accommodationCosts, setAccommodationCosts] = useState<{[key: number]: number}>({});
   const queryClient = useQueryClient();
 
   const { data: employees = [], isLoading: employeeLoading } = useQuery({
@@ -370,7 +371,7 @@ export default function TravelModule() {
               <TableBody>
                 {activeEmployees.map((employee: Employee, index: number) => {
                   const busCost = busFareRate;
-                  const accommodationCost = calculateAccommodation(employee, maleEmployees.length, femaleEmployees.length);
+                  const accommodationCost = accommodationCosts[employee.id] || 0;
                   const total = busCost + accommodationCost;
                   
                   return (
@@ -382,15 +383,23 @@ export default function TravelModule() {
                       <TableCell className="border-r border-gray-200 text-center">{employee.province}</TableCell>
                       <TableCell className="border-r border-gray-200 text-center">{busCost.toLocaleString()}</TableCell>
                       <TableCell className="border-r border-gray-200 text-center">
-                        <div>
-                          {accommodationCost.toLocaleString()}
-                          {employee.province === companyEventDestination && (
-                            <div className="text-xs text-red-500">(จังหวัดเดียวกัน)</div>
-                          )}
-                          {employee.level !== "7" && employee.province !== companyEventDestination && (
-                            <div className="text-xs text-gray-500">(หารคู่)</div>
-                          )}
-                        </div>
+                        <Input 
+                          type="number" 
+                          value={accommodationCosts[employee.id] || 0}
+                          onChange={(e) => setAccommodationCosts(prev => ({
+                            ...prev,
+                            [employee.id]: parseInt(e.target.value) || 0
+                          }))}
+                          className="w-20 text-center mx-auto bg-gray-50 border-gray-300" 
+                          min="0"
+                          placeholder="0"
+                        />
+                        {employee.province === companyEventDestination && (
+                          <div className="text-xs text-red-500">(จังหวัดเดียวกัน)</div>
+                        )}
+                        {employee.level !== "7" && employee.province !== companyEventDestination && (
+                          <div className="text-xs text-gray-500">(หารคู่)</div>
+                        )}
                       </TableCell>
                       <TableCell className="text-center font-semibold text-blue-700">{total.toLocaleString()}</TableCell>
                     </TableRow>
@@ -401,7 +410,7 @@ export default function TravelModule() {
                   <TableCell className="text-center font-bold text-lg text-blue-700">
                     {activeEmployees.reduce((sum: number, emp: Employee) => {
                       const busCost = busFareRate;
-                      const accommodationCost = calculateAccommodation(emp, maleEmployees.length, femaleEmployees.length);
+                      const accommodationCost = accommodationCosts[emp.id] || 0;
                       return sum + busCost + accommodationCost;
                     }, 0).toLocaleString()}
                   </TableCell>
