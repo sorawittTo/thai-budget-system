@@ -25,6 +25,33 @@ export default function TravelModule() {
   const [otherVehicleCosts, setOtherVehicleCosts] = useState<{[key: number]: number}>({});
   const [rotationNotes, setRotationNotes] = useState<{[key: number]: string}>({});
   const [accommodationCosts, setAccommodationCosts] = useState<{[key: number]: number}>({});
+
+  // ฟังก์ชันคำนวณค่าที่พักอัตโนมัติ
+  const getAutoAccommodationCost = (employee: Employee, maleCount: number, femaleCount: number) => {
+    const level = employee.level;
+    const employeeProvince = employee.province;
+    
+    // ถ้าระดับ 7 พักคนเดียว
+    if (level === "7") {
+      if (employeeProvince === companyEventDestination) {
+        return 0; // ไม่ได้ค่าที่พักถ้าจังหวัดเดียวกัน
+      }
+      return 2100; // อัตรามาตรฐานระดับ 7
+    }
+    
+    // ระดับอื่นๆ
+    if (employeeProvince === companyEventDestination) {
+      return 0; // ไม่ได้ค่าที่พักถ้าจังหวัดเดียวกัน
+    }
+    
+    // แยกชาย หญิง แล้วจับคู่หารค่าที่พัก
+    const standardRate = level === "6" ? 2100 : 1800;
+    if (employee.gender === "ชาย") {
+      return Math.ceil(maleCount / 2) > 0 ? standardRate / 2 : standardRate;
+    } else {
+      return Math.ceil(femaleCount / 2) > 0 ? standardRate / 2 : standardRate;
+    }
+  };
   const queryClient = useQueryClient();
 
   const { data: employees = [], isLoading: employeeLoading } = useQuery({
@@ -371,7 +398,8 @@ export default function TravelModule() {
               <TableBody>
                 {activeEmployees.map((employee: Employee, index: number) => {
                   const busCost = busFareRate;
-                  const accommodationCost = accommodationCosts[employee.id] || 0;
+                  const autoAccommodationCost = getAutoAccommodationCost(employee, maleEmployees.length, femaleEmployees.length);
+                  const accommodationCost = accommodationCosts[employee.id] !== undefined ? accommodationCosts[employee.id] : autoAccommodationCost;
                   const total = busCost + accommodationCost;
                   
                   return (
@@ -385,7 +413,7 @@ export default function TravelModule() {
                       <TableCell className="border-r border-gray-200 text-center">
                         <Input 
                           type="number" 
-                          value={accommodationCosts[employee.id] || 0}
+                          value={accommodationCost}
                           onChange={(e) => setAccommodationCosts(prev => ({
                             ...prev,
                             [employee.id]: parseInt(e.target.value) || 0
@@ -410,7 +438,8 @@ export default function TravelModule() {
                   <TableCell className="text-center font-bold text-lg text-blue-700">
                     {activeEmployees.reduce((sum: number, emp: Employee) => {
                       const busCost = busFareRate;
-                      const accommodationCost = accommodationCosts[emp.id] || 0;
+                      const autoAccommodationCost = getAutoAccommodationCost(emp, maleEmployees.length, femaleEmployees.length);
+                      const accommodationCost = accommodationCosts[emp.id] !== undefined ? accommodationCosts[emp.id] : autoAccommodationCost;
                       return sum + busCost + accommodationCost;
                     }, 0).toLocaleString()}
                   </TableCell>
