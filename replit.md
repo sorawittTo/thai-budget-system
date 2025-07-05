@@ -109,6 +109,7 @@ The build process:
 - July 05, 2025. Removed add/delete buttons from all travel tabs: simplified interface to only show edit functionality for existing data, maintaining clean table layouts
 - July 05, 2025. Enhanced family visit travel tab: now pulls tour cost data from employee records (tourCost field), multiplies by 2 for round-trip calculation, and filters to show only Active status employees
 - July 05, 2025. Applied professional UI styling to both assistance and travel modules: gradient backgrounds, modern tab designs with unique colors and icons, rounded corners, shadows, and consistent visual hierarchy
+- July 05, 2025. Updated assistance module "เงินช่วยเหลืออื่น ๆ" tab: integrated with employee database, displays all Active employees, pulls accommodation costs and monthly assistance from standard rates table based on each employee's level, automatic calculation of totals
 
 ## User Preferences
 

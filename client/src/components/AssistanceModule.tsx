@@ -139,7 +139,7 @@ export default function AssistanceModule() {
       const employee = employees?.find((emp: Employee) => emp.id === employeeId) as Employee;
       const level = employee?.level || "level_1";
       
-      // ดึงค่าจากตารางมาตรฐาน - ตามที่ระบุในหน้าพนักงาน
+      // ดึงค่าจากตารางมาตรฐาน - ตามระดับของแต่ละคน
       const standardHouseRent = getStandardRate(level, "ค่าเช่า");
       const standardMonthlyAssistance = getStandardRate(level, "เงินช่วยเหลือรายเดือน");
       
@@ -323,10 +323,11 @@ export default function AssistanceModule() {
                 <TableBody>
                   {(employees as Employee[]).filter(emp => emp.status === "Active").map((employee: Employee) => {
                     const level = employee.level;
-                    // ดึงค่าจากตารางมาตรฐาน - ตามที่ระบุในหน้าพนักงาน
+                    // ดึงค่าจากตารางมาตรฐาน - ตามระดับของแต่ละคน
                     const standardHouseRent = getStandardRate(level, "ค่าเช่า");
                     const standardMonthlyAssistance = getStandardRate(level, "เงินช่วยเหลือรายเดือน");
                     
+                    // ตรวจสอบว่ามีข้อมูลแล้วหรือยัง ถ้าไม่มีให้ใช้ค่าจากตารางมาตรฐาน
                     const assistanceItem = assistanceData[employee.id] || {
                       id: employee.id,
                       description: employee.fullName,
@@ -336,6 +337,16 @@ export default function AssistanceModule() {
                       oneTimePurchase: 0,
                       total: (12 * (standardHouseRent + standardMonthlyAssistance)) + 0
                     };
+                    
+                    // อัปเดตข้อมูลในหน่วยความจำหากยังไม่มี
+                    if (!assistanceData[employee.id]) {
+                      setTimeout(() => {
+                        setAssistanceData(prev => ({
+                          ...prev,
+                          [employee.id]: assistanceItem
+                        }));
+                      }, 0);
+                    }
                     
                     return (
                       <TableRow key={employee.id} className="hover:bg-gray-50 transition-colors">
