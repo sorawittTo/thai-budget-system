@@ -1,6 +1,13 @@
-import { pgTable, text, serial, integer, real, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, real, boolean, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
+export const users = pgTable("users", {
+  id: serial("id").primaryKey(),
+  username: text("username").unique().notNull(),
+  password: text("password").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
 
 export const budgetItems = pgTable("budget_items", {
   id: serial("id").primaryKey(),
@@ -108,6 +115,14 @@ export const insertOvertimePaymentSchema = createInsertSchema(overtimePayments).
 export const insertWorkingDaySchema = createInsertSchema(workingDays).omit({
   id: true,
 });
+
+export const insertUserSchema = createInsertSchema(users).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type User = typeof users.$inferSelect;
+export type InsertUser = z.infer<typeof insertUserSchema>;
 
 export type BudgetItem = typeof budgetItems.$inferSelect;
 export type InsertBudgetItem = z.infer<typeof insertBudgetItemSchema>;

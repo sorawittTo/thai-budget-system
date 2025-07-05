@@ -2,6 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import multer from "multer";
 import { storage } from "./storage";
+import { setupAuth } from "./auth";
 import {
   insertBudgetItemSchema,
   insertEmployeeSchema,
@@ -15,6 +16,9 @@ import {
 const upload = multer({ storage: multer.memoryStorage() });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Setup authentication first
+  setupAuth(app);
+  
   // Budget Items
   app.get("/api/budget-items", async (req, res) => {
     try {

@@ -6,6 +6,7 @@ import {
   assistancePayments,
   overtimePayments,
   workingDays,
+  users,
   type BudgetItem,
   type InsertBudgetItem,
   type Employee,
@@ -20,6 +21,8 @@ import {
   type InsertOvertimePayment,
   type WorkingDay,
   type InsertWorkingDay,
+  type User,
+  type InsertUser,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
@@ -62,6 +65,11 @@ export interface IStorage {
   createWorkingDay(workingDay: InsertWorkingDay): Promise<WorkingDay>;
   updateWorkingDay(id: number, workingDay: Partial<InsertWorkingDay>): Promise<WorkingDay>;
 
+  // Users
+  getUser(id: number): Promise<User | undefined>;
+  getUserByUsername(username: string): Promise<User | undefined>;
+  createUser(user: InsertUser): Promise<User>;
+
   // Utility methods
   resetAllData(): Promise<void>;
 }
@@ -74,6 +82,7 @@ export class MemStorage implements IStorage {
   private assistancePayments: Map<number, AssistancePayment>;
   private overtimePayments: Map<number, OvertimePayment>;
   private workingDays: Map<number, WorkingDay>;
+  private users: Map<number, User>;
   private currentId: number;
 
   constructor() {
@@ -84,6 +93,7 @@ export class MemStorage implements IStorage {
     this.assistancePayments = new Map();
     this.overtimePayments = new Map();
     this.workingDays = new Map();
+    this.users = new Map();
     this.currentId = 1;
     this.initializeDefaultData();
   }
@@ -199,10 +209,20 @@ export class MemStorage implements IStorage {
       this.masterRates.set(masterRate.id, masterRate);
     });
 
+    // Initialize default user for korat123
+    const defaultUser: User = {
+      id: 1,
+      username: "korat123",
+      password: "72ccb4c1825e0f8c87e2af946d7fb9e5f67b4b1a6e4e1b2a6bf8b8d5b8f9c2e3.7f5c1d9e2a6b8f4e", // korat123
+      createdAt: new Date()
+    };
+    this.users.set(1, defaultUser);
+
     this.currentId = Math.max(
       Math.max(...Array.from(this.budgetItems.keys())) + 1,
       Math.max(...Array.from(this.employees.keys())) + 1,
-      Math.max(...Array.from(this.masterRates.keys())) + 1
+      Math.max(...Array.from(this.masterRates.keys())) + 1,
+      Math.max(...Array.from(this.users.keys())) + 1
     );
   }
 
@@ -416,6 +436,31 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  // Users
+  async getUser(id: number): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    for (const user of this.users.values()) {
+      if (user.username === username) {
+        return user;
+      }
+    }
+    return undefined;
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    const id = this.currentId++;
+    const newUser: User = { 
+      ...user, 
+      id,
+      createdAt: new Date()
+    };
+    this.users.set(id, newUser);
+    return newUser;
+  }
+
   // Utility methods
   async resetAllData(): Promise<void> {
     this.budgetItems.clear();
@@ -425,6 +470,7 @@ export class MemStorage implements IStorage {
     this.assistancePayments.clear();
     this.overtimePayments.clear();
     this.workingDays.clear();
+    this.users.clear();
     this.currentId = 1;
     this.initializeDefaultData();
   }
@@ -549,6 +595,22 @@ export class DatabaseStorage implements IStorage {
   async updateWorkingDay(id: number, workingDay: Partial<InsertWorkingDay>): Promise<WorkingDay> {
     const [updated] = await db.update(workingDays).set(workingDay).where(eq(workingDays.id, id)).returning();
     return updated;
+  }
+
+  // Users
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user || undefined;
+  }
+
+  async createUser(user: InsertUser): Promise<User> {
+    const [created] = await db.insert(users).values(user).returning();
+    return created;
   }
 
   async resetAllData(): Promise<void> {
