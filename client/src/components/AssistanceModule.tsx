@@ -295,7 +295,7 @@ export default function AssistanceModule() {
                 ปีก่อน
               </Button>
               <div className="bg-white px-4 py-2 rounded-lg shadow-sm border">
-                <span className="text-lg font-semibold text-gray-800">ปีงบประมาณ พ.ศ. {currentYear}</span>
+                <span className="text-lg font-semibold text-gray-800">ปีงบประมาณ {currentYear}</span>
               </div>
               <Button
                 variant="outline"
