@@ -21,6 +21,8 @@ import {
   type WorkingDay,
   type InsertWorkingDay,
 } from "@shared/schema";
+import { db } from "./db";
+import { eq } from "drizzle-orm";
 
 export interface IStorage {
   // Budget Items
@@ -428,4 +430,179 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database Storage Implementation
+export class DatabaseStorage implements IStorage {
+  async getBudgetItems(): Promise<BudgetItem[]> {
+    return await db.select().from(budgetItems);
+  }
+
+  async createBudgetItem(item: InsertBudgetItem): Promise<BudgetItem> {
+    const [created] = await db.insert(budgetItems).values(item).returning();
+    return created;
+  }
+
+  async updateBudgetItem(id: number, item: Partial<InsertBudgetItem>): Promise<BudgetItem> {
+    const [updated] = await db.update(budgetItems).set(item).where(eq(budgetItems.id, id)).returning();
+    return updated;
+  }
+
+  async deleteBudgetItem(id: number): Promise<void> {
+    await db.delete(budgetItems).where(eq(budgetItems.id, id));
+  }
+
+  async getEmployees(): Promise<Employee[]> {
+    return await db.select().from(employees);
+  }
+
+  async createEmployee(employee: InsertEmployee): Promise<Employee> {
+    const [created] = await db.insert(employees).values(employee).returning();
+    return created;
+  }
+
+  async updateEmployee(id: number, employee: Partial<InsertEmployee>): Promise<Employee> {
+    const [updated] = await db.update(employees).set(employee).where(eq(employees.id, id)).returning();
+    return updated;
+  }
+
+  async deleteEmployee(id: number): Promise<void> {
+    await db.delete(employees).where(eq(employees.id, id));
+  }
+
+  async getMasterRates(): Promise<MasterRate[]> {
+    return await db.select().from(masterRates);
+  }
+
+  async createMasterRate(rate: InsertMasterRate): Promise<MasterRate> {
+    const [created] = await db.insert(masterRates).values(rate).returning();
+    return created;
+  }
+
+  async updateMasterRate(id: number, rate: Partial<InsertMasterRate>): Promise<MasterRate> {
+    const [updated] = await db.update(masterRates).set(rate).where(eq(masterRates.id, id)).returning();
+    return updated;
+  }
+
+  async getTravelExpenses(): Promise<TravelExpense[]> {
+    return await db.select().from(travelExpenses);
+  }
+
+  async createTravelExpense(expense: InsertTravelExpense): Promise<TravelExpense> {
+    const [created] = await db.insert(travelExpenses).values(expense).returning();
+    return created;
+  }
+
+  async updateTravelExpense(id: number, expense: Partial<InsertTravelExpense>): Promise<TravelExpense> {
+    const [updated] = await db.update(travelExpenses).set(expense).where(eq(travelExpenses.id, id)).returning();
+    return updated;
+  }
+
+  async getAssistancePayments(): Promise<AssistancePayment[]> {
+    return await db.select().from(assistancePayments);
+  }
+
+  async createAssistancePayment(payment: InsertAssistancePayment): Promise<AssistancePayment> {
+    const [created] = await db.insert(assistancePayments).values(payment).returning();
+    return created;
+  }
+
+  async updateAssistancePayment(id: number, payment: Partial<InsertAssistancePayment>): Promise<AssistancePayment> {
+    const [updated] = await db.update(assistancePayments).set(payment).where(eq(assistancePayments.id, id)).returning();
+    return updated;
+  }
+
+  async getOvertimePayments(): Promise<OvertimePayment[]> {
+    return await db.select().from(overtimePayments);
+  }
+
+  async createOvertimePayment(payment: InsertOvertimePayment): Promise<OvertimePayment> {
+    const [created] = await db.insert(overtimePayments).values(payment).returning();
+    return created;
+  }
+
+  async updateOvertimePayment(id: number, payment: Partial<InsertOvertimePayment>): Promise<OvertimePayment> {
+    const [updated] = await db.update(overtimePayments).set(payment).where(eq(overtimePayments.id, id)).returning();
+    return updated;
+  }
+
+  async getWorkingDays(): Promise<WorkingDay[]> {
+    return await db.select().from(workingDays);
+  }
+
+  async createWorkingDay(workingDay: InsertWorkingDay): Promise<WorkingDay> {
+    const [created] = await db.insert(workingDays).values(workingDay).returning();
+    return created;
+  }
+
+  async updateWorkingDay(id: number, workingDay: Partial<InsertWorkingDay>): Promise<WorkingDay> {
+    const [updated] = await db.update(workingDays).set(workingDay).where(eq(workingDays.id, id)).returning();
+    return updated;
+  }
+
+  async resetAllData(): Promise<void> {
+    // Clear all tables
+    await db.delete(budgetItems);
+    await db.delete(employees);
+    await db.delete(masterRates);
+    await db.delete(travelExpenses);
+    await db.delete(assistancePayments);
+    await db.delete(overtimePayments);
+    await db.delete(workingDays);
+    
+    // Initialize with default data
+    await this.initializeDefaultData();
+  }
+
+  private async initializeDefaultData() {
+    // Initialize MemStorage to get default data
+    const memStorage = new MemStorage();
+    
+    // Get default data from MemStorage
+    const defaultBudgetItems = await memStorage.getBudgetItems();
+    const defaultEmployees = await memStorage.getEmployees();
+    const defaultMasterRates = await memStorage.getMasterRates();
+    
+    // Insert default data into database
+    if (defaultBudgetItems.length > 0) {
+      await db.insert(budgetItems).values(defaultBudgetItems.map(item => ({
+        currentYear: item.currentYear,
+        compareYear: item.compareYear,
+        name: item.name,
+        budgetCode: item.budgetCode,
+        accountCode: item.accountCode,
+        currentYearAmount: item.currentYearAmount,
+        compareYearAmount: item.compareYearAmount,
+        category: item.category,
+        notes: item.notes,
+        sortOrder: item.sortOrder
+      })));
+    }
+    
+    if (defaultEmployees.length > 0) {
+      await db.insert(employees).values(defaultEmployees.map(emp => ({
+        employeeCode: emp.employeeCode,
+        fullName: emp.fullName,
+        level: emp.level,
+        salary: emp.salary,
+        positionAllowance: emp.positionAllowance,
+        specialAllowance: emp.specialAllowance,
+        workExperience: emp.workExperience,
+        status: emp.status,
+        gender: emp.gender,
+        province: emp.province,
+        tourCost: emp.tourCost
+      })));
+    }
+    
+    if (defaultMasterRates.length > 0) {
+      await db.insert(masterRates).values(defaultMasterRates.map(rate => ({
+        category: rate.category,
+        subcategory: rate.subcategory,
+        rate: rate.rate,
+        description: rate.description
+      })));
+    }
+  }
+}
+
+// Use DatabaseStorage instead of MemStorage
+export const storage = new DatabaseStorage();
