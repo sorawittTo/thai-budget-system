@@ -50,35 +50,7 @@ export default function AssistanceModule() {
     queryKey: ['/api/master-rates'],
   });
 
-  const [assistanceItems, setAssistanceItems] = useState<AssistanceItem[]>([
-    {
-      id: 1,
-      description: "ค่าที่พัก",
-      months: 12,
-      houseRent: 12000,
-      monthlyAssistance: 0,
-      oneTimePurchase: 0,
-      total: 144000
-    },
-    {
-      id: 2,
-      description: "ค่าช่วยเหลือรายเดือน",
-      months: 12,
-      houseRent: 0,
-      monthlyAssistance: 5000,
-      oneTimePurchase: 0,
-      total: 60000
-    },
-    {
-      id: 3,
-      description: "ค่าซื้อของเหมาจ่าย",
-      months: 12,
-      houseRent: 0,
-      monthlyAssistance: 0,
-      oneTimePurchase: 0,
-      total: 0
-    }
-  ]);
+  const [assistanceData, setAssistanceData] = useState<{[key: number]: AssistanceItem}>({});
 
   const [specialAssistanceItems, setSpecialAssistanceItems] = useState<SpecialAssistanceItem[]>([
     {
@@ -156,19 +128,28 @@ export default function AssistanceModule() {
     }
   ]);
 
-  const updateAssistanceItem = (id: number, field: keyof AssistanceItem, value: any) => {
-    setAssistanceItems(prev => 
-      prev.map(item => {
-        if (item.id === id) {
-          const updatedItem = { ...item, [field]: value };
-          if (field === 'months' || field === 'houseRent' || field === 'monthlyAssistance' || field === 'oneTimePurchase') {
-            updatedItem.total = (updatedItem.months * (updatedItem.houseRent + updatedItem.monthlyAssistance)) + updatedItem.oneTimePurchase;
-          }
-          return updatedItem;
-        }
-        return item;
-      })
-    );
+  const updateAssistanceItem = (employeeId: number, field: string, value: any) => {
+    setAssistanceData(prev => {
+      const currentData = prev[employeeId] || {
+        id: employeeId,
+        description: "",
+        months: 12,
+        houseRent: 0,
+        monthlyAssistance: 0,
+        oneTimePurchase: 0,
+        total: 0
+      };
+      
+      const updatedItem = { ...currentData, [field]: value };
+      if (field === 'months' || field === 'houseRent' || field === 'monthlyAssistance' || field === 'oneTimePurchase') {
+        updatedItem.total = (updatedItem.months * (updatedItem.houseRent + updatedItem.monthlyAssistance)) + updatedItem.oneTimePurchase;
+      }
+      
+      return {
+        ...prev,
+        [employeeId]: updatedItem
+      };
+    });
   };
 
   const updateSpecialAssistanceItem = (id: number, field: keyof SpecialAssistanceItem, value: any) => {
@@ -202,7 +183,7 @@ export default function AssistanceModule() {
   };
 
   const getTotalAssistance = () => {
-    return assistanceItems.reduce((sum, item) => sum + item.total, 0);
+    return Object.values(assistanceData).reduce((sum, item) => sum + item.total, 0);
   };
 
   const getTotalSpecialAssistance = () => {
@@ -326,44 +307,56 @@ export default function AssistanceModule() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {assistanceItems.map((item) => (
-                    <TableRow key={item.id} className="hover:bg-gray-50 transition-colors">
-                      <TableCell className="border-r border-gray-200 font-medium">{item.description}</TableCell>
-                      <TableCell className="border-r border-gray-200 text-center">
-                        <Input
-                          type="number"
-                          value={item.months}
-                          onChange={(e) => updateAssistanceItem(item.id, 'months', Number(e.target.value))}
-                          className="text-center w-20 mx-auto bg-gray-50 border-gray-300"
-                        />
-                      </TableCell>
-                      <TableCell className="border-r border-gray-200 text-center">
-                        <Input
-                          type="number"
-                          value={item.houseRent}
-                          onChange={(e) => updateAssistanceItem(item.id, 'houseRent', Number(e.target.value))}
-                          className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
-                        />
-                      </TableCell>
-                      <TableCell className="border-r border-gray-200 text-center">
-                        <Input
-                          type="number"
-                          value={item.monthlyAssistance}
-                          onChange={(e) => updateAssistanceItem(item.id, 'monthlyAssistance', Number(e.target.value))}
-                          className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
-                        />
-                      </TableCell>
-                      <TableCell className="border-r border-gray-200 text-center">
-                        <Input
-                          type="number"
-                          value={item.oneTimePurchase}
-                          onChange={(e) => updateAssistanceItem(item.id, 'oneTimePurchase', Number(e.target.value))}
-                          className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
-                        />
-                      </TableCell>
-                      <TableCell className="text-right font-semibold text-green-700">{item.total.toFixed(2)}</TableCell>
-                    </TableRow>
-                  ))}
+                  {(employees as Employee[]).filter(emp => emp.status === "Active").map((employee: Employee) => {
+                    const assistanceItem = assistanceData[employee.id] || {
+                      id: employee.id,
+                      description: employee.fullName,
+                      months: 12,
+                      houseRent: 0,
+                      monthlyAssistance: 0,
+                      oneTimePurchase: 0,
+                      total: 0
+                    };
+                    
+                    return (
+                      <TableRow key={employee.id} className="hover:bg-gray-50 transition-colors">
+                        <TableCell className="border-r border-gray-200 font-medium">{employee.fullName}</TableCell>
+                        <TableCell className="border-r border-gray-200 text-center">
+                          <Input
+                            type="number"
+                            value={assistanceItem.months}
+                            onChange={(e) => updateAssistanceItem(employee.id, 'months', Number(e.target.value))}
+                            className="text-center w-20 mx-auto bg-gray-50 border-gray-300"
+                          />
+                        </TableCell>
+                        <TableCell className="border-r border-gray-200 text-center">
+                          <Input
+                            type="number"
+                            value={assistanceItem.houseRent}
+                            onChange={(e) => updateAssistanceItem(employee.id, 'houseRent', Number(e.target.value))}
+                            className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
+                          />
+                        </TableCell>
+                        <TableCell className="border-r border-gray-200 text-center">
+                          <Input
+                            type="number"
+                            value={assistanceItem.monthlyAssistance}
+                            onChange={(e) => updateAssistanceItem(employee.id, 'monthlyAssistance', Number(e.target.value))}
+                            className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
+                          />
+                        </TableCell>
+                        <TableCell className="border-r border-gray-200 text-center">
+                          <Input
+                            type="number"
+                            value={assistanceItem.oneTimePurchase}
+                            onChange={(e) => updateAssistanceItem(employee.id, 'oneTimePurchase', Number(e.target.value))}
+                            className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
+                          />
+                        </TableCell>
+                        <TableCell className="text-right font-semibold text-green-700">{assistanceItem.total.toFixed(2)}</TableCell>
+                      </TableRow>
+                    );
+                  })}
                   <TableRow className="bg-gradient-to-r from-green-50 to-blue-50 border-t-2 border-green-200">
                     <TableCell colSpan={5} className="text-center font-bold text-green-800">ยอดรวมทั้งหมด</TableCell>
                     <TableCell className="text-right font-bold text-lg text-green-700">
