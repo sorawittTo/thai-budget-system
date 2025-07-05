@@ -2,12 +2,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { ChevronLeft, ChevronRight, Plane, Car, MapPin } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plane, Car, MapPin, Building2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { Employee, TravelExpense } from "@shared/schema";
 
 export default function TravelModule() {
-  const [activeTab, setActiveTab] = useState<"local" | "outside" | "students">("local");
+  const [activeTab, setActiveTab] = useState<"local" | "outside" | "students" | "meeting">("local");
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear() + 543);
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [travelExpenses, setTravelExpenses] = useState<TravelExpense[]>([]);
@@ -53,6 +53,7 @@ export default function TravelModule() {
     { id: "local", label: "เดินทางในพื้นที่", icon: MapPin, description: "การเดินทางในพื้นที่ราชการ" },
     { id: "outside", label: "เดินทางนอกพื้นที่", icon: Car, description: "การเดินทางนอกพื้นที่ราชการ" },
     { id: "students", label: "นำนักเรียน", icon: Plane, description: "การเดินทางพานักเรียนทัศนศึกษา" },
+    { id: "meeting", label: "ประชุมสัมมนา", icon: Building2, description: "การเดินทางไปประชุมสัมมนาอบรม" },
   ];
 
   if (employeeLoading || travelLoading) {
@@ -140,6 +141,14 @@ export default function TravelModule() {
             currentYear={currentYear}
             companyTripBusFare={companyTripBusFare}
             setCompanyTripBusFare={setCompanyTripBusFare}
+          />
+        )}
+
+        {activeTab === "meeting" && (
+          <MeetingTravelTab 
+            employees={employees} 
+            currentYear={currentYear}
+            travelExpenses={travelExpenses}
           />
         )}
       </div>
