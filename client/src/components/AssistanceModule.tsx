@@ -116,9 +116,7 @@ export default function AssistanceModule() {
   };
 
   const [overtimeData, setOvertimeData] = useState([
-    { id: 1, employeeType: "วันทำการ 3 วัน", employees: 0, hours: 8, hoursPerEmployee: 1, ratePerHour: 71.43, total: 0.00 },
-    { id: 2, employeeType: "วันทำการ 4 วัน", employees: 0, hours: 8, hoursPerEmployee: 1, ratePerHour: 71.43, total: 0.00 },
-    { id: 3, employeeType: "วันทำการ 5 วัน", employees: 0, hours: 8, hoursPerEmployee: 1, ratePerHour: 71.43, total: 0.00 }
+    { id: 1, employees: 0, hours: 8, hoursPerEmployee: 1, ratePerHour: 71.43, total: 0.00 }
   ]);
   
   const [overtimeRatePerHour, setOvertimeRatePerHour] = useState(15000);
@@ -398,7 +396,6 @@ export default function AssistanceModule() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-center border font-semibold">ประเภทพนักงาน</TableHead>
                   <TableHead className="text-center border font-semibold">จำนวนคน</TableHead>
                   <TableHead className="text-center border font-semibold">ชม./วัน</TableHead>
                   <TableHead className="text-center border font-semibold">จำนวน</TableHead>
@@ -409,7 +406,6 @@ export default function AssistanceModule() {
               <TableBody>
                 {overtimeData.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell className="text-left border">{item.employeeType}</TableCell>
                     <TableCell className="text-center border">
                       <div className="flex items-center gap-1">
                         <Input
@@ -448,7 +444,7 @@ export default function AssistanceModule() {
                   </TableRow>
                 ))}
                 <TableRow className="bg-gray-50">
-                  <TableCell colSpan={5} className="text-center border font-semibold">ยอดรวมทั้งหมด</TableCell>
+                  <TableCell colSpan={4} className="text-center border font-semibold">ยอดรวมทั้งหมด</TableCell>
                   <TableCell className="text-right border font-semibold text-lg">
                     {getTotalOvertime().toFixed(2)}
                   </TableCell>
