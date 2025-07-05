@@ -96,7 +96,9 @@ The build process:
 
 ## Changelog
 
-- July 05, 2025. Initial setup
+- July 05, 2025. Initial setup with Thai budget management system
+- July 05, 2025. Added original data from HTML file (24 budget items, 17 employees, master rates)
+- July 05, 2025. Updated UI to match original design 100% with flat-input styling, proper table layout, and category grouping
 
 ## User Preferences
 
