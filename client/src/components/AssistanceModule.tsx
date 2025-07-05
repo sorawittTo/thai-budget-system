@@ -128,14 +128,27 @@ export default function AssistanceModule() {
     }
   ]);
 
+  // ฟังก์ชันดึงอัตรามาตรฐานจากตารางมาตรฐาน
+  const getStandardRate = (category: string, subcategory: string): number => {
+    const rate = masterRates?.find(r => r.category === category && r.subcategory === subcategory);
+    return rate?.rate || 0;
+  };
+
   const updateAssistanceItem = (employeeId: number, field: string, value: any) => {
     setAssistanceData(prev => {
+      const employee = employees?.find((emp: Employee) => emp.id === employeeId) as Employee;
+      const level = employee?.level || "1";
+      
+      // ดึงค่าจากตารางมาตรฐาน
+      const standardHouseRent = getStandardRate(level === "7" || level === "6" ? "level_6_7" : "other_levels", "ค่าที่พัก");
+      const standardMonthlyAssistance = getStandardRate("assistance", "ค่าช่วยเหลือรายเดือน");
+      
       const currentData = prev[employeeId] || {
         id: employeeId,
         description: "",
         months: 12,
-        houseRent: 0,
-        monthlyAssistance: 0,
+        houseRent: standardHouseRent,
+        monthlyAssistance: standardMonthlyAssistance,
         oneTimePurchase: 0,
         total: 0
       };
@@ -298,29 +311,36 @@ export default function AssistanceModule() {
               <Table>
                 <TableHeader className="bg-gradient-to-r from-green-100 to-blue-100">
                   <TableRow className="border-b border-gray-200">
-                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">รายการ</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ชื่อ-นามสกุล</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ระดับ</TableHead>
                     <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">จำนวนเดือน</TableHead>
-                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่าที่พัก</TableHead>
-                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่าช่วยเหลือรายเดือน</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่าที่พัก<br/><span className="text-xs">(จากตารางมาตรฐาน)</span></TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่าช่วยเหลือรายเดือน<br/><span className="text-xs">(จากตารางมาตรฐาน)</span></TableHead>
                     <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่าซื้อของเหมาจ่าย</TableHead>
                     <TableHead className="text-center font-semibold text-green-800">รวม</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {(employees as Employee[]).filter(emp => emp.status === "Active").map((employee: Employee) => {
+                    const level = employee.level;
+                    // ดึงค่าจากตารางมาตรฐาน
+                    const standardHouseRent = getStandardRate(level === "7" || level === "6" ? "level_6_7" : "other_levels", "ค่าที่พัก");
+                    const standardMonthlyAssistance = getStandardRate("assistance", "ค่าช่วยเหลือรายเดือน");
+                    
                     const assistanceItem = assistanceData[employee.id] || {
                       id: employee.id,
                       description: employee.fullName,
                       months: 12,
-                      houseRent: 0,
-                      monthlyAssistance: 0,
+                      houseRent: standardHouseRent,
+                      monthlyAssistance: standardMonthlyAssistance,
                       oneTimePurchase: 0,
-                      total: 0
+                      total: (12 * (standardHouseRent + standardMonthlyAssistance)) + 0
                     };
                     
                     return (
                       <TableRow key={employee.id} className="hover:bg-gray-50 transition-colors">
                         <TableCell className="border-r border-gray-200 font-medium">{employee.fullName}</TableCell>
+                        <TableCell className="border-r border-gray-200 text-center font-medium">{employee.level}</TableCell>
                         <TableCell className="border-r border-gray-200 text-center">
                           <Input
                             type="number"
@@ -330,20 +350,26 @@ export default function AssistanceModule() {
                           />
                         </TableCell>
                         <TableCell className="border-r border-gray-200 text-center">
-                          <Input
-                            type="number"
-                            value={assistanceItem.houseRent}
-                            onChange={(e) => updateAssistanceItem(employee.id, 'houseRent', Number(e.target.value))}
-                            className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
-                          />
+                          <div className="flex flex-col items-center gap-1">
+                            <span className="text-xs text-gray-600">{standardHouseRent.toFixed(2)}</span>
+                            <Input
+                              type="number"
+                              value={assistanceItem.houseRent}
+                              onChange={(e) => updateAssistanceItem(employee.id, 'houseRent', Number(e.target.value))}
+                              className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
+                            />
+                          </div>
                         </TableCell>
                         <TableCell className="border-r border-gray-200 text-center">
-                          <Input
-                            type="number"
-                            value={assistanceItem.monthlyAssistance}
-                            onChange={(e) => updateAssistanceItem(employee.id, 'monthlyAssistance', Number(e.target.value))}
-                            className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
-                          />
+                          <div className="flex flex-col items-center gap-1">
+                            <span className="text-xs text-gray-600">{standardMonthlyAssistance.toFixed(2)}</span>
+                            <Input
+                              type="number"
+                              value={assistanceItem.monthlyAssistance}
+                              onChange={(e) => updateAssistanceItem(employee.id, 'monthlyAssistance', Number(e.target.value))}
+                              className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
+                            />
+                          </div>
                         </TableCell>
                         <TableCell className="border-r border-gray-200 text-center">
                           <Input
@@ -358,7 +384,7 @@ export default function AssistanceModule() {
                     );
                   })}
                   <TableRow className="bg-gradient-to-r from-green-50 to-blue-50 border-t-2 border-green-200">
-                    <TableCell colSpan={5} className="text-center font-bold text-green-800">ยอดรวมทั้งหมด</TableCell>
+                    <TableCell colSpan={6} className="text-center font-bold text-green-800">ยอดรวมทั้งหมด</TableCell>
                     <TableCell className="text-right font-bold text-lg text-green-700">
                       {getTotalAssistance().toFixed(2)}
                     </TableCell>
