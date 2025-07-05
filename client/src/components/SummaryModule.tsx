@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { Employee, BudgetItem, AssistancePayment, TravelExpense, OvertimePayment, MasterRate } from "@/../../shared/schema";
 import { calculateTravelTotals } from "@/components/TravelModule";
 import { calculateAssistanceTotals } from "@/components/AssistanceModule";
@@ -34,9 +34,7 @@ export default function SummaryModule() {
     queryKey: ['/api/overtime-payments'],
   });
 
-  const handleYearChange = (direction: "prev" | "next") => {
-    setCurrentYear(prev => direction === "prev" ? prev - 1 : prev + 1);
-  };
+
 
   // คำนวณสรุปงบประมาณรายจ่ายดำเนินงาน
   const calculateOperatingExpenses = () => {
@@ -172,27 +170,11 @@ export default function SummaryModule() {
                 <p className="text-gray-600 text-sm mt-1">การจัดทำงบประมาณรายจ่าย</p>
               </div>
             </div>
-            <div className="flex items-center gap-4 bg-gray-50 p-3 rounded-xl">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleYearChange("prev")}
-                className="flex items-center gap-2 hover:bg-purple-50 hover:border-purple-300 transition-colors"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
+            <div className="bg-gray-50 p-3 rounded-xl">
               <div className="bg-white px-4 py-2 rounded-lg shadow-sm border">
-                <span className="text-lg font-semibold text-gray-800">ครุณประมาณ พ.ศ.</span>
+                <span className="text-lg font-semibold text-gray-800">งบประมาณ พ.ศ.</span>
                 <span className="text-lg font-bold text-purple-600 ml-2">{currentYear}</span>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleYearChange("next")}
-                className="flex items-center gap-2 hover:bg-purple-50 hover:border-purple-300 transition-colors"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
             </div>
           </div>
         </div>
