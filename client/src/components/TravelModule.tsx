@@ -16,10 +16,9 @@ export function calculateTravelTotals(employees: Employee[] = [], workDays: {[ke
   const activeEmployees = employees.filter(emp => emp.status === "Active");
   const level7Employees = employees.filter(emp => emp.level === "7");
   const eligibleEmployees = employees.filter((employee: Employee) => {
-    // คำนวณจากอายุงาน - ถ้าทำงานมากกว่า 25 ปีถือว่าจะเกษียณ
     const currentYear = new Date().getFullYear() + 543;
     const serviceYears = currentYear - employee.startYear;
-    return serviceYears < 25; // พนักงานที่ยังไม่เกษียณ
+    return [20, 25, 30, 35, 40].includes(serviceYears);
   });
 
   // 1. ซื้อของฝาก
