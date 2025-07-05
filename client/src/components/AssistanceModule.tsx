@@ -118,7 +118,7 @@ export default function AssistanceModule() {
   };
 
   const getTotalSpecialAssistance = () => {
-    return 500000; // Fixed amount for special assistance
+    return 159700; // Total from special assistance table
   };
 
   if (employeeLoading || ratesLoading) {
@@ -254,11 +254,84 @@ export default function AssistanceModule() {
       {activeTab === "special" && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold mb-4">เงินช่วยเหลือพิเศษ</h2>
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <p className="text-blue-700 font-semibold">งบประมาณรวมสำหรับเงินช่วยเหลือพิเศษ</p>
-            <p className="text-2xl font-bold text-blue-800 mt-2">
-              {getTotalSpecialAssistance().toLocaleString()} บาท
-            </p>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="text-center border font-semibold">รายการ</TableHead>
+                  <TableHead className="text-center border font-semibold">จำนวน</TableHead>
+                  <TableHead className="text-center border font-semibold">วันที่</TableHead>
+                  <TableHead className="text-center border font-semibold">คนที่ได้รับ</TableHead>
+                  <TableHead className="text-center border font-semibold">ช่วยเหลือ/คน</TableHead>
+                  <TableHead className="text-center border font-semibold">รวมเงิน</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <TableRow>
+                  <TableCell className="text-left border">ความคุ้มครองประกันภัยอุบัติเหตุกลุ่มพนักงาน</TableCell>
+                  <TableCell className="text-center border">1</TableCell>
+                  <TableCell className="text-center border">2</TableCell>
+                  <TableCell className="text-center border">1</TableCell>
+                  <TableCell className="text-right border">250</TableCell>
+                  <TableCell className="text-right border">500.00</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-left border">ความคุ้มครองประกันภัยรถเจ้าหน้าที่แล้วเซ็นคุม</TableCell>
+                  <TableCell className="text-center border">2</TableCell>
+                  <TableCell className="text-center border">2</TableCell>
+                  <TableCell className="text-center border">1</TableCell>
+                  <TableCell className="text-right border">250</TableCell>
+                  <TableCell className="text-right border">1,000.00</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-left border">PM เครื่องดื่ม M7</TableCell>
+                  <TableCell className="text-center border">12</TableCell>
+                  <TableCell className="text-center border">2</TableCell>
+                  <TableCell className="text-center border">1</TableCell>
+                  <TableCell className="text-right border">250</TableCell>
+                  <TableCell className="text-right border">6,000.00</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-left border">Mini Overhaul เครื่อง M7</TableCell>
+                  <TableCell className="text-center border">1</TableCell>
+                  <TableCell className="text-center border">2</TableCell>
+                  <TableCell className="text-center border">1</TableCell>
+                  <TableCell className="text-right border">250</TableCell>
+                  <TableCell className="text-right border">500.00</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-left border">พนักงานข้างแดด</TableCell>
+                  <TableCell className="text-center border">1</TableCell>
+                  <TableCell className="text-center border">242</TableCell>
+                  <TableCell className="text-center border">2</TableCell>
+                  <TableCell className="text-right border">300</TableCell>
+                  <TableCell className="text-right border">145,200.00</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-left border">พนักงานทำบุญการพระสงฆ์โบสถ์รูปพระสำราญ</TableCell>
+                  <TableCell className="text-center border">1</TableCell>
+                  <TableCell className="text-center border">20</TableCell>
+                  <TableCell className="text-center border">1</TableCell>
+                  <TableCell className="text-right border">300</TableCell>
+                  <TableCell className="text-right border">6,000.00</TableCell>
+                </TableRow>
+                <TableRow>
+                  <TableCell className="text-left border">ความคุ้มครองสมัยประธา</TableCell>
+                  <TableCell className="text-center border">1</TableCell>
+                  <TableCell className="text-center border">2</TableCell>
+                  <TableCell className="text-center border">1</TableCell>
+                  <TableCell className="text-right border">250</TableCell>
+                  <TableCell className="text-right border">500.00</TableCell>
+                </TableRow>
+                <TableRow className="bg-gray-50">
+                  <TableCell colSpan={5} className="text-center border font-semibold">ยอดรวม</TableCell>
+                  <TableCell className="text-right border font-semibold text-lg">159,700.00</TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </div>
+          <div className="mt-6">
+            <p className="font-semibold">หมายเหตุ:</p>
           </div>
         </div>
       )}
