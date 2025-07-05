@@ -1,0 +1,14 @@
+                      <TableCell className="border-r border-gray-200 text-center">
+                        <Input 
+                          type="number" 
+                          value={customAccommodationCost !== undefined ? customAccommodationCost : accommodationDays * 2100} 
+                          onChange={(e) => setAccommodationCosts(prev => ({
+                            ...prev,
+                            [employee.id]: parseInt(e.target.value) || 0
+                          }))}
+                          className="w-24 text-center mx-auto bg-gray-50 border-gray-300" 
+                          min="0"
+                          placeholder="0"
+                        />
+                        <span className="text-xs text-gray-500 block mt-1">({accommodationDays} วัน)</span>
+                      </TableCell>
