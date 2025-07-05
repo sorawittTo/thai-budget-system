@@ -123,6 +123,7 @@ The build process:
 - July 05, 2025. Fixed budget item sorting arrows to work correctly within each category group
 - July 05, 2025. Updated summary page to pull real calculated data from all modules instead of using hardcoded values
 - July 05, 2025. Changed "ค่าจ้างชั่วโมงเพิ่ม" to "ค่าล่วงเวลา" in summary headings and integrated assistance calculations
+- July 05, 2025. Added authentication system with user login (korat123/korat123), PostgreSQL session storage, protected routes, and auth page
 
 ## User Preferences
 
