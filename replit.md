@@ -82,11 +82,20 @@ The application follows a typical client-server architecture with:
 
 ## Deployment Strategy
 
-The application is configured for deployment on Replit with:
+The application is configured for deployment on both Replit and Vercel:
+
+### Replit Development
 - **Development**: `npm run dev` - Runs both client and server in development mode
 - **Build**: `npm run build` - Creates production builds for both client and server
 - **Production**: `npm run start` - Runs the production server
 - **Database**: `npm run db:push` - Pushes schema changes to PostgreSQL
+
+### Vercel Production Deployment
+- **Configuration**: `vercel.json` configured for Node.js deployment
+- **Build Command**: `npm run build`
+- **Start Command**: `npm run start`
+- **Environment Variables**: Requires DATABASE_URL and related PostgreSQL credentials
+- **Static Assets**: Served through Express server from `dist/public`
 
 The build process:
 1. Vite builds the React client to `dist/public`
