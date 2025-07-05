@@ -105,6 +105,8 @@ The build process:
 - July 05, 2025. Updated family visit travel tab: changed "ค่ารถทัวร์เยี่ยมบ้าน" to "ค่ารถทัวร์ไป-กลับ", added "จำนวนครั้ง" column with calculations based on employee tour cost × 2 × trip count
 - July 05, 2025. Updated company event travel tab: changed "ค่าพาหนะ" to "ค่ารถโดยสาร ไป-กลับ", added editable bus cost field with calculation = user input × 2 for round-trip costs
 - July 05, 2025. Updated rotation work travel tab: redesigned to match souvenir tab layout with working days column (no age column), added transport columns with round-trip calculations, and other vehicle costs column
+- July 05, 2025. Updated company event travel tab: added editable accommodation fields for customizable per-person costs, maintaining round-trip calculation logic for transport expenses
+- July 05, 2025. Removed add/delete buttons from all travel tabs: simplified interface to only show edit functionality for existing data, maintaining clean table layouts
 
 ## User Preferences
 

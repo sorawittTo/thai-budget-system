@@ -273,14 +273,6 @@ export default function TravelModule() {
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="h-8 w-8 p-0 text-red-600"
-                        onClick={() => handleDelete(employee.id, "souvenir")}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -290,14 +282,7 @@ export default function TravelModule() {
         </table>
       </div>
       
-      <div className="mt-4 flex justify-between items-center">
-        <Button 
-          className="flex items-center gap-2"
-          onClick={() => handleAdd("souvenir")}
-        >
-          <Plus className="h-4 w-4" />
-          เพิ่มรายการ
-        </Button>
+      <div className="mt-4 flex justify-end items-center">
         <div className="text-lg font-semibold">
           รวมทั้งสิ้น: {eligibleEmployees.reduce((sum: number, emp: any) => {
             const currentWorkDays = workDays[emp.id] || 1;
@@ -382,14 +367,6 @@ export default function TravelModule() {
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="h-8 w-8 p-0 text-red-600"
-                        onClick={() => handleDelete(employee.id, "family")}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -399,14 +376,7 @@ export default function TravelModule() {
         </table>
       </div>
       
-      <div className="mt-4 flex justify-between items-center">
-        <Button 
-          className="flex items-center gap-2"
-          onClick={() => handleAdd("family")}
-        >
-          <Plus className="h-4 w-4" />
-          เพิ่มรายการ
-        </Button>
+      <div className="mt-4 flex justify-end items-center">
         <div className="text-lg font-semibold">
           รวมทั้งสิ้น: {activeEmployees.reduce((sum: number, emp: any) => {
             const baseTourCost = emp.tourCost || 5000;
@@ -491,8 +461,8 @@ export default function TravelModule() {
             {(employees as any[]).map((employee: any, index: number) => {
               // Check if travel province matches home province
               const sameProvince = travelProvince === employee.province;
-              const accommodation = sameProvince ? 0 : 
-                                  employee.level === "7" ? 2100 : 1050;
+              const baseAccommodation = sameProvince ? 0 : (employee.level === "7" ? 2100 : 1050);
+              const accommodation = workDays[`accommodation_${employee.id}`] || baseAccommodation;
               const defaultBusCost = workDays['default_bus_cost'] || 300; // ค่ารถโดยสารที่กรอกด้านบน
               const transport = defaultBusCost * 2; // ค่ารถโดยสาร ไป-กลับ (x2)
               const total = accommodation + transport;
@@ -507,7 +477,13 @@ export default function TravelModule() {
                     {sameProvince ? (
                       <span className="text-gray-400">ไม่ได้</span>
                     ) : (
-                      accommodation.toLocaleString()
+                      <Input
+                        type="number"
+                        value={accommodation}
+                        onChange={(e) => setWorkDays(prev => ({ ...prev, [`accommodation_${employee.id}`]: parseInt(e.target.value) || baseAccommodation }))}
+                        className="w-20 text-center"
+                        min="0"
+                      />
                     )}
                   </td>
                   <td className="px-4 py-3 border border-gray-300 text-center">{transport.toLocaleString()}</td>
@@ -524,14 +500,6 @@ export default function TravelModule() {
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="h-8 w-8 p-0 text-red-600"
-                        onClick={() => handleDelete(employee.id, "company")}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -541,19 +509,12 @@ export default function TravelModule() {
         </table>
       </div>
       
-      <div className="mt-4 flex justify-between items-center">
-        <Button 
-          className="flex items-center gap-2"
-          onClick={() => handleAdd("company")}
-        >
-          <Plus className="h-4 w-4" />
-          เพิ่มรายการ
-        </Button>
+      <div className="mt-4 flex justify-end items-center">
         <div className="text-lg font-semibold">
           รวมทั้งสิ้น: {(employees as any[]).reduce((total: number, emp: any) => {
             const sameProvince = travelProvince === emp.province;
-            const accommodation = sameProvince ? 0 : 
-                                emp.level === "7" ? 2100 : 1050;
+            const baseAccommodation = sameProvince ? 0 : (emp.level === "7" ? 2100 : 1050);
+            const accommodation = workDays[`accommodation_${emp.id}`] || baseAccommodation;
             const defaultBusCost = workDays['default_bus_cost'] || 300;
             const transport = defaultBusCost * 2;
             return total + accommodation + transport;
@@ -662,14 +623,6 @@ export default function TravelModule() {
                       >
                         <Edit2 className="h-4 w-4" />
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        className="h-8 w-8 p-0 text-red-600"
-                        onClick={() => handleDelete(employee.id, "rotation")}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
                     </div>
                   </td>
                 </tr>
@@ -679,14 +632,7 @@ export default function TravelModule() {
         </table>
       </div>
       
-      <div className="mt-4 flex justify-between items-center">
-        <Button 
-          className="flex items-center gap-2"
-          onClick={() => handleAdd("rotation")}
-        >
-          <Plus className="h-4 w-4" />
-          เพิ่มรายการ
-        </Button>
+      <div className="mt-4 flex justify-end items-center">
         <div className="text-lg font-semibold">
           รวมทั้งสิ้น: {level7Employees.reduce((sum: number, emp: any) => {
             const currentWorkDays = workDays[emp.id] || 1;
