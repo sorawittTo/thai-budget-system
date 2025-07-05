@@ -5,11 +5,14 @@ import { z } from "zod";
 export const budgetItems = pgTable("budget_items", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
+  budgetCode: text("budget_code"),
   currentYearAmount: real("current_year_amount").default(0),
   compareYearAmount: real("compare_year_amount").default(0),
   currentYear: integer("current_year").notNull(),
   compareYear: integer("compare_year").notNull(),
   category: text("category").notNull(),
+  notes: text("notes"),
+  sortOrder: integer("sort_order").default(0),
 });
 
 export const employees = pgTable("employees", {

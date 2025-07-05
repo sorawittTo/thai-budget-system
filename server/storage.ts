@@ -89,34 +89,40 @@ export class MemStorage implements IStorage {
   private initializeDefaultData() {
     // Original budget items from HTML file
     const defaultBudgetItems = [
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าใช้จ่ายกิจกรรมส่งเสริมค่านิยมร่วมขององค์กร', category: 'หมวด 1 : ค่าใช้จ่ายเกี่ยวกับพนักงาน', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าไฟฟ้า', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าน้ำประปา', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าโทรศัพท์', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าวัสดุทั่วไป', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าวัสดุงานบ้านงานครัว', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าจ้าง', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าไปรษณียากรและพัสดุไปรษณีย์', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าขนส่ง', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าซ่อมแซมและบำรุงรักษา', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าตอบแทน', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าเช่า', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่ารับรอง', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าใช้จ่ายในการเดินทาง', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าทรัพยากรสาสนเทศห้องสมุด', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าจัดประชุม/ชี้แจง', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าใช้จ่ายในการจัดงานและพิธีต่าง ๆ', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าใช้จ่ายเบ็ดเตล็ด', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'เงินบริจาค', category: 'หมวด 4 : เงินช่วยเหลือภายนอกและเงินบริจาค', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าวัสดุผลิต - ทั่วไป', category: 'หมวด 58: ค่าใช้จ่ายด้านการผลิต', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ครุภัณฑ์เครื่องใช้ไฟฟ้าและประปา', category: 'หมวด 7 : สินทรัพย์ถาวร', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ครุภัณฑ์เบ็ดเตล็ด', category: 'หมวด 7 : สินทรัพย์ถาวร', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ครุภัณฑ์ยานพาหนะและขนส่ง', category: 'หมวด 7 : สินทรัพย์ถาวร', currentYearAmount: 0, compareYearAmount: 0 },
-      { currentYear: 2568, compareYear: 2569, name: 'ค่าเสริมสร้างปรับปรุงอาคารสถานที่', category: 'หมวด 7 : สินทรัพย์ถาวร', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าใช้จ่ายกิจกรรมส่งเสริมค่านิยมร่วมขององค์กร', budgetCode: '52021100', category: 'หมวด 1 : ค่าใช้จ่ายเกี่ยวกับพนักงาน', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 1 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าไฟฟ้า', budgetCode: '52021200', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 2 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าน้ำประปา', budgetCode: '52021201', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 3 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าโทรศัพท์', budgetCode: '52021202', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 4 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าวัสดุทั่วไป', budgetCode: '52021203', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 5 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าวัสดุงานบ้านงานครัว', budgetCode: '52021204', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 6 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าจ้าง', budgetCode: '52021205', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 7 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าไปรษณียากรและพัสดุไปรษณีย์', budgetCode: '52021206', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 8 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าขนส่ง', budgetCode: '52021207', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 9 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าซ่อมแซมและบำรุงรักษา', budgetCode: '52021208', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 10 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าตอบแทน', budgetCode: '52021209', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 11 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าเช่า', budgetCode: '52021210', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 12 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่ารับรอง', budgetCode: '52021211', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 13 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าใช้จ่ายในการเดินทาง', budgetCode: '52021212', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 14 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าทรัพยากรสาสนเทศห้องสมุด', budgetCode: '52021213', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 15 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าจัดประชุม/ชี้แจง', budgetCode: '52021214', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 16 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าใช้จ่ายในการจัดงานและพิธีต่าง ๆ', budgetCode: '52021215', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 17 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าใช้จ่ายเบ็ดเตล็ด', budgetCode: '52021216', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 18 },
+      { currentYear: 2568, compareYear: 2569, name: 'เงินบริจาค', budgetCode: '54021001', category: 'หมวด 4 : เงินช่วยเหลือภายนอกและเงินบริจาค', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 19 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าวัสดุผลิต - ทั่วไป', budgetCode: '58021001', category: 'หมวด 58: ค่าใช้จ่ายด้านการผลิต', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 20 },
+      { currentYear: 2568, compareYear: 2569, name: 'ครุภัณฑ์เครื่องใช้ไฟฟ้าและประปา', budgetCode: '71021001', category: 'หมวด 7 : สินทรัพย์ถาวร', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 21 },
+      { currentYear: 2568, compareYear: 2569, name: 'ครุภัณฑ์เบ็ดเตล็ด', budgetCode: '71021002', category: 'หมวด 7 : สินทรัพย์ถาวร', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 22 },
+      { currentYear: 2568, compareYear: 2569, name: 'ครุภัณฑ์ยานพาหนะและขนส่ง', budgetCode: '71021003', category: 'หมวด 7 : สินทรัพย์ถาวร', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 23 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าเสริมสร้างปรับปรุงอาคารสถานที่', budgetCode: '71021004', category: 'หมวด 7 : สินทรัพย์ถาวร', currentYearAmount: 0, compareYearAmount: 0, notes: '', sortOrder: 24 },
     ];
 
     defaultBudgetItems.forEach((item, index) => {
-      const budgetItem: BudgetItem = { ...item, id: index + 1 };
+      const budgetItem: BudgetItem = { 
+        ...item, 
+        id: index + 1,
+        budgetCode: item.budgetCode || null,
+        notes: item.notes || null,
+        sortOrder: item.sortOrder || index + 1
+      };
       this.budgetItems.set(index + 1, budgetItem);
     });
 
@@ -191,7 +197,10 @@ export class MemStorage implements IStorage {
       ...item, 
       id,
       currentYearAmount: item.currentYearAmount ?? 0,
-      compareYearAmount: item.compareYearAmount ?? 0
+      compareYearAmount: item.compareYearAmount ?? 0,
+      budgetCode: item.budgetCode ?? null,
+      notes: item.notes ?? null,
+      sortOrder: item.sortOrder ?? 0
     };
     this.budgetItems.set(id, budgetItem);
     return budgetItem;

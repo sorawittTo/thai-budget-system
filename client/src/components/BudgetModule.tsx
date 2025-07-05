@@ -1,14 +1,30 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Printer, Plus } from "lucide-react";
+import { Plus, Trash2, ArrowUp, ArrowDown, Edit3, Save, X } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import type { BudgetItem } from "@shared/schema";
+import type { BudgetItem, InsertBudgetItem } from "@shared/schema";
+
+interface BudgetGroup {
+  category: string;
+  items: BudgetItem[];
+}
 
 export default function BudgetModule() {
-  const [currentYear, setCurrentYear] = useState(2568);
-  const [compareYear, setCompareYear] = useState(2569);
-  const [budgetItems, setBudgetItems] = useState<BudgetItem[]>([]);
+  const [budgetGroups, setBudgetGroups] = useState<BudgetGroup[]>([]);
+  const [newItem, setNewItem] = useState({
+    name: "",
+    budgetCode: "",
+    currentYearAmount: 0,
+    compareYearAmount: 0,
+    currentYear: 2568,
+    compareYear: 2569,
+    category: "",
+    notes: "",
+    sortOrder: 0
+  });
+  const [editingItem, setEditingItem] = useState<number | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: budgetData, isLoading } = useQuery({
@@ -19,7 +35,29 @@ export default function BudgetModule() {
     },
   });
 
-  const updateBudgetMutation = useMutation({
+  const createBudgetItemMutation = useMutation({
+    mutationFn: async (item: InsertBudgetItem) => {
+      const response = await apiRequest("POST", "/api/budget-items", item);
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/budget-items"] });
+      setNewItem({
+        name: "",
+        budgetCode: "",
+        currentYearAmount: 0,
+        compareYearAmount: 0,
+        currentYear: 2568,
+        compareYear: 2569,
+        category: "",
+        notes: "",
+        sortOrder: 0
+      });
+      setShowAddForm(false);
+    },
+  });
+
+  const updateBudgetItemMutation = useMutation({
     mutationFn: async ({ id, ...item }: Partial<BudgetItem> & { id: number }) => {
       const response = await apiRequest("PUT", `/api/budget-items/${id}`, item);
       return response.json();
@@ -29,10 +67,9 @@ export default function BudgetModule() {
     },
   });
 
-  const createBudgetMutation = useMutation({
-    mutationFn: async (item: Omit<BudgetItem, "id">) => {
-      const response = await apiRequest("POST", "/api/budget-items", item);
-      return response.json();
+  const deleteBudgetItemMutation = useMutation({
+    mutationFn: async (id: number) => {
+      await apiRequest("DELETE", `/api/budget-items/${id}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/budget-items"] });
@@ -41,64 +78,66 @@ export default function BudgetModule() {
 
   useEffect(() => {
     if (budgetData) {
-      setBudgetItems(budgetData);
+      // Group budget items by category
+      const grouped = budgetData.reduce((acc: { [key: string]: BudgetItem[] }, item: BudgetItem) => {
+        if (!acc[item.category]) {
+          acc[item.category] = [];
+        }
+        acc[item.category].push(item);
+        return acc;
+      }, {});
+
+      const groups: BudgetGroup[] = Object.keys(grouped).map(category => ({
+        category,
+        items: grouped[category].sort((a: BudgetItem, b: BudgetItem) => (a.sortOrder || 0) - (b.sortOrder || 0))
+      }));
+
+      setBudgetGroups(groups);
     }
   }, [budgetData]);
 
-  const handleYearChange = (direction: "prev" | "next") => {
-    if (direction === "prev") {
-      setCurrentYear(prev => prev - 1);
-      setCompareYear(prev => prev - 1);
-    } else {
-      setCurrentYear(prev => prev + 1);
-      setCompareYear(prev => prev + 1);
+  const handleAddItem = () => {
+    if (newItem.name && newItem.category) {
+      createBudgetItemMutation.mutate({
+        ...newItem,
+        budgetCode: newItem.budgetCode || null,
+        notes: newItem.notes || null,
+        sortOrder: newItem.sortOrder || 0
+      });
     }
   };
 
-  const handleUpdateBudgetItem = (id: number, field: string, value: any) => {
-    updateBudgetMutation.mutate({ id, [field]: value });
+  const handleUpdateItem = (id: number, field: string, value: any) => {
+    updateBudgetItemMutation.mutate({ id, [field]: value });
   };
 
-  const handleAddBudgetItem = () => {
-    const newItem = {
-      name: "รายการใหม่",
-      currentYearAmount: 0,
-      compareYearAmount: 0,
-      currentYear,
-      compareYear,
-      category: "หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป",
-    };
-    createBudgetMutation.mutate(newItem);
-  };
-
-  const getTotalCurrent = () => {
-    return budgetItems.reduce((sum, item) => sum + (item.currentYearAmount || 0), 0);
-  };
-
-  const getTotalCompare = () => {
-    return budgetItems.reduce((sum, item) => sum + (item.compareYearAmount || 0), 0);
-  };
-
-  const handlePrint = () => {
-    window.print();
-  };
-
-  // Group budget items by category
-  const groupedItems = budgetItems.reduce((groups, item) => {
-    const category = item.category || 'อื่นๆ';
-    if (!groups[category]) {
-      groups[category] = [];
+  const handleDeleteItem = (id: number) => {
+    if (confirm("คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?")) {
+      deleteBudgetItemMutation.mutate(id);
     }
-    groups[category].push(item);
-    return groups;
-  }, {} as Record<string, BudgetItem[]>);
+  };
+
+  const handleMoveItem = (id: number, direction: "up" | "down") => {
+    const allItems = budgetGroups.flatMap(group => group.items);
+    const currentIndex = allItems.findIndex(item => item.id === id);
+    const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+    
+    if (targetIndex >= 0 && targetIndex < allItems.length) {
+      const currentItem = allItems[currentIndex];
+      const targetItem = allItems[targetIndex];
+      
+      // Swap sort orders
+      updateBudgetItemMutation.mutate({ id: currentItem.id, sortOrder: targetItem.sortOrder });
+      updateBudgetItemMutation.mutate({ id: targetItem.id, sortOrder: currentItem.sortOrder });
+    }
+  };
 
   const categories = [
-    'หมวด 1 : ค่าใช้จ่ายเกี่ยวกับพนักงาน',
-    'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป',
-    'หมวด 4 : เงินช่วยเหลือภายนอกและเงินบริจาค',
-    'หมวด 58: ค่าใช้จ่ายด้านการผลิต',
-    'หมวด 7 : สินทรัพย์ถาวร'
+    "หมวด 1 : ค่าใช้จ่ายเกี่ยวกับพนักงาน",
+    "หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป",
+    "หมวด 4 : เงินช่วยเหลือภายนอกและเงินบริจาค",
+    "หมวด 58: ค่าใช้จ่ายด้านการผลิต",
+    "หมวด 7 : สินทรัพย์ถาวร"
   ];
 
   if (isLoading) {
@@ -111,165 +150,243 @@ export default function BudgetModule() {
   }
 
   return (
-    <div id="view-budget" className="main-view">
-      <header className="bg-white text-gray-800 p-4 rounded-t-xl flex flex-wrap justify-between items-center gap-4 border-b">
-        <div>
-          <h2 className="text-xl font-bold">ตารางงบประมาณประจำปี</h2>
-          <p className="text-sm text-gray-500">จัดการและเปรียบเทียบงบประมาณรายจ่าย</p>
-        </div>
-        <div className="flex items-center gap-4 no-print">
-          <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-lg">
-            <button 
-              onClick={() => handleYearChange("prev")}
-              className="p-1 rounded-md hover:bg-gray-200 transition-colors" 
-              title="ปีก่อนหน้า"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-            <div className="flex items-center gap-2 text-sm font-semibold">
-              <select 
-                value={currentYear} 
-                onChange={(e) => setCurrentYear(parseInt(e.target.value))}
-                className="bg-transparent border-none text-gray-700 focus:ring-0 p-0"
-              >
-                {Array.from({ length: 13 }, (_, i) => 2568 + i).map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-              <span>vs</span>
-              <select 
-                value={compareYear} 
-                onChange={(e) => setCompareYear(parseInt(e.target.value))}
-                className="bg-transparent border-none text-gray-700 focus:ring-0 p-0"
-              >
-                {Array.from({ length: 13 }, (_, i) => 2568 + i).map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            </div>
-            <button 
-              onClick={() => handleYearChange("next")}
-              className="p-1 rounded-md hover:bg-gray-200 transition-colors" 
-              title="ปีถัดไป"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </button>
+    <div id="view-budget" className="main-view bg-white rounded-xl shadow-lg">
+      <header className="bg-white text-gray-800 p-4 rounded-t-xl border-b">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-xl font-bold">งบประมาณประจำปี {new Date().getFullYear() + 543}</h2>
+            <p className="text-sm text-gray-500">จัดการรายการงบประมาณและเปรียบเทียบรายปี</p>
           </div>
-          <button 
-            onClick={handlePrint}
-            className="bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-lg shadow-sm hover:bg-gray-300 transition-colors"
+          <Button
+            onClick={() => setShowAddForm(!showAddForm)}
+            className="bg-green-500 hover:bg-green-600 text-white"
           >
-            พิมพ์
-          </button>
+            <Plus className="h-4 w-4 mr-2" />
+            เพิ่มรายการ
+          </Button>
         </div>
       </header>
-      
-      <div className="bg-white p-4 rounded-b-xl shadow-lg">
-        <table className="w-full text-sm border-collapse">
-          <thead>
-            <tr className="bg-blue-600 text-white">
-              <th className="px-4 py-3 text-left border border-gray-300">รหัสบัญชี</th>
-              <th className="px-4 py-3 text-left border border-gray-300">รายการ</th>
-              <th className="px-4 py-3 text-right border border-gray-300">งบประมาณปี {currentYear}</th>
-              <th className="px-4 py-3 text-right border border-gray-300">คำของบประมาณปี {compareYear}</th>
-              <th className="px-4 py-3 text-right border border-gray-300">ผลต่าง (+/-)</th>
-              <th className="px-4 py-3 text-left border border-gray-300">หมายเหตุ</th>
-            </tr>
-          </thead>
-          <tbody id="budget-table-body-new">
-            {/* Main Header */}
-            <tr className="bg-indigo-600 text-white font-bold">
-              <td colSpan={6} className="px-4 py-3 border border-gray-300 text-lg">รวมงบประมาณรายจ่ายดำเนินงาน</td>
-            </tr>
+
+      <div className="p-4">
+        {/* Add Item Form */}
+        {showAddForm && (
+          <div className="bg-gray-50 p-4 rounded-lg mb-6">
+            <h3 className="text-lg font-semibold mb-4">เพิ่มรายการงบประมาณใหม่</h3>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <input
+                type="text"
+                placeholder="ชื่อรายการ"
+                value={newItem.name}
+                onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                className="flat-input border border-gray-300 rounded-md"
+              />
+              <input
+                type="text"
+                placeholder="รหัสงบประมาณ"
+                value={newItem.budgetCode}
+                onChange={(e) => setNewItem({ ...newItem, budgetCode: e.target.value })}
+                className="flat-input border border-gray-300 rounded-md"
+              />
+              <select
+                value={newItem.category}
+                onChange={(e) => setNewItem({ ...newItem, category: e.target.value })}
+                className="flat-input border border-gray-300 rounded-md"
+              >
+                <option value="">เลือกหมวด</option>
+                {categories.map(category => (
+                  <option key={category} value={category}>{category}</option>
+                ))}
+              </select>
+              <input
+                type="number"
+                placeholder="จำนวนเงินปีปัจจุบัน"
+                value={newItem.currentYearAmount}
+                onChange={(e) => setNewItem({ ...newItem, currentYearAmount: parseFloat(e.target.value) || 0 })}
+                className="flat-input border border-gray-300 rounded-md"
+              />
+              <input
+                type="number"
+                placeholder="จำนวนเงินปีเปรียบเทียบ"
+                value={newItem.compareYearAmount}
+                onChange={(e) => setNewItem({ ...newItem, compareYearAmount: parseFloat(e.target.value) || 0 })}
+                className="flat-input border border-gray-300 rounded-md"
+              />
+              <input
+                type="text"
+                placeholder="หมายเหตุ"
+                value={newItem.notes}
+                onChange={(e) => setNewItem({ ...newItem, notes: e.target.value })}
+                className="flat-input border border-gray-300 rounded-md"
+              />
+              <div className="flex gap-2">
+                <button
+                  onClick={handleAddItem}
+                  className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
+                >
+                  <Save className="h-4 w-4" />
+                  บันทึก
+                </button>
+                <button
+                  onClick={() => setShowAddForm(false)}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-md flex items-center gap-2"
+                >
+                  <X className="h-4 w-4" />
+                  ยกเลิก
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Budget Groups */}
+        {budgetGroups.map((group, groupIndex) => (
+          <div key={groupIndex} className="mb-8">
+            <h3 className="text-lg font-semibold mb-4 bg-indigo-100 px-4 py-2 rounded-lg border-l-4 border-indigo-600">
+              {group.category}
+            </h3>
             
-            {categories.map((category) => (
-              groupedItems[category] && groupedItems[category].length > 0 && (
-                <React.Fragment key={category}>
-                  {/* Category Header */}
-                  <tr className="bg-gray-200 font-semibold">
-                    <td colSpan={6} className="px-4 py-2 border border-gray-300">{category}</td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm border-collapse border border-gray-300">
+                <thead className="bg-indigo-600 text-white">
+                  <tr>
+                    <th className="px-4 py-3 text-left border border-gray-300">ลำดับ</th>
+                    <th className="px-4 py-3 text-left border border-gray-300">รหัสงบประมาณ</th>
+                    <th className="px-4 py-3 text-left border border-gray-300">รายการ</th>
+                    <th className="px-4 py-3 text-right border border-gray-300">ปี 2568</th>
+                    <th className="px-4 py-3 text-right border border-gray-300">ปี 2569</th>
+                    <th className="px-4 py-3 text-right border border-gray-300">เปลี่ยนแปลง</th>
+                    <th className="px-4 py-3 text-left border border-gray-300">หมายเหตุ</th>
+                    <th className="px-4 py-3 text-center border border-gray-300">จัดการ</th>
                   </tr>
-                  
-                  {/* Category Items */}
-                  {groupedItems[category].map((item) => (
+                </thead>
+                <tbody>
+                  {group.items.map((item, itemIndex) => (
                     <tr key={item.id} className="border-b hover:bg-gray-50">
+                      <td className="px-4 py-3 border border-gray-300 text-center">
+                        {itemIndex + 1}
+                      </td>
                       <td className="px-4 py-3 border border-gray-300">
-                        <input 
-                          type="text" 
-                          className="flat-input text-left w-full"
-                          placeholder="รหัสบัญชี"
+                        <input
+                          type="text"
+                          value={item.budgetCode || ""}
+                          onChange={(e) => handleUpdateItem(item.id, "budgetCode", e.target.value)}
+                          className="flat-input w-full"
+                          placeholder="รหัสงบประมาณ"
                         />
                       </td>
                       <td className="px-4 py-3 border border-gray-300">
-                        <input 
-                          type="text" 
-                          value={item.name} 
-                          onChange={(e) => handleUpdateBudgetItem(item.id, "name", e.target.value)}
-                          className="flat-input text-left w-full"
+                        <input
+                          type="text"
+                          value={item.name}
+                          onChange={(e) => handleUpdateItem(item.id, "name", e.target.value)}
+                          className="flat-input w-full"
                         />
                       </td>
                       <td className="px-4 py-3 border border-gray-300 text-right">
                         <input
                           type="number"
                           value={item.currentYearAmount || 0}
-                          onChange={(e) => handleUpdateBudgetItem(item.id, "currentYearAmount", parseFloat(e.target.value) || 0)}
-                          className="flat-input text-right w-full"
+                          onChange={(e) => handleUpdateItem(item.id, "currentYearAmount", parseFloat(e.target.value) || 0)}
+                          className="flat-input w-full text-right"
                         />
                       </td>
                       <td className="px-4 py-3 border border-gray-300 text-right">
                         <input
                           type="number"
                           value={item.compareYearAmount || 0}
-                          onChange={(e) => handleUpdateBudgetItem(item.id, "compareYearAmount", parseFloat(e.target.value) || 0)}
-                          className="flat-input text-right w-full"
+                          onChange={(e) => handleUpdateItem(item.id, "compareYearAmount", parseFloat(e.target.value) || 0)}
+                          className="flat-input w-full text-right"
                         />
                       </td>
                       <td className="px-4 py-3 border border-gray-300 text-right">
-                        {((item.currentYearAmount || 0) - (item.compareYearAmount || 0)).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                        <span className={`font-medium ${
+                          ((item.compareYearAmount || 0) - (item.currentYearAmount || 0)) >= 0 
+                            ? 'text-green-600' 
+                            : 'text-red-600'
+                        }`}>
+                          {((item.compareYearAmount || 0) - (item.currentYearAmount || 0)).toLocaleString('th-TH')}
+                        </span>
                       </td>
                       <td className="px-4 py-3 border border-gray-300">
-                        <input 
-                          type="text" 
-                          placeholder="หมายเหตุ" 
-                          className="flat-input text-left w-full"
+                        <input
+                          type="text"
+                          value={item.notes || ""}
+                          onChange={(e) => handleUpdateItem(item.id, "notes", e.target.value)}
+                          className="flat-input w-full"
+                          placeholder="หมายเหตุ"
                         />
+                      </td>
+                      <td className="px-4 py-3 border border-gray-300 text-center">
+                        <div className="flex justify-center gap-1">
+                          <button
+                            onClick={() => handleMoveItem(item.id, "up")}
+                            className="text-blue-600 hover:text-blue-800 p-1"
+                            title="เลื่อนขึ้น"
+                          >
+                            <ArrowUp className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleMoveItem(item.id, "down")}
+                            className="text-blue-600 hover:text-blue-800 p-1"
+                            title="เลื่อนลง"
+                          >
+                            <ArrowDown className="h-4 w-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteItem(item.id)}
+                            className="text-red-600 hover:text-red-800 p-1"
+                            title="ลบ"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
-                </React.Fragment>
-              )
-            ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ))}
 
-            {/* Asset Section Header */}
-            <tr className="bg-indigo-600 text-white font-bold">
-              <td colSpan={6} className="px-4 py-3 border border-gray-300 text-lg">รวมงบประมาณรายจ่ายสินทรัพย์</td>
-            </tr>
-          </tbody>
-          
-          <tfoot className="font-bold bg-gray-100">
-            <tr id="budget-table-footer-new">
-              <td colSpan={2} className="px-4 py-3 text-lg border border-gray-300">รวมงบประมาณรายจ่ายทั้งสิ้น</td>
-              <td className="px-4 py-3 text-right text-lg border border-gray-300" id="grand-total-current">
-                {getTotalCurrent().toLocaleString('th-TH', { minimumFractionDigits: 2 })}
-              </td>
-              <td className="px-4 py-3 text-right text-lg border border-gray-300" id="grand-total-next">
-                {getTotalCompare().toLocaleString('th-TH', { minimumFractionDigits: 2 })}
-              </td>
-              <td className="px-4 py-3 text-right text-lg border border-gray-300">
-                {(getTotalCurrent() - getTotalCompare()).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
-              </td>
-              <td className="px-4 py-3 border border-gray-300"></td>
-            </tr>
-          </tfoot>
-        </table>
-        
-        <div className="mt-4 flex justify-start">
-          <button 
-            onClick={handleAddBudgetItem} 
-            className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg shadow-sm no-print"
-          >
-            เพิ่มรายการใหม่
-          </button>
+        {/* Summary */}
+        <div className="bg-gray-50 p-4 rounded-lg mt-6">
+          <h3 className="text-lg font-semibold mb-4">สรุปงบประมาณ</h3>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-indigo-600">
+                {budgetGroups.reduce((sum, group) => 
+                  sum + group.items.reduce((itemSum, item) => itemSum + (item.currentYearAmount || 0), 0), 0
+                ).toLocaleString('th-TH')}
+              </div>
+              <div className="text-sm text-gray-600">รวมปี 2568</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-600">
+                {budgetGroups.reduce((sum, group) => 
+                  sum + group.items.reduce((itemSum, item) => itemSum + (item.compareYearAmount || 0), 0), 0
+                ).toLocaleString('th-TH')}
+              </div>
+              <div className="text-sm text-gray-600">รวมปี 2569</div>
+            </div>
+            <div className="text-center">
+              <div className={`text-2xl font-bold ${
+                (budgetGroups.reduce((sum, group) => 
+                  sum + group.items.reduce((itemSum, item) => itemSum + (item.compareYearAmount || 0), 0), 0) - 
+                budgetGroups.reduce((sum, group) => 
+                  sum + group.items.reduce((itemSum, item) => itemSum + (item.currentYearAmount || 0), 0), 0)) >= 0 
+                  ? 'text-green-600' 
+                  : 'text-red-600'
+              }`}>
+                {(budgetGroups.reduce((sum, group) => 
+                  sum + group.items.reduce((itemSum, item) => itemSum + (item.compareYearAmount || 0), 0), 0) - 
+                budgetGroups.reduce((sum, group) => 
+                  sum + group.items.reduce((itemSum, item) => itemSum + (item.currentYearAmount || 0), 0), 0)
+                ).toLocaleString('th-TH')}
+              </div>
+              <div className="text-sm text-gray-600">ผลต่าง</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
