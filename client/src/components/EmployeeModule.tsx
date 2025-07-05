@@ -351,7 +351,7 @@ export default function EmployeeModule() {
                     <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ตำแหน่ง</th>
                     <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ระดับ</th>
                     <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าเช่าบ้าน</th>
-                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">เงินช่วยเหลือค่ารักษาพยาบาล</th>
+                    <th className="px-4 py-3 text-center border border-gray-300 font-semibold">เงินช่วยเหลือรายเดือน</th>
                     <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่าซื้อของเหมาจ่าย</th>
                     <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่ารถโดยสาร โคราช-กทม./เที่ยว</th>
                     <th className="px-4 py-3 text-center border border-gray-300 font-semibold">ค่ารถรับจ้าง/เที่ยว</th>
