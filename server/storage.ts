@@ -87,18 +87,97 @@ export class MemStorage implements IStorage {
   }
 
   private initializeDefaultData() {
-    // Initialize with default master rates
-    const defaultRates: InsertMasterRate[] = [
-      { category: "allowance", subcategory: "daily", rate: 240, unit: "บาท/วัน", description: "ค่าเบี้ยเลี้ยงรายวัน" },
-      { category: "allowance", subcategory: "accommodation", rate: 800, unit: "บาท/คืน", description: "ค่าที่พัก" },
-      { category: "transport", subcategory: "bus", rate: 4, unit: "บาท/กม.", description: "ค่ารถประจำทาง" },
-      { category: "transport", subcategory: "taxi", rate: 20, unit: "บาท/กม.", description: "ค่ารถรับจ้าง" },
-      { category: "overtime", subcategory: "holiday", rate: 150, unit: "บาท/ชั่วโมง", description: "ค่าล่วงเวลาวันหยุด" },
+    // Original budget items from HTML file
+    const defaultBudgetItems = [
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าใช้จ่ายกิจกรรมส่งเสริมค่านิยมร่วมขององค์กร', category: 'หมวด 1 : ค่าใช้จ่ายเกี่ยวกับพนักงาน', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าไฟฟ้า', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าน้ำประปา', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าโทรศัพท์', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าวัสดุทั่วไป', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าวัสดุงานบ้านงานครัว', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าจ้าง', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าไปรษณียากรและพัสดุไปรษณีย์', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าขนส่ง', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าซ่อมแซมและบำรุงรักษา', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าตอบแทน', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าเช่า', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่ารับรอง', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าใช้จ่ายในการเดินทาง', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าทรัพยากรสาสนเทศห้องสมุด', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าจัดประชุม/ชี้แจง', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าใช้จ่ายในการจัดงานและพิธีต่าง ๆ', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าใช้จ่ายเบ็ดเตล็ด', category: 'หมวด 2 : ค่าใช้จ่ายดำเนินงานทั่วไป', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'เงินบริจาค', category: 'หมวด 4 : เงินช่วยเหลือภายนอกและเงินบริจาค', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าวัสดุผลิต - ทั่วไป', category: 'หมวด 58: ค่าใช้จ่ายด้านการผลิต', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ครุภัณฑ์เครื่องใช้ไฟฟ้าและประปา', category: 'หมวด 7 : สินทรัพย์ถาวร', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ครุภัณฑ์เบ็ดเตล็ด', category: 'หมวด 7 : สินทรัพย์ถาวร', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ครุภัณฑ์ยานพาหนะและขนส่ง', category: 'หมวด 7 : สินทรัพย์ถาวร', currentYearAmount: 0, compareYearAmount: 0 },
+      { currentYear: 2568, compareYear: 2569, name: 'ค่าเสริมสร้างปรับปรุงอาคารสถานที่', category: 'หมวด 7 : สินทรัพย์ถาวร', currentYearAmount: 0, compareYearAmount: 0 },
     ];
 
-    defaultRates.forEach(rate => {
-      this.createMasterRate(rate);
+    defaultBudgetItems.forEach((item, index) => {
+      const budgetItem: BudgetItem = { ...item, id: index + 1 };
+      this.budgetItems.set(index + 1, budgetItem);
     });
+
+    // Original employee data from HTML file
+    const defaultEmployees = [
+      { employeeCode: '62539086', fullName: 'พัทธดนย์ ทรัพย์ประสม', status: 'Active', gender: 'ชาย', startYear: 2539, level: '7', province: 'พิษณุโลก', tourCost: 1200, salary: 45000, allowance: 10000 },
+      { employeeCode: '52531175', fullName: 'พีรนุช ธนบดีภัทร', status: 'Active', gender: 'หญิง', startYear: 2531, level: '6', province: 'ขอนแก่น', tourCost: 600, salary: 40000, allowance: 9000 },
+      { employeeCode: '82532130', fullName: 'นลินรัตน์ ตรีไพศาลศักดิ์', status: 'Active', gender: 'หญิง', startYear: 2532, level: '5.5', province: 'ขอนแก่น', tourCost: 0, salary: 38000, allowance: 8500 },
+      { employeeCode: '42538115', fullName: 'อุมารักษ์ เตลันยืน', status: 'Active', gender: 'หญิง', startYear: 2538, level: '4', province: '', tourCost: 0, salary: 30000, allowance: 6000 },
+      { employeeCode: '42538092', fullName: 'สมควร กลิ่นสุคนธ์', status: 'Active', gender: 'หญิง', startYear: 2538, level: '4', province: '', tourCost: 0, salary: 30000, allowance: 6000 },
+      { employeeCode: '52542046', fullName: 'สรวิชญ์ ธรรศเดชา', status: 'Active', gender: 'ชาย', startYear: 2542, level: '5', province: '', tourCost: 600, salary: 35000, allowance: 7000 },
+      { employeeCode: '22538173', fullName: 'ประภัสสร เล็กศรีสกุล', status: 'Active', gender: 'หญิง', startYear: 2538, level: '5', province: 'ขอนแก่น', tourCost: 600, salary: 35000, allowance: 7000 },
+      { employeeCode: '82542011', fullName: 'มลธิรา สุขสำราญ', status: 'Active', gender: 'หญิง', startYear: 2542, level: '5', province: 'ขอนแก่น', tourCost: 1200, salary: 35000, allowance: 7000 },
+      { employeeCode: '42539087', fullName: 'สุภาณี จำปานุ้ย', status: 'Active', gender: 'หญิง', startYear: 2539, level: '5', province: 'ขอนแก่น', tourCost: 600, salary: 35000, allowance: 7000 },
+      { employeeCode: '62537025', fullName: 'วิชญ อุปันนัทธ์', status: 'Active', gender: 'ชาย', startYear: 2537, level: '5', province: 'เชียงใหม่', tourCost: 600, salary: 35000, allowance: 7000 },
+      { employeeCode: '82536096', fullName: 'นุสรา อัศวโชคชัย', status: 'Active', gender: 'หญิง', startYear: 2536, level: '5', province: 'ขอนแก่น', tourCost: 600, salary: 35000, allowance: 7000 },
+      { employeeCode: '72539071', fullName: 'สันติภาพ ทองประดี', status: 'Active', gender: 'ชาย', startYear: 2539, level: '5', province: 'ขอนแก่น', tourCost: 0, salary: 35000, allowance: 7000 },
+      { employeeCode: '82538194', fullName: 'ขวัญญาณัฐ จุลเกษม', status: 'Active', gender: 'หญิง', startYear: 2538, level: '4.5', province: 'ขอนแก่น', tourCost: 600, salary: 32000, allowance: 6500 },
+      { employeeCode: '52538087', fullName: 'สงวน ร้องเกาะเกิด', status: 'Active', gender: 'ชาย', startYear: 2538, level: '3', province: '', tourCost: 0, salary: 25000, allowance: 5000 },
+      { employeeCode: '2539140', fullName: 'สุมาพร จงภู่', status: 'Active', gender: 'หญิง', startYear: 2539, level: '3', province: 'ขอนแก่น', tourCost: 0, salary: 25000, allowance: 5000 },
+      { employeeCode: '42540033', fullName: 'คมสันติ์ นุชนารถ', status: 'Active', gender: 'ชาย', startYear: 2540, level: '3', province: '', tourCost: 0, salary: 25000, allowance: 5000 },
+      { employeeCode: '82540031', fullName: 'พิชิต แจ่มศรี', status: 'Active', gender: 'ชาย', startYear: 2540, level: '3', province: '', tourCost: 0, salary: 25000, allowance: 5000 },
+    ];
+
+    defaultEmployees.forEach((employee, index) => {
+      const emp: Employee = { ...employee, id: index + 1 + 25 };
+      this.employees.set(index + 1 + 25, emp);
+    });
+
+    // Master rates from original HTML
+    const defaultRates: InsertMasterRate[] = [
+      { category: "level_7", subcategory: "ผู้บริหารส่วน", rate: 9500, unit: "บาท", description: "ค่าเช่า" },
+      { category: "level_7", subcategory: "ผู้บริหารส่วน", rate: 6250, unit: "บาท", description: "เงินช่วยเหลือรายเดือน" },
+      { category: "level_7", subcategory: "ผู้บริหารส่วน", rate: 8000, unit: "บาท", description: "เงินช่วยเหลือก้อน" },
+      { category: "level_6", subcategory: "ผู้บริหารทีม", rate: 9500, unit: "บาท", description: "ค่าเช่า" },
+      { category: "level_6", subcategory: "ผู้บริหารทีม", rate: 6250, unit: "บาท", description: "เงินช่วยเหลือรายเดือน" },
+      { category: "level_5", subcategory: "เจ้าหน้าที่ชำนาญงาน", rate: 8000, unit: "บาท", description: "ค่าเช่า" },
+      { category: "level_5", subcategory: "เจ้าหน้าที่ชำนาญงาน", rate: 5500, unit: "บาท", description: "เงินช่วยเหลือรายเดือน" },
+      { category: "level_4", subcategory: "เจ้าหน้าที่", rate: 8000, unit: "บาท", description: "ค่าเช่า" },
+      { category: "level_4", subcategory: "เจ้าหน้าที่", rate: 5500, unit: "บาท", description: "เงินช่วยเหลือรายเดือน" },
+      { category: "level_3", subcategory: "พนักงานปฏิบัติการ", rate: 6500, unit: "บาท", description: "ค่าเช่า" },
+      { category: "level_3", subcategory: "พนักงานปฏิบัติการ", rate: 4750, unit: "บาท", description: "เงินช่วยเหลือรายเดือน" },
+      { category: "travel", subcategory: "perDiem", rate: 500, unit: "บาท/วัน", description: "ค่าเบี้ยเลี้ยง (ระดับ 7-6)" },
+      { category: "travel", subcategory: "perDiem", rate: 450, unit: "บาท/วัน", description: "ค่าเบี้ยเลี้ยง (ระดับ 5-3)" },
+      { category: "travel", subcategory: "hotel", rate: 2100, unit: "บาท/คืน", description: "ค่าที่พัก (ระดับ 7-6)" },
+      { category: "travel", subcategory: "hotel", rate: 1800, unit: "บาท/คืน", description: "ค่าที่พัก (ระดับ 5-3)" },
+      { category: "travel", subcategory: "transport", rate: 300, unit: "บาท", description: "ค่าเดินทาง" },
+      { category: "travel", subcategory: "local", rate: 250, unit: "บาท", description: "ค่าเดินทางท้องถิ่น" },
+    ];
+
+    let rateId = 100;
+    defaultRates.forEach(rate => {
+      const masterRate: MasterRate = { ...rate, id: rateId++, description: rate.description ?? null };
+      this.masterRates.set(masterRate.id, masterRate);
+    });
+
+    this.currentId = Math.max(
+      Math.max(...Array.from(this.budgetItems.keys())) + 1,
+      Math.max(...Array.from(this.employees.keys())) + 1,
+      Math.max(...Array.from(this.masterRates.keys())) + 1
+    );
   }
 
   // Budget Items
