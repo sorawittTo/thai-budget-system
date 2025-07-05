@@ -21,6 +21,7 @@ export default function AssistanceModule() {
     { id: 7, description: "ความคุ้มครองสมัยประธา", quantity: 1, days: 2, recipients: 1, amountPerPerson: 250, total: 500.00 }
   ]);
   const [specialAssistanceNotes, setSpecialAssistanceNotes] = useState("");
+  const [overtimeNotes, setOvertimeNotes] = useState("");
 
   const { data: employeeData, isLoading: employeeLoading } = useQuery({
     queryKey: ["/api/employees"],
@@ -210,15 +211,18 @@ export default function AssistanceModule() {
           className="flex items-center gap-2"
         >
           <Clock className="h-4 w-4" />
-          เงินล่วงเวลา
+          ค่าล่วงเวลา
         </Button>
       </div>
 
       {/* Tab Content */}
       {activeTab === "other" && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold mb-4">เงินช่วยเหลืออื่น ๆ</h2>
-          <div className="overflow-x-auto">
+        <div className="space-y-6">
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg border-l-4 border-green-500">
+            <h2 className="text-xl font-semibold text-green-800 mb-2">เงินช่วยเหลืออื่น ๆ</h2>
+            <p className="text-green-600 text-sm">ข้อมูลการช่วยเหลือรายเดือนและค่าใช้จ่ายอื่นๆ สำหรับพนักงาน</p>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -280,9 +284,12 @@ export default function AssistanceModule() {
       )}
 
       {activeTab === "special" && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold mb-4">เงินช่วยเหลือพิเศษ</h2>
-          <div className="overflow-x-auto">
+        <div className="space-y-6">
+          <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-4 rounded-lg border-l-4 border-purple-500">
+            <h2 className="text-xl font-semibold text-purple-800 mb-2">เงินช่วยเหลือพิเศษ</h2>
+            <p className="text-purple-600 text-sm">รายการเงินช่วยเหลือพิเศษในกรณีต่างๆ และค่าใช้จ่ายเฉพาะกิจ</p>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -377,22 +384,26 @@ export default function AssistanceModule() {
       )}
 
       {activeTab === "overtime" && (
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold mb-4">เงินล่วงเวลา</h2>
+        <div className="space-y-6">
+          <div className="bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg border-l-4 border-orange-500">
+            <h2 className="text-xl font-semibold text-orange-800 mb-2">ค่าล่วงเวลา</h2>
+            <p className="text-orange-600 text-sm">การคำนวณค่าล่วงเวลาสำหรับพนักงานตามชั่วโมงการทำงาน</p>
+          </div>
           
-          <div className="mb-4">
+          <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
             <div className="flex items-center gap-2">
-              <span className="font-semibold">เงินเดือน (สำหรับคำนวณอัตราต่อชั่วโมง):</span>
+              <span className="font-semibold text-blue-800">เงินเดือน (สำหรับคำนวณอัตราต่อชั่วโมง):</span>
               <Input
                 type="number"
                 value={overtimeRatePerHour}
                 onChange={(e) => setOvertimeRatePerHour(Number(e.target.value))}
-                className="w-32 flat-input"
+                className="w-32 flat-input bg-white"
               />
+              <span className="text-blue-600 text-sm">บาท</span>
             </div>
           </div>
 
-          <div className="overflow-x-auto">
+          <div className="bg-white rounded-lg shadow-sm border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -451,6 +462,20 @@ export default function AssistanceModule() {
                 </TableRow>
               </TableBody>
             </Table>
+          </div>
+          
+          <div className="mt-6">
+            <div className="flex items-start gap-2">
+              <p className="font-semibold pt-2">หมายเหตุ:</p>
+              <div className="flex-1">
+                <Input
+                  value={overtimeNotes}
+                  onChange={(e) => setOvertimeNotes(e.target.value)}
+                  placeholder="กรอกหมายเหตุเพิ่มเติม..."
+                  className="flat-input w-full"
+                />
+              </div>
+            </div>
           </div>
         </div>
       )}
