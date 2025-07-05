@@ -39,7 +39,8 @@ export default function WorkdayModule() {
 
     const totalDays = isLeapYear(selectedYear) ? 366 : 365;
     const weekendDays = Math.floor(totalDays / 7) * 2; // Approximate weekend days
-    const holidays = 13; // Standard Thai holidays
+    // วันหยุดนักขัตฤกษ์ตามประกาศ ธปท. ปี 2568 มี 17 วัน รวมวันหยุดพิเศษ 2 วัน
+    const holidays = selectedYear === 2568 ? 17 : 13; // Bank of Thailand holidays
     const workingDays = totalDays - weekendDays - holidays - additionalHolidays;
 
     const calculatedWorkingDay: WorkingDay = {
@@ -150,7 +151,10 @@ export default function WorkdayModule() {
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">วันหยุดนักขัตฤกษ์:</span>
-                <span className="font-medium">{displayData?.holidays || 0} วัน</span>
+                <span className="font-medium">
+                  {displayData?.holidays || 0} วัน
+                  {displayData?.year === 2568 && <span className="text-blue-600 ml-1">(ตามประกาศ ธปท.)</span>}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">วันหยุดเพิ่มเติม:</span>
@@ -165,21 +169,52 @@ export default function WorkdayModule() {
 
             {/* Thai Holidays Information */}
             <div className="bg-blue-50 p-4 rounded-lg">
-              <h4 className="font-semibold text-blue-800 mb-2">วันหยุดนักขัตฤกษ์ประจำปี</h4>
+              <h4 className="font-semibold text-blue-800 mb-2">
+                วันหยุดนักขัตฤกษ์ประจำปี {displayData?.year || 2569}
+              </h4>
               <div className="text-sm text-blue-700 space-y-1">
-                <p>• วันขึ้นปีใหม่ (1 วัน)</p>
-                <p>• วันมาฆบูชา (1 วัน)</p>
-                <p>• วันจักรี (1 วัน)</p>
-                <p>• วันสงกรานต์ (3 วัน)</p>
-                <p>• วันแรงงาน (1 วัน)</p>
-                <p>• วันวิสาขบูชา (1 วัน)</p>
-                <p>• วันเฉลิมพระชนมพรรษา ร.10 (1 วัน)</p>
-                <p>• วันอาสาฬหบูชา (1 วัน)</p>
-                <p>• วันเข้าพรรษา (1 วัน)</p>
-                <p>• วันเฉลิมพระชนมพรรษา ร.9 (1 วัน)</p>
-                <p>• วันปิยมหาราช (1 วัน)</p>
-                <p>• วันพ่อแห่งชาติ (1 วัน)</p>
-                <p>• วันรัฐธรรมนูญ (1 วัน)</p>
+                {displayData?.year === 2568 ? (
+                  <>
+                    <p>• วันขึ้นปีใหม่ (1 มกราคม)</p>
+                    <p>• วันมาฆบูชา (12 กุมภาพันธ์)</p>
+                    <p>• วันจักรี (7 เมษายน - ชดเชย)</p>
+                    <p>• วันสงกรานต์ (14-15 เมษายน)</p>
+                    <p>• วันแรงงาน (1 พฤษภาคม)</p>
+                    <p>• วันฉัตรมงคล (5 พฤษภาคม - ชดเชย)</p>
+                    <p>• วันพืชมงคล (9 พฤษภาคม)</p>
+                    <p>• วันวิสาขบูชา (12 พฤษภาคม - ชดเชย)</p>
+                    <p>• วันหยุดพิเศษ (2 มิถุนายน)</p>
+                    <p>• วันเฉลิมพระชนมพรรษา ร.10 (3 มิถุนายน)</p>
+                    <p>• วันอาสาฬหบูชา (10 กรกฎาคม)</p>
+                    <p>• วันเข้าพรรษา (11 กรกฎาคม)</p>
+                    <p>• วันหยุดพิเศษ (11 สิงหาคม)</p>
+                    <p>• วันเฉลิมพระชนมพรรษา ร.9 (12 สิงหาคม)</p>
+                    <p>• วันปิยมหาราช (13-14 ตุลาคม)</p>
+                    <p>• วันพ่อแห่งชาติ (5 ธันวาคม)</p>
+                    <p>• วันรัฐธรรมนูญ (10 ธันวาคม)</p>
+                    <p>• วันสิ้นปี (31 ธันวาคม)</p>
+                    <p className="text-xs text-blue-600 mt-2">
+                      รวม 17 วัน (ตามประกาศ ธปท. รวมวันหยุดพิเศษ 2 วัน)
+                    </p>
+                  </>
+                ) : (
+                  <>
+                    <p>• วันขึ้นปีใหม่ (1 วัน)</p>
+                    <p>• วันมาฆบูชา (1 วัน)</p>
+                    <p>• วันจักรี (1 วัน)</p>
+                    <p>• วันสงกรานต์ (3 วัน)</p>
+                    <p>• วันแรงงาน (1 วัน)</p>
+                    <p>• วันวิสาขบูชา (1 วัน)</p>
+                    <p>• วันเฉลิมพระชนมพรรษา ร.10 (1 วัน)</p>
+                    <p>• วันอาสาฬหบูชา (1 วัน)</p>
+                    <p>• วันเข้าพรรษา (1 วัน)</p>
+                    <p>• วันเฉลิมพระชนมพรรษา ร.9 (1 วัน)</p>
+                    <p>• วันปิยมหาราช (1 วัน)</p>
+                    <p>• วันพ่อแห่งชาติ (1 วัน)</p>
+                    <p>• วันรัฐธรรมนูญ (1 วัน)</p>
+                    <p className="text-xs text-blue-600 mt-2">รวม 13 วัน</p>
+                  </>
+                )}
               </div>
             </div>
           </div>
