@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ChevronLeft, ChevronRight, Plus, Edit2, Trash2, Info } from "lucide-react";
@@ -12,10 +14,12 @@ import type { Employee, TravelExpense, InsertTravelExpense } from "@shared/schem
 export default function TravelModule() {
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear() + 543);
   const [activeTab, setActiveTab] = useState("souvenir");
-  const [editingItem, setEditingItem] = useState<TravelExpense | null>(null);
+  const [editingItem, setEditingItem] = useState<any>(null);
   const [travelProvince, setTravelProvince] = useState("กรุงเทพมหานคร");
   const [workDays, setWorkDays] = useState<{[key: number]: number}>({});
   const [showInfo, setShowInfo] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [editFormData, setEditFormData] = useState<any>({});
   const queryClient = useQueryClient();
 
   const { data: employees = [], isLoading: employeeLoading } = useQuery({
@@ -76,17 +80,20 @@ export default function TravelModule() {
 
   // Handle edit/delete functions
   const handleEdit = (employeeId: number, tabType: string) => {
-    const sampleExpense: InsertTravelExpense = {
+    const employee = (employees as any[]).find(emp => emp.id === employeeId);
+    if (!employee) return;
+    
+    // Set form data based on tab type
+    let formData = {
       employeeId,
-      travelType: tabType,
-      allowance: 600,
-      accommodation: 2100,
-      transportation: 8000,
-      total: 10700,
-      year: currentYear
+      employeeName: employee.fullName,
+      tabType,
+      workDays: workDays[employeeId] || 1,
+      tripCount: employee.tripCount || 1,
     };
     
-    createTravelExpense.mutate(sampleExpense);
+    setEditFormData(formData);
+    setShowEditDialog(true);
   };
 
   const handleDelete = (employeeId: number, tabType: string) => {
@@ -96,6 +103,27 @@ export default function TravelModule() {
         description: `ลบรายการ${tabType}สำหรับพนักงาน ID ${employeeId}`,
       });
     }
+  };
+
+  const handleSaveEdit = () => {
+    if (editFormData.tabType === "souvenir") {
+      setWorkDays(prev => ({ ...prev, [editFormData.employeeId]: editFormData.workDays }));
+    } else if (editFormData.tabType === "family") {
+      // Update trip count (this could be stored in localStorage or state)
+      const employees = JSON.parse(localStorage.getItem('employees') || '[]');
+      const updatedEmployees = employees.map((emp: any) => 
+        emp.id === editFormData.employeeId 
+          ? { ...emp, tripCount: editFormData.tripCount }
+          : emp
+      );
+      localStorage.setItem('employees', JSON.stringify(updatedEmployees));
+    }
+    
+    setShowEditDialog(false);
+    toast({
+      title: "บันทึกสำเร็จ",
+      description: "ข้อมูลถูกอัปเดตแล้ว",
+    });
   };
 
   const handleAdd = (tabType: string) => {
@@ -670,6 +698,53 @@ export default function TravelModule() {
 
       {renderTabs()}
       {renderTabContent()}
+
+      {/* Edit Dialog */}
+      <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>แก้ไขข้อมูล - {editFormData.employeeName}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            {editFormData.tabType === "souvenir" && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="workDays" className="text-right">
+                  วันทำงาน
+                </Label>
+                <Input
+                  id="workDays"
+                  type="number"
+                  value={editFormData.workDays || 1}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, workDays: parseInt(e.target.value) || 1 }))}
+                  className="col-span-3"
+                />
+              </div>
+            )}
+            {editFormData.tabType === "family" && (
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="tripCount" className="text-right">
+                  จำนวนครั้ง
+                </Label>
+                <Input
+                  id="tripCount"
+                  type="number"
+                  value={editFormData.tripCount || 1}
+                  onChange={(e) => setEditFormData(prev => ({ ...prev, tripCount: parseInt(e.target.value) || 1 }))}
+                  className="col-span-3"
+                />
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setShowEditDialog(false)}>
+              ยกเลิก
+            </Button>
+            <Button onClick={handleSaveEdit}>
+              บันทึก
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
