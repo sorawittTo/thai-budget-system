@@ -186,7 +186,8 @@ export default function TravelModule() {
               <th className="px-4 py-3 text-center border border-gray-300">วันทำงาน</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่าเบี้ยเลี้ยง</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่าที่พัก</th>
-              <th className="px-4 py-3 text-center border border-gray-300">ค่าพาหนะ</th>
+              <th className="px-4 py-3 text-center border border-gray-300">ค่ารถโดยสาร โคราช-กทม./เที่ยว</th>
+              <th className="px-4 py-3 text-center border border-gray-300">ค่ารถรับจ้าง/เที่ยว</th>
               <th className="px-4 py-3 text-center border border-gray-300">รวม</th>
               <th className="px-4 py-3 text-center border border-gray-300">จัดการ</th>
             </tr>
@@ -197,10 +198,11 @@ export default function TravelModule() {
               const currentWorkDays = workDays[employee.id] || 1; // Default 1 day, can be edited
               const allowanceDays = 2 + currentWorkDays; // Base 3 days for 1 work day
               const accommodationDays = 1 + currentWorkDays; // Base 2 days for 1 work day
-              const allowanceCost = allowanceDays * 500;
-              const accommodationCost = accommodationDays * 2100;
-              const transportCost = 8000;
-              const total = allowanceCost + accommodationCost + transportCost;
+              const allowanceCost = allowanceDays * (employee.level === "7" || employee.level === "6" ? 500 : 450);
+              const accommodationCost = accommodationDays * (employee.level === "7" || employee.level === "6" ? 2100 : 1800);
+              const busCost = 300; // ค่ารถโดยสาร โคราช-กทม./เที่ยว
+              const taxiCost = 250; // ค่ารถรับจ้าง/เที่ยว
+              const total = allowanceCost + accommodationCost + busCost + taxiCost;
               
               return (
                 <tr key={employee.id} className="hover:bg-gray-50">
@@ -227,7 +229,8 @@ export default function TravelModule() {
                     {accommodationCost.toLocaleString()}<br/>
                     <span className="text-xs text-gray-500">({accommodationDays} วัน)</span>
                   </td>
-                  <td className="px-4 py-3 border border-gray-300 text-center">{transportCost.toLocaleString()}</td>
+                  <td className="px-4 py-3 border border-gray-300 text-center">{busCost.toLocaleString()}</td>
+                  <td className="px-4 py-3 border border-gray-300 text-center">{taxiCost.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center font-semibold">{total.toLocaleString()}</td>
                   <td className="px-4 py-3 border border-gray-300 text-center">
                     <div className="flex justify-center gap-2">
@@ -269,7 +272,11 @@ export default function TravelModule() {
             const currentWorkDays = workDays[emp.id] || 1;
             const allowanceDays = 2 + currentWorkDays;
             const accommodationDays = 1 + currentWorkDays;
-            return sum + (allowanceDays * 500) + (accommodationDays * 2100) + 8000;
+            const allowanceCost = allowanceDays * (emp.level === "7" || emp.level === "6" ? 500 : 450);
+            const accommodationCost = accommodationDays * (emp.level === "7" || emp.level === "6" ? 2100 : 1800);
+            const busCost = 300;
+            const taxiCost = 250;
+            return sum + allowanceCost + accommodationCost + busCost + taxiCost;
           }, 0).toLocaleString()} บาท
         </div>
       </div>
