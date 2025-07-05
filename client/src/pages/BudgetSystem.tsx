@@ -12,10 +12,10 @@ import { Download, Upload, RotateCcw, Save } from "lucide-react";
 import { exportToExcel } from "@/utils/excelUtils";
 import { saveToLocalStorage } from "@/utils/localStorage";
 
-type ActiveModule = "welcome" | "budget" | "config" | "travel" | "assistance" | "workday" | "summary";
+type ActiveModule = "budget" | "config" | "travel" | "assistance" | "workday" | "summary";
 
 export default function BudgetSystem() {
-  const [activeModule, setActiveModule] = useState<ActiveModule>("welcome");
+  const [activeModule, setActiveModule] = useState<ActiveModule>("summary");
   const [savingIndicator, setSavingIndicator] = useState(false);
   const { toast } = useToast();
 
@@ -152,7 +152,7 @@ export default function BudgetSystem() {
         </header>
 
         {/* Navigation */}
-        <Navigation activeModule={activeModule} setActiveModule={setActiveModule} />
+        <Navigation activeModule={activeModule} setActiveModule={(module) => setActiveModule(module as ActiveModule)} />
 
         {/* Main Content */}
         <main id="main-content">
