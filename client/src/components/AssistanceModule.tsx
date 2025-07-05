@@ -115,25 +115,29 @@ export default function AssistanceModule() {
     });
   };
 
-  const calculateOvertimeData = () => {
-    return employees.map(employee => {
-      const hours = 40;
-      const hourlyRate = 150;
-      const total = hours * hourlyRate;
-      
-      return {
-        id: employee.id,
-        employeeCode: employee.employeeCode,
-        fullName: employee.fullName,
-        hours,
-        hourlyRate,
-        total,
-      };
-    });
+  const [overtimeData, setOvertimeData] = useState([
+    { id: 1, employeeType: "วันทำการ 3 วัน", employees: 0, hours: 8, hoursPerEmployee: 1, ratePerHour: 71.43, total: 0.00 },
+    { id: 2, employeeType: "วันทำการ 4 วัน", employees: 0, hours: 8, hoursPerEmployee: 1, ratePerHour: 71.43, total: 0.00 },
+    { id: 3, employeeType: "วันทำการ 5 วัน", employees: 0, hours: 8, hoursPerEmployee: 1, ratePerHour: 71.43, total: 0.00 }
+  ]);
+  
+  const [overtimeRatePerHour, setOvertimeRatePerHour] = useState(15000);
+  
+  const updateOvertimeData = (id: number, field: string, value: number) => {
+    setOvertimeData(prev => 
+      prev.map(item => {
+        if (item.id === id) {
+          const updated = { ...item, [field]: value };
+          // Recalculate total: employees × hours × hoursPerEmployee × ratePerHour
+          updated.total = updated.employees * updated.hours * updated.hoursPerEmployee * updated.ratePerHour;
+          return updated;
+        }
+        return item;
+      })
+    );
   };
 
   const assistanceData = calculateAssistanceData();
-  const overtimeData = calculateOvertimeData();
 
   const getTotalAssistance = () => {
     return assistanceData.reduce((sum, item) => sum + item.total, 0);
@@ -377,33 +381,76 @@ export default function AssistanceModule() {
       {activeTab === "overtime" && (
         <div className="space-y-4">
           <h2 className="text-xl font-semibold mb-4">เงินล่วงเวลา</h2>
+          
+          <div className="mb-4">
+            <div className="flex items-center gap-2">
+              <span className="font-semibold">เงินเดือน (สำหรับคำนวณอัตราต่อชั่วโมง):</span>
+              <Input
+                type="number"
+                value={overtimeRatePerHour}
+                onChange={(e) => setOvertimeRatePerHour(Number(e.target.value))}
+                className="w-32 flat-input"
+              />
+            </div>
+          </div>
+
           <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="text-center border font-semibold">ลำดับ</TableHead>
-                  <TableHead className="text-center border font-semibold">รหัสพนักงาน</TableHead>
-                  <TableHead className="text-center border font-semibold">ชื่อ-นามสกุล</TableHead>
-                  <TableHead className="text-center border font-semibold">จำนวนชั่วโมง</TableHead>
-                  <TableHead className="text-center border font-semibold">อัตราต่อชั่วโมง</TableHead>
+                  <TableHead className="text-center border font-semibold">ประเภทพนักงาน</TableHead>
+                  <TableHead className="text-center border font-semibold">จำนวนคน</TableHead>
+                  <TableHead className="text-center border font-semibold">ชม./วัน</TableHead>
+                  <TableHead className="text-center border font-semibold">จำนวน</TableHead>
+                  <TableHead className="text-center border font-semibold">อัตราชั่วโมง</TableHead>
                   <TableHead className="text-center border font-semibold">รวม</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {overtimeData.map((item, index) => (
+                {overtimeData.map((item) => (
                   <TableRow key={item.id}>
-                    <TableCell className="text-center border">{index + 1}</TableCell>
-                    <TableCell className="text-center border">{item.employeeCode}</TableCell>
-                    <TableCell className="text-left border">{item.fullName}</TableCell>
-                    <TableCell className="text-center border">{item.hours}</TableCell>
-                    <TableCell className="text-right border">{item.hourlyRate.toLocaleString()}</TableCell>
-                    <TableCell className="text-right border font-semibold">{item.total.toLocaleString()}</TableCell>
+                    <TableCell className="text-left border">{item.employeeType}</TableCell>
+                    <TableCell className="text-center border">
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          value={item.employees}
+                          onChange={(e) => updateOvertimeData(item.id, 'employees', Number(e.target.value))}
+                          className="w-16 text-center flat-input"
+                        />
+                        <Edit2 className="h-3 w-3 text-gray-400" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center border">
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          value={item.hours}
+                          onChange={(e) => updateOvertimeData(item.id, 'hours', Number(e.target.value))}
+                          className="w-16 text-center flat-input"
+                        />
+                        <Edit2 className="h-3 w-3 text-gray-400" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center border">
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          value={item.hoursPerEmployee}
+                          onChange={(e) => updateOvertimeData(item.id, 'hoursPerEmployee', Number(e.target.value))}
+                          className="w-16 text-center flat-input"
+                        />
+                        <Edit2 className="h-3 w-3 text-gray-400" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right border">{item.ratePerHour.toFixed(2)}</TableCell>
+                    <TableCell className="text-right border font-semibold">{item.total.toFixed(2)}</TableCell>
                   </TableRow>
                 ))}
                 <TableRow className="bg-gray-50">
-                  <TableCell colSpan={5} className="text-center border font-semibold">รวมทั้งหมด</TableCell>
+                  <TableCell colSpan={5} className="text-center border font-semibold">ยอดรวมทั้งหมด</TableCell>
                   <TableCell className="text-right border font-semibold text-lg">
-                    {getTotalOvertime().toLocaleString()} บาท
+                    {getTotalOvertime().toFixed(2)}
                   </TableCell>
                 </TableRow>
               </TableBody>
