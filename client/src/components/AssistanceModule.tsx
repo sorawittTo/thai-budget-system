@@ -29,14 +29,15 @@ interface SpecialAssistanceItem {
 interface OvertimeItem {
   id: number;
   days: number;
-  hours: number;
+  hoursPerDay: number;
+  people: number;
   ratePerHour: number;
   total: number;
 }
 
 export default function AssistanceModule() {
   const [activeTab, setActiveTab] = useState<"other" | "special" | "overtime">("other");
-  const [currentYear, setCurrentYear] = useState(2025);
+  const [currentYear, setCurrentYear] = useState(2569);
   const [overtimeRatePerHour, setOvertimeRatePerHour] = useState(18000);
   const [otherNotes, setOtherNotes] = useState("");
   const [specialNotes, setSpecialNotes] = useState("");
@@ -152,9 +153,10 @@ export default function AssistanceModule() {
     {
       id: 1,
       days: 30,
-      hours: 120,
-      ratePerHour: 75,
-      total: 9000
+      hoursPerDay: 4,
+      people: 1,
+      ratePerHour: Math.round(18000 / 210),
+      total: 30 * 4 * 1 * Math.round(18000 / 210)
     }
   ]);
 
@@ -231,8 +233,11 @@ export default function AssistanceModule() {
       prev.map(item => {
         if (item.id === id) {
           const updatedItem = { ...item, [field]: value };
-          if (field === 'hours' || field === 'ratePerHour') {
-            updatedItem.total = updatedItem.hours * updatedItem.ratePerHour;
+          if (field === 'days' || field === 'hoursPerDay' || field === 'people') {
+            // คำนวณอัตราต่อชั่วโมงจากเงินเดือน หารด้วย 210
+            const calculatedRate = Math.round(overtimeRatePerHour / 210);
+            updatedItem.ratePerHour = calculatedRate;
+            updatedItem.total = updatedItem.days * updatedItem.hoursPerDay * updatedItem.people * calculatedRate;
           }
           return updatedItem;
         }
@@ -566,7 +571,8 @@ export default function AssistanceModule() {
                 <TableHeader className="bg-gradient-to-r from-orange-100 to-yellow-100">
                   <TableRow className="border-b border-gray-200">
                     <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">จำนวนวัน</TableHead>
-                    <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">จำนวนชั่วโมง</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">ชั่วโมง/วัน</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">จำนวนคน</TableHead>
                     <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">อัตราต่อชั่วโมง</TableHead>
                     <TableHead className="border-r border-gray-200 text-center font-semibold text-orange-800">หมายเหตุ</TableHead>
                     <TableHead className="text-center font-semibold text-orange-800">รวม</TableHead>
@@ -586,18 +592,21 @@ export default function AssistanceModule() {
                       <TableCell className="border-r border-gray-200 text-center">
                         <Input
                           type="number"
-                          value={item.hours}
-                          onChange={(e) => updateOvertimeItem(item.id, 'hours', Number(e.target.value))}
+                          value={item.hoursPerDay}
+                          onChange={(e) => updateOvertimeItem(item.id, 'hoursPerDay', Number(e.target.value))}
                           className="text-center w-20 mx-auto bg-gray-50 border-gray-300"
                         />
                       </TableCell>
                       <TableCell className="border-r border-gray-200 text-center">
                         <Input
                           type="number"
-                          value={item.ratePerHour}
-                          onChange={(e) => updateOvertimeItem(item.id, 'ratePerHour', Number(e.target.value))}
+                          value={item.people}
+                          onChange={(e) => updateOvertimeItem(item.id, 'people', Number(e.target.value))}
                           className="text-center w-20 mx-auto bg-gray-50 border-gray-300"
                         />
+                      </TableCell>
+                      <TableCell className="border-r border-gray-200 text-center">
+                        <span className="text-sm font-medium text-gray-700">{Math.round(overtimeRatePerHour / 210)}</span>
                       </TableCell>
                       <TableCell className="border-r border-gray-200 text-center">
                         <Input
@@ -611,7 +620,7 @@ export default function AssistanceModule() {
                     </TableRow>
                   ))}
                   <TableRow className="bg-gradient-to-r from-orange-50 to-yellow-50 border-t-2 border-orange-200">
-                    <TableCell colSpan={4} className="text-center font-bold text-orange-800">ยอดรวมทั้งหมด</TableCell>
+                    <TableCell colSpan={5} className="text-center font-bold text-orange-800">ยอดรวมทั้งหมด</TableCell>
                     <TableCell className="text-right font-bold text-lg text-orange-700">
                       {getTotalOvertime().toFixed(2)}
                     </TableCell>
