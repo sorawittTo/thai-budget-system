@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +51,36 @@ export default function AssistanceModule() {
   });
 
   const [assistanceData, setAssistanceData] = useState<{[key: number]: AssistanceItem}>({});
+
+  // โหลดข้อมูลเริ่มต้นจากตารางมาตรฐานเมื่อมีข้อมูลพนักงานและตารางมาตรฐาน
+  useEffect(() => {
+    if (employees && masterRates && employees.length > 0 && masterRates.length > 0) {
+      const activeEmployees = (employees as Employee[]).filter(emp => emp.status === "Active");
+      const newAssistanceData: {[key: number]: AssistanceItem} = {};
+      
+      activeEmployees.forEach(employee => {
+        if (!assistanceData[employee.id]) {
+          const level = employee.level;
+          const standardHouseRent = getStandardRate(level, "ค่าเช่า");
+          const standardMonthlyAssistance = getStandardRate(level, "เงินช่วยเหลือรายเดือน");
+          
+          newAssistanceData[employee.id] = {
+            id: employee.id,
+            description: employee.fullName,
+            months: 12,
+            houseRent: standardHouseRent,
+            monthlyAssistance: standardMonthlyAssistance,
+            oneTimePurchase: 0,
+            total: (12 * (standardHouseRent + standardMonthlyAssistance)) + 0
+          };
+        }
+      });
+      
+      if (Object.keys(newAssistanceData).length > 0) {
+        setAssistanceData(prev => ({ ...prev, ...newAssistanceData }));
+      }
+    }
+  }, [employees, masterRates]);
 
   const [specialAssistanceItems, setSpecialAssistanceItems] = useState<SpecialAssistanceItem[]>([
     {
@@ -129,7 +159,23 @@ export default function AssistanceModule() {
   ]);
 
   // ฟังก์ชันดึงอัตรามาตรฐานจากตารางมาตรฐาน
-  const getStandardRate = (category: string, description: string): number => {
+  const getStandardRate = (employeeLevel: string, description: string): number => {
+    // แปลงระดับพนักงานให้ตรงกับ category ในตารางมาตรฐาน
+    let category = "";
+    const level = parseFloat(employeeLevel);
+    
+    if (level >= 7) {
+      category = "level_7";
+    } else if (level >= 6) {
+      category = "level_6";
+    } else if (level >= 5) {
+      category = "level_5";
+    } else if (level >= 4) {
+      category = "level_4";
+    } else {
+      category = "level_3";
+    }
+    
     const rate = masterRates?.find(r => r.category === category && r.description === description);
     return rate?.rate || 0;
   };
@@ -137,7 +183,7 @@ export default function AssistanceModule() {
   const updateAssistanceItem = (employeeId: number, field: string, value: any) => {
     setAssistanceData(prev => {
       const employee = employees?.find((emp: Employee) => emp.id === employeeId) as Employee;
-      const level = employee?.level || "level_1";
+      const level = employee?.level || "1";
       
       // ดึงค่าจากตารางมาตรฐาน - ตามระดับของแต่ละคน
       const standardHouseRent = getStandardRate(level, "ค่าเช่า");
@@ -337,16 +383,6 @@ export default function AssistanceModule() {
                       oneTimePurchase: 0,
                       total: (12 * (standardHouseRent + standardMonthlyAssistance)) + 0
                     };
-                    
-                    // อัปเดตข้อมูลในหน่วยความจำหากยังไม่มี
-                    if (!assistanceData[employee.id]) {
-                      setTimeout(() => {
-                        setAssistanceData(prev => ({
-                          ...prev,
-                          [employee.id]: assistanceItem
-                        }));
-                      }, 0);
-                    }
                     
                     return (
                       <TableRow key={employee.id} className="hover:bg-gray-50 transition-colors">
