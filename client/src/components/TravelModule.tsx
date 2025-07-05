@@ -35,7 +35,7 @@ export function calculateTravelTotals(employees: Employee[] = [], workDays: {[ke
 
   // 2. เยี่ยมครอบครัว
   const familyVisitTotal = activeEmployees.reduce((sum: number, emp: Employee) => {
-    const baseTourCost = emp.tourCost || 5000;
+    const baseTourCost = (emp as any).tourCost || 5000; // ตรงกับโค้ดในตัว module
     const roundTripCost = baseTourCost * 2;
     const tripCount = workDays[`trip_${emp.id}` as keyof typeof workDays] || 1;
     return sum + (roundTripCost * tripCount);
@@ -43,17 +43,40 @@ export function calculateTravelTotals(employees: Employee[] = [], workDays: {[ke
 
   // 3. ร่วมงานวันพนักงาน
   const companyEventTotal = activeEmployees.reduce((sum: number, emp: Employee) => {
-    const busCost = 600 * 2; // ค่าเริ่มต้น
+    const busCost = 600; // ใช้ busFareRate เริ่มต้น 600
     const customAccommodation = accommodationCosts[emp.id];
     let accommodationCost = 0;
     
     if (customAccommodation !== undefined) {
       accommodationCost = customAccommodation;
     } else {
-      const maleCount = activeEmployees.filter(e => e.gender === "ชาย").length;
-      const femaleCount = activeEmployees.filter(e => e.gender === "หญิง").length;
-      accommodationCost = emp.gender === "ชาย" ? 
-        (maleCount > 1 ? 600 : 1200) : (femaleCount > 1 ? 600 : 1200);
+      // ใช้ฟังก์ชันคำนวณค่าที่พักอัตโนมัติแบบเดียวกับใน module
+      const level = emp.level;
+      const employeeProvince = emp.province;
+      const companyEventDestination = "กรุงเทพมหานคร"; // ค่าเริ่มต้น
+      
+      if (level === "7") {
+        if (employeeProvince === companyEventDestination) {
+          accommodationCost = 0; // ไม่ได้ค่าที่พักถ้าจังหวัดเดียวกัน
+        } else {
+          accommodationCost = 2100; // อัตรามาตรฐานระดับ 7
+        }
+      } else {
+        if (employeeProvince === companyEventDestination) {
+          accommodationCost = 0; // ไม่ได้ค่าที่พักถ้าจังหวัดเดียวกัน
+        } else {
+          // แยกชาย หญิง แล้วจับคู่หารค่าที่พัก
+          const standardRate = level === "6" ? 2100 : 1800;
+          const maleCount = activeEmployees.filter(e => e.gender === "ชาย").length;
+          const femaleCount = activeEmployees.filter(e => e.gender === "หญิง").length;
+          
+          if (emp.gender === "ชาย") {
+            accommodationCost = maleCount > 1 ? standardRate / 2 : standardRate;
+          } else {
+            accommodationCost = femaleCount > 1 ? standardRate / 2 : standardRate;
+          }
+        }
+      }
     }
     
     return sum + busCost + accommodationCost;
