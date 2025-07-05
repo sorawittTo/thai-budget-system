@@ -109,15 +109,17 @@ export default function TravelModule() {
     if (editFormData.tabType === "souvenir") {
       setWorkDays(prev => ({ ...prev, [editFormData.employeeId]: editFormData.workDays }));
     } else if (editFormData.tabType === "family") {
-      // Update trip count (this could be stored in localStorage or state)
-      const employees = JSON.parse(localStorage.getItem('employees') || '[]');
-      const updatedEmployees = employees.map((emp: any) => 
-        emp.id === editFormData.employeeId 
-          ? { ...emp, tripCount: editFormData.tripCount }
-          : emp
-      );
-      localStorage.setItem('employees', JSON.stringify(updatedEmployees));
+      // Update trip count using mutation to refresh data
+      const updatedEmployee = {
+        tripCount: editFormData.tripCount
+      };
+      
+      // For now, we'll use a simple state update approach
+      setWorkDays(prev => ({ ...prev, [`trip_${editFormData.employeeId}`]: editFormData.tripCount }));
     }
+    
+    // Force refresh the queries to show updated data
+    queryClient.invalidateQueries({ queryKey: ["/api/employees"] });
     
     setShowEditDialog(false);
     toast({
@@ -354,7 +356,7 @@ export default function TravelModule() {
             {activeEmployees.map((employee: any, index: number) => {
               const baseTourCost = employee.tourCost || 5000; // ค่ารถเที่ยวเยี่ยมบ้าน จากตารางพนักงาน
               const roundTripCost = baseTourCost * 2; // ค่ารถทัวร์ไป-กลับ (x2)
-              const tripCount = employee.tripCount || 1; // จำนวนครั้ง (default 1)
+              const tripCount = workDays[`trip_${employee.id}`] || employee.tripCount || 1; // จำนวนครั้ง (from state or default 1)
               const totalCost = roundTripCost * tripCount; // รวม
               
               return (
@@ -408,7 +410,7 @@ export default function TravelModule() {
           รวมทั้งสิ้น: {activeEmployees.reduce((sum: number, emp: any) => {
             const baseTourCost = emp.tourCost || 5000;
             const roundTripCost = baseTourCost * 2;
-            const tripCount = emp.tripCount || 1;
+            const tripCount = workDays[`trip_${emp.id}`] || emp.tripCount || 1;
             return sum + (roundTripCost * tripCount);
           }, 0).toLocaleString()} บาท
         </div>
