@@ -74,7 +74,7 @@ export default function SummaryModule() {
     const travelTotals = calculateTravelTotals(employees, defaultWorkDays, defaultOtherVehicleCosts, defaultAccommodationCosts);
 
     return {
-      souvenir: travelTotals.souvenir, // tab รับของที่ระลึก (ซื้อของฝาก)
+      souvenir: travelTotals.souvenir, // tab ซื้อของฝาก
       familyVisit: travelTotals.familyVisit, // tab เยี่ยมครอบครัว
       meeting: travelTotals.companyEvent, // tab ร่วมงานวันพนักงาน
       studentTrip: travelTotals.rotation, // tab หมุนเวียนงาน ผจศ.
