@@ -314,8 +314,8 @@ export default function AssistanceModule() {
                     <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ชื่อ-นามสกุล</TableHead>
                     <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ระดับ</TableHead>
                     <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">จำนวนเดือน</TableHead>
-                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่าที่พัก<br/><span className="text-xs">(จากตารางมาตรฐาน)</span></TableHead>
-                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่าช่วยเหลือรายเดือน<br/><span className="text-xs">(จากตารางมาตรฐาน)</span></TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่าเช่าบ้าน</TableHead>
+                    <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">เงินช่วยเหลือรายเดือน</TableHead>
                     <TableHead className="border-r border-gray-200 text-center font-semibold text-green-800">ค่าซื้อของเหมาจ่าย</TableHead>
                     <TableHead className="text-center font-semibold text-green-800">รวม</TableHead>
                   </TableRow>
@@ -350,26 +350,20 @@ export default function AssistanceModule() {
                           />
                         </TableCell>
                         <TableCell className="border-r border-gray-200 text-center">
-                          <div className="flex flex-col items-center gap-1">
-                            <span className="text-xs text-gray-600">{standardHouseRent.toFixed(2)}</span>
-                            <Input
-                              type="number"
-                              value={assistanceItem.houseRent}
-                              onChange={(e) => updateAssistanceItem(employee.id, 'houseRent', Number(e.target.value))}
-                              className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
-                            />
-                          </div>
+                          <Input
+                            type="number"
+                            value={assistanceItem.houseRent}
+                            onChange={(e) => updateAssistanceItem(employee.id, 'houseRent', Number(e.target.value))}
+                            className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
+                          />
                         </TableCell>
                         <TableCell className="border-r border-gray-200 text-center">
-                          <div className="flex flex-col items-center gap-1">
-                            <span className="text-xs text-gray-600">{standardMonthlyAssistance.toFixed(2)}</span>
-                            <Input
-                              type="number"
-                              value={assistanceItem.monthlyAssistance}
-                              onChange={(e) => updateAssistanceItem(employee.id, 'monthlyAssistance', Number(e.target.value))}
-                              className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
-                            />
-                          </div>
+                          <Input
+                            type="number"
+                            value={assistanceItem.monthlyAssistance}
+                            onChange={(e) => updateAssistanceItem(employee.id, 'monthlyAssistance', Number(e.target.value))}
+                            className="text-center w-24 mx-auto bg-gray-50 border-gray-300"
+                          />
                         </TableCell>
                         <TableCell className="border-r border-gray-200 text-center">
                           <Input
@@ -397,6 +391,7 @@ export default function AssistanceModule() {
               <div className="flex items-start gap-3">
                 <p className="font-semibold text-gray-700 pt-2">หมายเหตุ:</p>
                 <div className="flex-1">
+                  <p className="text-sm text-gray-600 mb-2">ค่าเช่าบ้านและเงินช่วยเหลือรายเดือน มาจากตารางอัตรามาตรฐานตามระดับพนักงาน</p>
                   <Input
                     value={otherNotes}
                     onChange={(e) => setOtherNotes(e.target.value)}
