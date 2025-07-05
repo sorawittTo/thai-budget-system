@@ -39,8 +39,10 @@ export default function WorkdayModule() {
 
     const totalDays = isLeapYear(selectedYear) ? 366 : 365;
     const weekendDays = Math.floor(totalDays / 7) * 2; // Approximate weekend days
-    // วันหยุดนักขัตฤกษ์ตามประกาศ ธปท. ปี 2568 มี 18 วัน รวมวันหยุดพิเศษ 2 วัน
-    const holidays = selectedYear === 2568 ? 18 : 13; // Bank of Thailand holidays
+    // วันหยุดนักขัตฤกษ์ตามประกาศ ธปท. 
+    // ปี 2568 มี 18 วัน รวมวันหยุดพิเศษ 2 วัน
+    // ปีอื่นๆ ใช้วันหยุดปกติจากปีก่อนหน้า (ไม่รวมวันหยุดพิเศษ)
+    const holidays = selectedYear === 2568 ? 18 : 16; // Bank of Thailand holidays (base 16 from 2568 without special holidays)
     const workingDays = totalDays - weekendDays - holidays - additionalHolidays;
 
     const calculatedWorkingDay: WorkingDay = {
@@ -201,18 +203,21 @@ export default function WorkdayModule() {
                   <>
                     <p>• วันขึ้นปีใหม่ (1 วัน)</p>
                     <p>• วันมาฆบูชา (1 วัน)</p>
-                    <p>• วันจักรี (1 วัน)</p>
-                    <p>• วันสงกรานต์ (3 วัน)</p>
+                    <p>• วันจักรี/ชดเชย (1 วัน)</p>
+                    <p>• วันสงกรานต์ (2 วัน)</p>
                     <p>• วันแรงงาน (1 วัน)</p>
-                    <p>• วันวิสาขบูชา (1 วัน)</p>
-                    <p>• วันเฉลิมพระชนมพรรษา ร.10 (1 วัน)</p>
+                    <p>• วันฉัตรมงคล/ชดเชย (1 วัน)</p>
+                    <p>• วันวิสาขบูชา/ชดเชย (1 วัน)</p>
+                    <p>• วันเฉลิมพระชนมพรรษา พระบรมราชินี (1 วัน)</p>
                     <p>• วันอาสาฬหบูชา (1 วัน)</p>
-                    <p>• วันเข้าพรรษา (1 วัน)</p>
-                    <p>• วันเฉลิมพระชนมพรรษา ร.9 (1 วัน)</p>
+                    <p>• วันเฉลิมพระชนมพรรษา ร.10 (1 วัน)</p>
+                    <p>• วันแม่แห่งชาติ (1 วัน)</p>
+                    <p>• วันนวมินทรมหาราช (1 วัน)</p>
                     <p>• วันปิยมหาราช (1 วัน)</p>
                     <p>• วันพ่อแห่งชาติ (1 วัน)</p>
                     <p>• วันรัฐธรรมนูญ (1 วัน)</p>
-                    <p className="text-xs text-blue-600 mt-2">รวม 13 วัน</p>
+                    <p>• วันสิ้นปี (1 วัน)</p>
+                    <p className="text-xs text-blue-600 mt-2">รวม 16 วัน (ไม่รวมวันหยุดพิเศษ)</p>
                   </>
                 )}
               </div>
