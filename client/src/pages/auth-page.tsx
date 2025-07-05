@@ -40,9 +40,6 @@ export default function AuthPage() {
         <Card>
           <CardHeader>
             <CardTitle className="text-center">เข้าสู่ระบบ</CardTitle>
-            <CardDescription className="text-center">
-              ระบบจัดการงบประมาณไทย
-            </CardDescription>
           </CardHeader>
           <CardContent>
             <Form {...form}>
