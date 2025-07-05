@@ -114,6 +114,8 @@ input[type=number] {
   padding: 0.5rem;
   border-radius: 0.375rem;
   width: 100%;
+  word-wrap: break-word;
+  white-space: normal;
 }
 
 .flat-input.text-right { 
@@ -126,6 +128,32 @@ input[type=number] {
 
 .flat-input:focus, .flat-input:hover {
   background-color: rgba(0,0,0,0.05);
+}
+
+/* Table responsiveness for budget items */
+.budget-table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.budget-table th,
+.budget-table td {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  vertical-align: top;
+}
+
+.budget-table .item-name-cell {
+  min-width: 320px;
+  max-width: 400px;
+}
+
+.budget-table .item-name-input {
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  line-height: 1.4;
+  min-height: 2.5rem;
 }
 
 .has-tooltip {

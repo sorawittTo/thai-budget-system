@@ -256,53 +256,54 @@ export default function BudgetModule() {
             </h3>
             
             <div className="overflow-x-auto">
-              <table className="w-full text-sm border-collapse border border-gray-300">
+              <table className="budget-table text-sm border-collapse border border-gray-300">
                 <thead className="bg-indigo-600 text-white">
                   <tr>
-                    <th className="px-4 py-3 text-left border border-gray-300">ลำดับ</th>
-                    <th className="px-4 py-3 text-left border border-gray-300">รหัสงบประมาณ</th>
-                    <th className="px-4 py-3 text-left border border-gray-300">รหัสบัญชี</th>
-                    <th className="px-4 py-3 text-left border border-gray-300">รายการ</th>
-                    <th className="px-4 py-3 text-right border border-gray-300">ปี 2568</th>
-                    <th className="px-4 py-3 text-right border border-gray-300">ปี 2569</th>
-                    <th className="px-4 py-3 text-right border border-gray-300">เปลี่ยนแปลง</th>
-                    <th className="px-4 py-3 text-left border border-gray-300">หมายเหตุ</th>
-                    <th className="px-4 py-3 text-center border border-gray-300">จัดการ</th>
+                    <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '60px' }}>ลำดับ</th>
+                    <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '120px' }}>รหัสงบประมาณ</th>
+                    <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '120px' }}>รหัสบัญชี</th>
+                    <th className="px-4 py-3 text-left border border-gray-300 item-name-cell" style={{ width: '350px' }}>รายการ</th>
+                    <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '100px' }}>ปี 2568</th>
+                    <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '100px' }}>ปี 2569</th>
+                    <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '100px' }}>เปลี่ยนแปลง</th>
+                    <th className="px-4 py-3 text-left border border-gray-300" style={{ width: '150px' }}>หมายเหตุ</th>
+                    <th className="px-2 py-3 text-center border border-gray-300" style={{ width: '100px' }}>จัดการ</th>
                   </tr>
                 </thead>
                 <tbody>
                   {group.items.map((item, itemIndex) => (
                     <tr key={item.id} className="border-b hover:bg-gray-50">
-                      <td className="px-4 py-3 border border-gray-300 text-center">
+                      <td className="px-2 py-3 border border-gray-300 text-center w-16">
                         {itemIndex + 1}
                       </td>
-                      <td className="px-4 py-3 border border-gray-300">
+                      <td className="px-2 py-3 border border-gray-300 w-28">
                         <input
                           type="text"
                           value={item.budgetCode || ""}
                           onChange={(e) => handleUpdateItem(item.id, "budgetCode", e.target.value)}
-                          className="flat-input w-full"
+                          className="flat-input w-full text-center"
                           placeholder="รหัสงบประมาณ"
                         />
                       </td>
-                      <td className="px-4 py-3 border border-gray-300">
+                      <td className="px-2 py-3 border border-gray-300 w-28">
                         <input
                           type="text"
                           value={item.accountCode || ""}
                           onChange={(e) => handleUpdateItem(item.id, "accountCode", e.target.value)}
-                          className="flat-input w-full"
+                          className="flat-input w-full text-center"
                           placeholder="รหัสบัญชี"
                         />
                       </td>
-                      <td className="px-4 py-3 border border-gray-300">
-                        <input
-                          type="text"
+                      <td className="px-4 py-3 border border-gray-300 item-name-cell">
+                        <textarea
                           value={item.name}
                           onChange={(e) => handleUpdateItem(item.id, "name", e.target.value)}
-                          className="flat-input w-full"
+                          className="flat-input item-name-input resize-none"
+                          rows={2}
+                          style={{ width: '100%', height: 'auto', minHeight: '2.5rem' }}
                         />
                       </td>
-                      <td className="px-4 py-3 border border-gray-300 text-right">
+                      <td className="px-2 py-3 border border-gray-300 text-right w-24">
                         <input
                           type="number"
                           value={item.currentYearAmount || 0}
@@ -310,7 +311,7 @@ export default function BudgetModule() {
                           className="flat-input w-full text-right"
                         />
                       </td>
-                      <td className="px-4 py-3 border border-gray-300 text-right">
+                      <td className="px-2 py-3 border border-gray-300 text-right w-24">
                         <input
                           type="number"
                           value={item.compareYearAmount || 0}
@@ -318,8 +319,8 @@ export default function BudgetModule() {
                           className="flat-input w-full text-right"
                         />
                       </td>
-                      <td className="px-4 py-3 border border-gray-300 text-right">
-                        <span className={`font-medium ${
+                      <td className="px-2 py-3 border border-gray-300 text-right w-24">
+                        <span className={`font-medium text-sm ${
                           ((item.compareYearAmount || 0) - (item.currentYearAmount || 0)) >= 0 
                             ? 'text-green-600' 
                             : 'text-red-600'
@@ -327,37 +328,37 @@ export default function BudgetModule() {
                           {((item.compareYearAmount || 0) - (item.currentYearAmount || 0)).toLocaleString('th-TH')}
                         </span>
                       </td>
-                      <td className="px-4 py-3 border border-gray-300">
+                      <td className="px-4 py-3 border border-gray-300 w-32">
                         <input
                           type="text"
                           value={item.notes || ""}
                           onChange={(e) => handleUpdateItem(item.id, "notes", e.target.value)}
-                          className="flat-input w-full"
+                          className="flat-input w-full text-left"
                           placeholder="หมายเหตุ"
                         />
                       </td>
-                      <td className="px-4 py-3 border border-gray-300 text-center">
+                      <td className="px-2 py-3 border border-gray-300 text-center w-20">
                         <div className="flex justify-center gap-1">
                           <button
                             onClick={() => handleMoveItem(item.id, "up")}
                             className="text-blue-600 hover:text-blue-800 p-1"
                             title="เลื่อนขึ้น"
                           >
-                            <ArrowUp className="h-4 w-4" />
+                            <ArrowUp className="h-3 w-3" />
                           </button>
                           <button
                             onClick={() => handleMoveItem(item.id, "down")}
                             className="text-blue-600 hover:text-blue-800 p-1"
                             title="เลื่อนลง"
                           >
-                            <ArrowDown className="h-4 w-4" />
+                            <ArrowDown className="h-3 w-3" />
                           </button>
                           <button
                             onClick={() => handleDeleteItem(item.id)}
                             className="text-red-600 hover:text-red-800 p-1"
                             title="ลบ"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3 w-3" />
                           </button>
                         </div>
                       </td>
