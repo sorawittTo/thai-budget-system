@@ -74,10 +74,10 @@ export default function SummaryModule() {
     const travelTotals = calculateTravelTotals(employees, defaultWorkDays, defaultOtherVehicleCosts, defaultAccommodationCosts);
 
     return {
-      souvenir: travelTotals.souvenir,
-      meeting: travelTotals.companyEvent,
-      studentTrip: travelTotals.rotation,
-      familyVisit: travelTotals.familyVisit,
+      souvenir: travelTotals.souvenir, // tab รับของที่ระลึก (ซื้อของฝาก)
+      familyVisit: travelTotals.familyVisit, // tab เยี่ยมครอบครัว
+      meeting: travelTotals.companyEvent, // tab ร่วมงานวันพนักงาน
+      studentTrip: travelTotals.rotation, // tab หมุนเวียนงาน ผจศ.
       total: travelTotals.total
     };
   };
