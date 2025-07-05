@@ -162,19 +162,19 @@ export default function SummaryModule() {
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
-                    <span>ค่าซื้อของฝากเดินทางต่างจังหวัด</span>
+                    <span>ซื้อของฝาก</span>
                     <span className="font-medium">{travelExpensesCalc.souvenir.toLocaleString()} บาท</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>ค่าเดินทางประชุมดำเนินการ</span>
+                    <span>ร่วมงานวันพนักงาน</span>
                     <span className="font-medium">{travelExpensesCalc.meeting.toLocaleString()} บาท</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>ค่าเดินทางนำนักเรียนท่องเที่ยว</span>
+                    <span>เยี่ยมบ้าน</span>
                     <span className="font-medium">{travelExpensesCalc.studentTrip.toLocaleString()} บาท</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>ค่าเดินทางเยี่ยมบ้านของ นศ.</span>
+                    <span>หมุนเวียนงาน ผจศ.</span>
                     <span className="font-medium">{travelExpensesCalc.familyVisit.toLocaleString()} บาท</span>
                   </div>
                 </div>
