@@ -101,6 +101,7 @@ The build process:
 - July 05, 2025. Updated UI to match original design 100% with flat-input styling, proper table layout, and category grouping
 - July 05, 2025. Updated travel module with 4 tabs, working add/edit/delete functions, and tooltip conditions
 - July 05, 2025. Updated master rates table headers: "ค่าเดินทางสายงานนอกพื้นที่" → "ค่าซื้อของเหมาจ่าย", "ค่าเดินทางประชุมการปฏิบัติงาน/เดินทาง" → "ค่ารถโดยสาร โคราช-กทม./เที่ยว", "ค่าเดินทางนำนักเรียน" → "ค่ารถรับจ้าง/เที่ยว"
+- July 05, 2025. Updated souvenir travel tab: removed vehicle cost column, added transport columns with multi-line headers and round-trip calculations (standard rate × 2)
 
 ## User Preferences
 

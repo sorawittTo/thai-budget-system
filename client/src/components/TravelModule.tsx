@@ -186,8 +186,8 @@ export default function TravelModule() {
               <th className="px-4 py-3 text-center border border-gray-300">วันทำงาน</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่าเบี้ยเลี้ยง</th>
               <th className="px-4 py-3 text-center border border-gray-300">ค่าที่พัก</th>
-              <th className="px-4 py-3 text-center border border-gray-300">ค่ารถโดยสาร โคราช-กทม./เที่ยว</th>
-              <th className="px-4 py-3 text-center border border-gray-300">ค่ารถรับจ้าง/เที่ยว</th>
+              <th className="px-4 py-3 text-center border border-gray-300">ค่ารถโดยสาร<br/>โคราช-กทม ไปกลับ</th>
+              <th className="px-4 py-3 text-center border border-gray-300">ค่ารถรับจ้าง<br/>ไป-กลับ</th>
               <th className="px-4 py-3 text-center border border-gray-300">รวม</th>
               <th className="px-4 py-3 text-center border border-gray-300">จัดการ</th>
             </tr>
@@ -200,8 +200,8 @@ export default function TravelModule() {
               const accommodationDays = 1 + currentWorkDays; // Base 2 days for 1 work day
               const allowanceCost = allowanceDays * (employee.level === "7" || employee.level === "6" ? 500 : 450);
               const accommodationCost = accommodationDays * (employee.level === "7" || employee.level === "6" ? 2100 : 1800);
-              const busCost = 300; // ค่ารถโดยสาร โคราช-กทม./เที่ยว
-              const taxiCost = 250; // ค่ารถรับจ้าง/เที่ยว
+              const busCost = 300 * 2; // ค่ารถโดยสาร โคราช-กทม ไปกลับ (x2)
+              const taxiCost = 250 * 2; // ค่ารถรับจ้าง ไป-กลับ (x2)
               const total = allowanceCost + accommodationCost + busCost + taxiCost;
               
               return (
@@ -274,8 +274,8 @@ export default function TravelModule() {
             const accommodationDays = 1 + currentWorkDays;
             const allowanceCost = allowanceDays * (emp.level === "7" || emp.level === "6" ? 500 : 450);
             const accommodationCost = accommodationDays * (emp.level === "7" || emp.level === "6" ? 2100 : 1800);
-            const busCost = 300;
-            const taxiCost = 250;
+            const busCost = 300 * 2;
+            const taxiCost = 250 * 2;
             return sum + allowanceCost + accommodationCost + busCost + taxiCost;
           }, 0).toLocaleString()} บาท
         </div>
