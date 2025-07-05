@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChevronLeft, ChevronRight, FileText } from "lucide-react";
 import { Employee, BudgetItem, AssistancePayment, TravelExpense, OvertimePayment, MasterRate } from "@/../../shared/schema";
 import { calculateTravelTotals } from "@/components/TravelModule";
+import { calculateAssistanceTotals } from "@/components/AssistanceModule";
 
 export default function SummaryModule() {
   const [currentYear, setCurrentYear] = useState(2569);
@@ -93,59 +94,61 @@ export default function SummaryModule() {
       };
     }
 
+    // ใช้ข้อมูลจริงจาก AssistanceModule
     const activeEmployees = employees.filter(emp => emp.status === "Active");
     
-    // 1. เงินช่วยเหลืออื่น ๆ (คำนวณจากข้อมูลจริง)
-    const otherAssistance = activeEmployees.reduce((sum, emp) => {
+    // สร้างข้อมูล assistanceData แบบเดียวกับใน AssistanceModule
+    const assistanceData: {[key: number]: any} = {};
+    activeEmployees.forEach(emp => {
       const level = emp.level;
-      const months = 12;
-      
-      // หาอัตรามาตรฐานจาก master rates ตามระดับ
       let houseRent = 0;
       let monthlyAssistance = 0;
-      let oneTimePurchase = 0;
       
-      // หาอัตรามาตรฐานจากตาราง master rates
+      // หาอัตรามาตรฐานตามระดับ
       if (level === "7") {
-        const level7Rate = masterRates.find(rate => rate.category === "level_7");
-        if (level7Rate) {
-          houseRent = 12000; // ค่าที่พักระดับ 7
-          monthlyAssistance = 7500; // เงินช่วยเหลือรายเดือนระดับ 7
-          oneTimePurchase = 10000; // ค่าซื้อของครั้งเดียว
-        }
+        houseRent = 12000;
+        monthlyAssistance = 7500;
       } else if (level === "6") {
-        houseRent = 8000; // ค่าที่พักระดับ 6
-        monthlyAssistance = 6250; // เงินช่วยเหลือรายเดือนระดับ 6
-        oneTimePurchase = 8000; // ค่าซื้อของครั้งเดียว
+        houseRent = 8000;
+        monthlyAssistance = 6250;
       } else if (level === "5.5") {
-        houseRent = 9500; // ค่าที่พักระดับ 5.5
-        monthlyAssistance = 6250; // เงินช่วยเหลือรายเดือนระดับ 5.5
-        oneTimePurchase = 6000; // ค่าซื้อของครั้งเดียว
+        houseRent = 9500;
+        monthlyAssistance = 6250;
       } else if (level === "5") {
-        houseRent = 8000; // ค่าที่พักระดับ 5
-        monthlyAssistance = 5500; // เงินช่วยเหลือรายเดือนระดับ 5
-        oneTimePurchase = 6000; // ค่าซื้อของครั้งเดียว
+        houseRent = 8000;
+        monthlyAssistance = 5500;
       } else {
-        houseRent = 6000; // ค่าที่พักระดับอื่นๆ
-        monthlyAssistance = 4500; // เงินช่วยเหลือรายเดือนระดับอื่นๆ
-        oneTimePurchase = 5000; // ค่าซื้อของครั้งเดียว
+        houseRent = 6000;
+        monthlyAssistance = 4500;
       }
       
-      return sum + (houseRent * months) + (monthlyAssistance * months) + oneTimePurchase;
-    }, 0);
+      assistanceData[emp.id] = {
+        id: emp.id,
+        description: emp.fullName,
+        months: 12,
+        houseRent: houseRent,
+        monthlyAssistance: monthlyAssistance,
+        oneTimePurchase: 0,
+        total: (12 * (houseRent + monthlyAssistance)) + 0
+      };
+    });
 
-    // 2. เงินช่วยเหลือพิเศษ (ค่าตายตัว)
-    const specialAssistance = 159700000;
+    // ข้อมูลเงินช่วยเหลือพิเศษ
+    const specialAssistanceItems = [
+      { id: 1, description: "งานบุญประจำปี", timesPerYear: 5, daysPerTime: 1, peoplePerTime: 5, assistanceRatePerDay: 300, total: 7500 },
+      { id: 2, description: "งานบุญปีใหม่", timesPerYear: 1, daysPerTime: 1, peoplePerTime: 5, assistanceRatePerDay: 300, total: 1500 },
+      { id: 3, description: "งานบุญสงกรานต์", timesPerYear: 1, daysPerTime: 3, peoplePerTime: 5, assistanceRatePerDay: 300, total: 4500 },
+      { id: 4, description: "งานบุญผู้สูงอายุ", timesPerYear: 1, daysPerTime: 1, peoplePerTime: 5, assistanceRatePerDay: 300, total: 1500 },
+      { id: 5, description: "งานบุญท้าวเวสสุวรรณ", timesPerYear: 1, daysPerTime: 1, peoplePerTime: 5, assistanceRatePerDay: 300, total: 1500 },
+      { id: 6, description: "งานบุญลอยกระทง", timesPerYear: 1, daysPerTime: 1, peoplePerTime: 5, assistanceRatePerDay: 300, total: 1500 },
+      { id: 7, description: "งานบุญเข้าพรรษา", timesPerYear: 1, daysPerTime: 1, peoplePerTime: 5, assistanceRatePerDay: 300, total: 1500 }
+    ];
 
-    // 3. ค่าจ้างชั่วโมงเพิ่ม (ค่าตายตัว)
-    const overtime = 0;
+    // ข้อมูลค่าล่วงเวลา (ยังไม่มีข้อมูล)
+    const overtimeItems: any[] = [];
 
-    return {
-      other: otherAssistance,
-      special: specialAssistance,
-      overtime: overtime,
-      total: otherAssistance + specialAssistance + overtime
-    };
+    // ใช้ฟังก์ชันคำนวณจริง
+    return calculateAssistanceTotals(employees, masterRates, assistanceData, specialAssistanceItems, overtimeItems);
   };
 
   const operatingExpenses = calculateOperatingExpenses();
@@ -274,7 +277,7 @@ export default function SummaryModule() {
                     <span className="font-medium">{assistanceTotal.special.toLocaleString()} บาท</span>
                   </div>
                   <div className="flex justify-between">
-                    <span>ค่าจ้างชั่วโมงเพิ่ม:</span>
+                    <span>ค่าล่วงเวลา:</span>
                     <span className="font-medium">{assistanceTotal.overtime.toLocaleString()} บาท</span>
                   </div>
                 </div>

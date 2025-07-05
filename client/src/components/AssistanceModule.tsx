@@ -6,6 +6,33 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Heart, HelpCircle, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import { Employee, MasterRate } from "@/../../shared/schema";
 
+// ฟังก์ชันคำนวณยอดรวมของแต่ละ tab
+export function calculateAssistanceTotals(
+  employees: Employee[] = [],
+  masterRates: MasterRate[] = [],
+  assistanceData: {[key: number]: AssistanceItem} = {},
+  specialAssistanceItems: SpecialAssistanceItem[] = [],
+  overtimeItems: OvertimeItem[] = []
+) {
+  const activeEmployees = employees.filter(emp => emp.status === "Active");
+  
+  // 1. เงินช่วยเหลืออื่น ๆ
+  const otherAssistanceTotal = Object.values(assistanceData).reduce((sum, item) => sum + item.total, 0);
+  
+  // 2. เงินช่วยเหลือพิเศษ
+  const specialAssistanceTotal = specialAssistanceItems.reduce((sum, item) => sum + item.total, 0);
+  
+  // 3. ค่าล่วงเวลา
+  const overtimeTotal = overtimeItems.reduce((sum, item) => sum + item.total, 0);
+  
+  return {
+    other: otherAssistanceTotal,
+    special: specialAssistanceTotal,
+    overtime: overtimeTotal,
+    total: otherAssistanceTotal + specialAssistanceTotal + overtimeTotal
+  };
+}
+
 interface AssistanceItem {
   id: number;
   description: string;
