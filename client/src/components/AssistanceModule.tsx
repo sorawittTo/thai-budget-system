@@ -60,25 +60,24 @@ export default function AssistanceModule() {
       const newAssistanceData: {[key: number]: AssistanceItem} = {};
       
       activeEmployees.forEach(employee => {
-        if (!assistanceData[employee.id]) {
-          const level = employee.level;
-          const standardHouseRent = getStandardRate(level, "ค่าเช่า");
-          const standardMonthlyAssistance = getStandardRate(level, "เงินช่วยเหลือรายเดือน");
-          
-          newAssistanceData[employee.id] = {
-            id: employee.id,
-            description: employee.fullName,
-            months: 12,
-            houseRent: standardHouseRent,
-            monthlyAssistance: standardMonthlyAssistance,
-            oneTimePurchase: 0,
-            total: (12 * (standardHouseRent + standardMonthlyAssistance)) + 0
-          };
-        }
+        const level = employee.level;
+        const standardHouseRent = getStandardRate(level, "ค่าเช่า");
+        const standardMonthlyAssistance = getStandardRate(level, "เงินช่วยเหลือรายเดือน");
+        
+        // อัปเดตข้อมูลทุกครั้งที่ตารางมาตรฐานเปลี่ยน
+        newAssistanceData[employee.id] = {
+          id: employee.id,
+          description: employee.fullName,
+          months: assistanceData[employee.id]?.months || 12,
+          houseRent: standardHouseRent,
+          monthlyAssistance: standardMonthlyAssistance,
+          oneTimePurchase: assistanceData[employee.id]?.oneTimePurchase || 0,
+          total: ((assistanceData[employee.id]?.months || 12) * (standardHouseRent + standardMonthlyAssistance)) + (assistanceData[employee.id]?.oneTimePurchase || 0)
+        };
       });
       
       if (Object.keys(newAssistanceData).length > 0) {
-        setAssistanceData(prev => ({ ...prev, ...newAssistanceData }));
+        setAssistanceData(newAssistanceData);
       }
     }
   }, [employees, masterRates]);
@@ -443,7 +442,9 @@ export default function AssistanceModule() {
               <div className="flex items-start gap-3">
                 <p className="font-semibold text-gray-700 pt-2">หมายเหตุ:</p>
                 <div className="flex-1">
-                  <p className="text-sm text-gray-600 mb-2">ค่าเช่าบ้านและเงินช่วยเหลือรายเดือน มาจากตารางอัตรามาตรฐานตามระดับพนักงาน</p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    <strong>ค่าเช่าบ้าน</strong> และ <strong>เงินช่วยเหลือรายเดือน</strong> ดึงข้อมูลจากตารางอัตราค่าใช้จ่ายมาตรฐานตามระดับพนักงานโดยอัตโนมัติ
+                  </p>
                   <Input
                     value={otherNotes}
                     onChange={(e) => setOtherNotes(e.target.value)}
