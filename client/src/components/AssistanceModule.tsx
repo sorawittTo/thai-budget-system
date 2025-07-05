@@ -11,6 +11,15 @@ export default function AssistanceModule() {
   const [activeTab, setActiveTab] = useState<"other" | "special" | "overtime">("other");
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [assistanceSettings, setAssistanceSettings] = useState<{[key: string]: {months: number, oneTimeAmount: number}}>({});
+  const [specialAssistanceData, setSpecialAssistanceData] = useState([
+    { id: 1, description: "ความคุ้มครองประกันภัยอุบัติเหตุกลุ่มพนักงาน", quantity: 1, days: 2, recipients: 1, amountPerPerson: 250, total: 500.00 },
+    { id: 2, description: "ความคุ้มครองประกันภัยรถเจ้าหน้าที่แล้วเซ็นคุม", quantity: 2, days: 2, recipients: 1, amountPerPerson: 250, total: 1000.00 },
+    { id: 3, description: "PM เครื่องดื่ม M7", quantity: 12, days: 2, recipients: 1, amountPerPerson: 250, total: 6000.00 },
+    { id: 4, description: "Mini Overhaul เครื่อง M7", quantity: 1, days: 2, recipients: 1, amountPerPerson: 250, total: 500.00 },
+    { id: 5, description: "พนักงานข้างแดด", quantity: 1, days: 242, recipients: 2, amountPerPerson: 300, total: 145200.00 },
+    { id: 6, description: "พนักงานทำบุญการพระสงฆ์โบสถ์รูปพระสำราญ", quantity: 1, days: 20, recipients: 1, amountPerPerson: 300, total: 6000.00 },
+    { id: 7, description: "ความคุ้มครองสมัยประธา", quantity: 1, days: 2, recipients: 1, amountPerPerson: 250, total: 500.00 }
+  ]);
 
   const { data: employeeData, isLoading: employeeLoading } = useQuery({
     queryKey: ["/api/employees"],
@@ -66,6 +75,22 @@ export default function AssistanceModule() {
     }));
   };
 
+  const updateSpecialAssistanceData = (id: number, field: string, value: number | string) => {
+    setSpecialAssistanceData(prev => 
+      prev.map(item => {
+        if (item.id === id) {
+          const updated = { ...item, [field]: value };
+          // Recalculate total when any field changes
+          if (field !== 'description' && field !== 'total') {
+            updated.total = updated.quantity * updated.days * updated.recipients * updated.amountPerPerson;
+          }
+          return updated;
+        }
+        return item;
+      })
+    );
+  };
+
   const calculateAssistanceData = () => {
     return employees.map(employee => {
       const settings = assistanceSettings[employee.id] || { months: 12, oneTimeAmount: 0 };
@@ -118,7 +143,7 @@ export default function AssistanceModule() {
   };
 
   const getTotalSpecialAssistance = () => {
-    return 159700; // Total from special assistance table
+    return specialAssistanceData.reduce((sum, item) => sum + item.total, 0);
   };
 
   if (employeeLoading || ratesLoading) {
@@ -267,65 +292,67 @@ export default function AssistanceModule() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                <TableRow>
-                  <TableCell className="text-left border">ความคุ้มครองประกันภัยอุบัติเหตุกลุ่มพนักงาน</TableCell>
-                  <TableCell className="text-center border">1</TableCell>
-                  <TableCell className="text-center border">2</TableCell>
-                  <TableCell className="text-center border">1</TableCell>
-                  <TableCell className="text-right border">250</TableCell>
-                  <TableCell className="text-right border">500.00</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="text-left border">ความคุ้มครองประกันภัยรถเจ้าหน้าที่แล้วเซ็นคุม</TableCell>
-                  <TableCell className="text-center border">2</TableCell>
-                  <TableCell className="text-center border">2</TableCell>
-                  <TableCell className="text-center border">1</TableCell>
-                  <TableCell className="text-right border">250</TableCell>
-                  <TableCell className="text-right border">1,000.00</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="text-left border">PM เครื่องดื่ม M7</TableCell>
-                  <TableCell className="text-center border">12</TableCell>
-                  <TableCell className="text-center border">2</TableCell>
-                  <TableCell className="text-center border">1</TableCell>
-                  <TableCell className="text-right border">250</TableCell>
-                  <TableCell className="text-right border">6,000.00</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="text-left border">Mini Overhaul เครื่อง M7</TableCell>
-                  <TableCell className="text-center border">1</TableCell>
-                  <TableCell className="text-center border">2</TableCell>
-                  <TableCell className="text-center border">1</TableCell>
-                  <TableCell className="text-right border">250</TableCell>
-                  <TableCell className="text-right border">500.00</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="text-left border">พนักงานข้างแดด</TableCell>
-                  <TableCell className="text-center border">1</TableCell>
-                  <TableCell className="text-center border">242</TableCell>
-                  <TableCell className="text-center border">2</TableCell>
-                  <TableCell className="text-right border">300</TableCell>
-                  <TableCell className="text-right border">145,200.00</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="text-left border">พนักงานทำบุญการพระสงฆ์โบสถ์รูปพระสำราญ</TableCell>
-                  <TableCell className="text-center border">1</TableCell>
-                  <TableCell className="text-center border">20</TableCell>
-                  <TableCell className="text-center border">1</TableCell>
-                  <TableCell className="text-right border">300</TableCell>
-                  <TableCell className="text-right border">6,000.00</TableCell>
-                </TableRow>
-                <TableRow>
-                  <TableCell className="text-left border">ความคุ้มครองสมัยประธา</TableCell>
-                  <TableCell className="text-center border">1</TableCell>
-                  <TableCell className="text-center border">2</TableCell>
-                  <TableCell className="text-center border">1</TableCell>
-                  <TableCell className="text-right border">250</TableCell>
-                  <TableCell className="text-right border">500.00</TableCell>
-                </TableRow>
+                {specialAssistanceData.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell className="text-left border">
+                      <Input
+                        value={item.description}
+                        onChange={(e) => updateSpecialAssistanceData(item.id, 'description', e.target.value)}
+                        className="flat-input border-none bg-transparent"
+                      />
+                    </TableCell>
+                    <TableCell className="text-center border">
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          value={item.quantity}
+                          onChange={(e) => updateSpecialAssistanceData(item.id, 'quantity', Number(e.target.value))}
+                          className="w-16 text-center flat-input"
+                        />
+                        <Edit2 className="h-3 w-3 text-gray-400" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center border">
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          value={item.days}
+                          onChange={(e) => updateSpecialAssistanceData(item.id, 'days', Number(e.target.value))}
+                          className="w-16 text-center flat-input"
+                        />
+                        <Edit2 className="h-3 w-3 text-gray-400" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center border">
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          value={item.recipients}
+                          onChange={(e) => updateSpecialAssistanceData(item.id, 'recipients', Number(e.target.value))}
+                          className="w-16 text-center flat-input"
+                        />
+                        <Edit2 className="h-3 w-3 text-gray-400" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-center border">
+                      <div className="flex items-center gap-1">
+                        <Input
+                          type="number"
+                          value={item.amountPerPerson}
+                          onChange={(e) => updateSpecialAssistanceData(item.id, 'amountPerPerson', Number(e.target.value))}
+                          className="w-20 text-center flat-input"
+                        />
+                        <Edit2 className="h-3 w-3 text-gray-400" />
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right border font-semibold">{item.total.toLocaleString('th-TH', { minimumFractionDigits: 2 })}</TableCell>
+                  </TableRow>
+                ))}
                 <TableRow className="bg-gray-50">
                   <TableCell colSpan={5} className="text-center border font-semibold">ยอดรวม</TableCell>
-                  <TableCell className="text-right border font-semibold text-lg">159,700.00</TableCell>
+                  <TableCell className="text-right border font-semibold text-lg">
+                    {getTotalSpecialAssistance().toLocaleString('th-TH', { minimumFractionDigits: 2 })}
+                  </TableCell>
                 </TableRow>
               </TableBody>
             </Table>
