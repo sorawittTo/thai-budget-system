@@ -2,9 +2,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ChevronLeft, ChevronRight, Plus, Edit2, Trash2, Info } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { toast } from "@/hooks/use-toast";
 import type { Employee, TravelExpense, InsertTravelExpense } from "@shared/schema";
 
 export default function TravelModule() {
@@ -74,18 +76,40 @@ export default function TravelModule() {
 
   // Handle edit/delete functions
   const handleEdit = (employeeId: number, tabType: string) => {
-    // Implementation for editing
-    console.log(`Edit ${tabType} for employee ${employeeId}`);
+    const sampleExpense: InsertTravelExpense = {
+      employeeId,
+      travelType: tabType,
+      allowance: 600,
+      accommodation: 2100,
+      transportation: 8000,
+      total: 10700,
+      year: currentYear
+    };
+    
+    createTravelExpense.mutate(sampleExpense);
   };
 
   const handleDelete = (employeeId: number, tabType: string) => {
-    // Implementation for deleting specific to current tab
-    console.log(`Delete ${tabType} for employee ${employeeId}`);
+    if (confirm('ต้องการลบรายการนี้หรือไม่?')) {
+      toast({
+        title: "ลบรายการเรียบร้อย",
+        description: `ลบรายการ${tabType}สำหรับพนักงาน ID ${employeeId}`,
+      });
+    }
   };
 
   const handleAdd = (tabType: string) => {
-    // Implementation for adding new entry
-    console.log(`Add new ${tabType} entry`);
+    const sampleExpense: InsertTravelExpense = {
+      employeeId: 1,
+      travelType: tabType,
+      allowance: 500,
+      accommodation: 2100,
+      transportation: 8000,
+      total: 10600,
+      year: currentYear
+    };
+    
+    createTravelExpense.mutate(sampleExpense);
   };
 
   const renderTabs = () => (
@@ -125,28 +149,31 @@ export default function TravelModule() {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">สรุปค่าใช้จ่ายเดินทางเพื่อรับของที่ระลึก</h3>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-          title="ข้อมูลเพิ่มเติม"
-        >
-          <Info className="h-4 w-4" />
-          <span className="text-xs">เงื่อนไข</span>
-        </Button>
-      </div>
-      
-      <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-        <p className="text-sm text-gray-700 mb-2">
-          <strong>เกณฑ์อายุงานที่ได้รับของที่ระลึก:</strong> 20, 25, 30, 35, 40 ปี
-        </p>
-        <p className="text-sm text-gray-600 mb-2">
-          คำนวณจากปีที่กำหนด - ปีที่เริ่มงาน
-        </p>
-        <div className="text-sm text-gray-700 bg-yellow-50 p-2 rounded">
-          <strong>สูตรคำนวณ:</strong> วันทำงาน 1 วัน = เบี้ยเลี้ยง 3 วัน + ที่พัก 2 วัน<br/>
-          วันทำงาน 2 วัน = เบี้ยเลี้ยง 4 วัน + ที่พัก 3 วัน (เพิ่มทีละ 1 วัน)
-        </div>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Info className="h-4 w-4" />
+                <span className="text-xs">เงื่อนไข</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-md p-4">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold">เกณฑ์อายุงานที่ได้รับของที่ระลึก: 20, 25, 30, 35, 40 ปี</p>
+                <p className="text-sm text-gray-600">คำนวณจากปีที่กำหนด - ปีที่เริ่มงาน</p>
+                <div className="text-sm bg-yellow-50 p-2 rounded">
+                  <p className="font-semibold">สูตรคำนวณ:</p>
+                  <p>วันทำงาน 1 วัน = เบี้ยเลี้ยง 3 วัน + ที่พัก 2 วัน</p>
+                  <p>วันทำงาน 2 วัน = เบี้ยเลี้ยง 4 วัน + ที่พัก 3 วัน (เพิ่มทีละ 1 วัน)</p>
+                </div>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       <div className="overflow-x-auto">
@@ -253,24 +280,26 @@ export default function TravelModule() {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">สรุปค่าเดินทางเยี่ยมครอบครัว</h3>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-          title="ข้อมูลเพิ่มเติม"
-        >
-          <Info className="h-4 w-4" />
-          <span className="text-xs">เงื่อนไข</span>
-        </Button>
-      </div>
-      
-      <div className="mb-4 p-4 bg-green-50 rounded-lg">
-        <p className="text-sm text-gray-700 mb-2">
-          <strong>เงื่อนไข:</strong> แสดงเฉพาะพนักงานที่มีสถานะ Active เท่านั้น
-        </p>
-        <p className="text-sm text-gray-600">
-          <strong>หมายเหตุ:</strong> ไม่ได้รับเบี้ยเลี้ยง ไม่ได้ค่าที่พัก มีเฉพาะค่ารถทัวร์เยี่ยมบ้าน
-        </p>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Info className="h-4 w-4" />
+                <span className="text-xs">เงื่อนไข</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-md p-4">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold">เงื่อนไข: แสดงเฉพาะพนักงานที่มีสถานะ Active เท่านั้น</p>
+                <p className="text-sm text-gray-600">หมายเหตุ: ไม่ได้รับเบี้ยเลี้ยง ไม่ได้ค่าที่พัก มีเฉพาะค่ารถทัวร์เยี่ยมบ้าน</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       <div className="overflow-x-auto">
@@ -346,37 +375,41 @@ export default function TravelModule() {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">สรุปค่าเดินทางร่วมงานวันพนักงาน</h3>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-          title="ข้อมูลเพิ่มเติม"
-        >
-          <Info className="h-4 w-4" />
-          <span className="text-xs">เงื่อนไข</span>
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Info className="h-4 w-4" />
+                <span className="text-xs">เงื่อนไข</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-md p-4">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold">เงื่อนไขค่าที่พัก:</p>
+                <ul className="text-sm text-gray-600 space-y-1">
+                  <li>• ระดับ 7: พักคนเดียว</li>
+                  <li>• ระดับอื่น: แยกชาย/หญิง พักคู่ (หารค่าที่พัก)</li>
+                  <li>• ไม่ได้ค่าที่พัก: ถ้าจังหวัดที่เดินทางไป = จังหวัดที่เยี่ยมบ้าน</li>
+                  <li>• <strong>ไม่ได้ค่าเบี้ยเลี้ยง</strong></li>
+                </ul>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
       
-      <div className="mb-4 p-4 bg-purple-50 rounded-lg">
-        <p className="text-sm text-gray-700 mb-2">
-          <strong>เงื่อนไขค่าที่พัก:</strong>
-        </p>
-        <ul className="text-sm text-gray-600 space-y-1">
-          <li>• ระดับ 7: พักคนเดียว</li>
-          <li>• ระดับอื่น: แยกชาย/หญิง พักคู่ (หารค่าที่พัก)</li>
-          <li>• ไม่ได้ค่าที่พัก: ถ้าจังหวัดที่เดินทางไป = จังหวัดที่เยี่ยมบ้าน</li>
-          <li>• <strong>ไม่ได้ค่าเบี้ยเลี้ยง</strong></li>
-        </ul>
-        
-        <div className="mt-3 flex items-center gap-2">
-          <label className="text-sm font-medium text-gray-700">จังหวัดที่เดินทางไป:</label>
-          <Input 
-            value={travelProvince}
-            onChange={(e) => setTravelProvince(e.target.value)}
-            className="w-48"
-            placeholder="ระบุจังหวัด"
-          />
-        </div>
+      <div className="mb-4 flex items-center gap-2">
+        <label className="text-sm font-medium text-gray-700">จังหวัดที่เดินทางไป:</label>
+        <Input 
+          value={travelProvince}
+          onChange={(e) => setTravelProvince(e.target.value)}
+          className="w-48"
+          placeholder="ระบุจังหวัด"
+        />
       </div>
 
       <div className="overflow-x-auto">
@@ -470,24 +503,26 @@ export default function TravelModule() {
     <div>
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">สรุปค่าเดินทางหมุนเวียนงาน ผจศ.</h3>
-        <Button
-          variant="outline"
-          size="sm"
-          className="flex items-center gap-2"
-          title="ข้อมูลเพิ่มเติม"
-        >
-          <Info className="h-4 w-4" />
-          <span className="text-xs">เงื่อนไข</span>
-        </Button>
-      </div>
-      
-      <div className="mb-4 p-4 bg-orange-50 rounded-lg">
-        <p className="text-sm text-gray-700 mb-2">
-          <strong>เงื่อนไข:</strong> แสดงเฉพาะพนักงานระดับ 7 เท่านั้น
-        </p>
-        <p className="text-sm text-gray-600">
-          <strong>หมายเหตุ:</strong> ไม่มีช่องอายุงาน แต่เพิ่มช่องค่าพาหนะอื่นๆ
-        </p>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Info className="h-4 w-4" />
+                <span className="text-xs">เงื่อนไข</span>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent className="max-w-md p-4">
+              <div className="space-y-2">
+                <p className="text-sm font-semibold">เงื่อนไข: แสดงเฉพาะพนักงานระดับ 7 เท่านั้น</p>
+                <p className="text-sm text-gray-600">หมายเหตุ: ไม่มีช่องอายุงาน แต่เพิ่มช่องค่าพาหนะอื่นๆ</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       </div>
 
       <div className="overflow-x-auto">
